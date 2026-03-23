@@ -1,0 +1,60 @@
+<!-- DATAGRID -->
+<clr-datagrid [clrDgLoading]="loading()" style="height: 520px">
+  <clr-dg-column [clrDgField]="'libelle'">Actionnaire</clr-dg-column>
+  <clr-dg-column>Actions</clr-dg-column>
+  <clr-dg-column>Montant (TND)</clr-dg-column>
+  <clr-dg-column>%</clr-dg-column>
+  <!--Row-->
+  <clr-dg-row *clrDgItems="let actionnaire of actionnairesData">
+    <clr-dg-cell>{{ actionnaire.libelle }}</clr-dg-cell>
+
+    <clr-dg-cell class="text-right digit">
+      {{ actionnaire?.nbrActionsApAugmentation | number : "1.0-0" }}
+    </clr-dg-cell>
+
+    <clr-dg-cell class="text-right digit">
+      {{
+        actionnaire?.nbrActionsApAugmentation * valeurAction()
+          | number : "1.0-0"
+      }}
+    </clr-dg-cell>
+
+    <clr-dg-cell class="text-right">
+      {{
+        actionnaire?.nbrActionsApAugmentation / total_nombre_action
+          | percent : "1.3-3"
+      }}
+    </clr-dg-cell>
+  </clr-dg-row>
+  <!--Footer-->
+  <clr-dg-footer>
+    <div cds-layout="horizontal align:stretch">
+      <div>
+        Total actionnaires :
+        <span
+          class="badge badge-info digit"
+          style="font-size: 14px; padding: 0.8em 1em"
+          >{{ actionnaires()?.length }}</span
+        >
+      </div>
+
+      <div>
+        Total montant:
+        <span
+          class="badge badge-info digit"
+          style="font-size: 14px; padding: 0.8em 1em"
+          >{{ total_montant | number : "1.0-0" }}</span
+        >
+      </div>
+
+      <div>
+        Total actions:
+        <span
+          class="badge badge-info digit"
+          style="font-size: 14px; padding: 0.8em 1em"
+          >{{ total_nombre_action | number : "1.0-0" }}</span
+        >
+      </div>
+    </div>
+  </clr-dg-footer>
+</clr-datagrid>

@@ -1,0 +1,229 @@
+<!-- Header -->
+<span cds-text="title">
+  <cds-icon shape="bullseye" status="info" size="lg"></cds-icon> Participations
+  en actions par fonds</span
+>
+
+<!-- Search fonds -->
+<div cds-layout="horizontal align:left gap:md m-t:xl">
+  <clr-dropdown>
+    <cds-button size="md" action="outline" clrDropdownTrigger>
+      {{ selectedFonds?.denomination || "Sélectionner un fonds" }}
+      <cds-icon shape="angle" status="info" direction="down"></cds-icon>
+    </cds-button>
+
+    <clr-dropdown-menu *clrIfOpen>
+      <div
+        clrDropdownItem
+        *ngFor="let f of fonds"
+        (click)="selectFonds(f)"
+        onkeypress=""
+      >
+        {{ f.denomination }}
+      </div>
+    </clr-dropdown-menu>
+  </clr-dropdown>
+
+  <!-- Fund name -->
+  <span class="fund-name active" [style.marginBottom]="'0.2em'">
+    {{
+      selectedFonds ? selectedFonds.denomination : "Dénomination du fonds ..."
+    }}
+    <cds-icon
+      onkeypress=""
+      shape="dashboard"
+      size="lg"
+      status="info"
+      title="Cliquer pour consulter la fiche funds"
+      style="cursor: pointer"
+      (click)="goToFiche()"
+    ></cds-icon>
+  </span>
+</div>
+
+<!-- Fund state -->
+@if (selectedFonds?.etat.libelle == 'En liquidation' ||
+selectedFonds?.etat.libelle == 'En pré-liquidation') {
+<div class="badge badge-warning" cds-text="caption" cds-layout="p:sm">
+  Fonds {{ selectedFonds?.etat.libelle }}
+</div>
+}
+
+<!-- Data grid -->
+<clr-datagrid style="max-height: calc(100vh - 240px)" [clrDgLoading]="loading">
+  <clr-dg-action-bar>
+    <div cds-layout="horizontal gap:md">
+      <div cds-layout="align:stretch">
+        <cds-divider
+          cds-layout="m-t:lg m-b:sm"
+          class="htitled-divider"
+          title="Actions par fonds (Spécification des sorties espérées par souscription)"
+        ></cds-divider>
+      </div>
+      <div cds-layout="align:right">
+        <cds-button
+          action="outline"
+          status="primary"
+          (click)="exportParticipationAction()"
+          onKeyPress=""
+        >
+          <cds-icon shape="xls-file" status="info" size="md"></cds-icon> Générer
+          un rapport
+        </cds-button>
+      </div>
+    </div>
+  </clr-dg-action-bar>
+
+  <clr-dg-column [clrDgField]="'sa.financement.projet.nom'"
+    >Projet</clr-dg-column
+  >
+  <clr-dg-column>Date du comité d’investissement</clr-dg-column>
+  <clr-dg-column>Date de la souscription</clr-dg-column>
+  <clr-dg-column>Nombre d'actions souscrites</clr-dg-column>
+  <clr-dg-column>TRI espéré</clr-dg-column>
+  <clr-dg-column>Type de sortie espérée</clr-dg-column>
+  <clr-dg-column>Date de sortie espérée</clr-dg-column>
+  <clr-dg-row
+    *clrDgItems="let p of participationsAction; let i = index"
+    [clrDgItem]="p"
+  >
+    <clr-dg-action-overflow>
+      <div cds-layout="vertical gap:xxs">
+        <div class="button-group">
+          <cds-button
+            action="flat-inline"
+            (click)="displayParticipationModal(p)"
+          >
+            <cds-icon shape="bullseye" status="info"></cds-icon> Spécifier une
+            sortie espérée
+          </cds-button>
+        </div>
+        <div class="button-group">
+          <cds-button
+            action="flat-inline"
+            status="danger"
+            (click)="setSelectedParticipation(p); deleteParticipation()"
+          >
+            <cds-icon shape="trash" status="danger"></cds-icon> Annuler la
+            sortie espérée
+          </cds-button>
+        </div>
+      </div>
+    </clr-dg-action-overflow>
+
+    <clr-dg-cell
+      ><a
+        class="show-hide-icon"
+        [routerLink]="['/dashboard/project', p?.sa?.financement?.projet.id]"
+        [title]="p?.sa?.financement?.projet.nom"
+        >{{ p?.sa?.financement?.projet.nom }}
+        <cds-icon shape="link" status="info"></cds-icon> </a
+    ></clr-dg-cell>
+    <clr-dg-cell class="text-center">{{
+      p?.ci?.dateComite | date : "dd/MM/yyyy"
+    }}</clr-dg-cell>
+    <clr-dg-cell class="text-center">{{
+      p?.sa?.dateBulletin | date : "dd/MM/yyyy"
+    }}</clr-dg-cell>
+    <clr-dg-cell class="digit text-right">{{
+      p?.sa?.actions | number : "1.0-0"
+    }}</clr-dg-cell>
+    <clr-dg-cell class="digit text-right">{{
+      p?.sa?.triEspere | percent : "1.0-0"
+    }}</clr-dg-cell>
+    <clr-dg-cell>{{ p?.sa?.typeSortieEsperee?.libelle }}</clr-dg-cell>
+    <clr-dg-cell class="text-center">{{
+      p?.sa?.dateSortieEsperee | date : "dd/MM/yyyy"
+    }}</clr-dg-cell>
+  </clr-dg-row>
+  <clr-dg-footer
+    >{{ participationsAction.length }} participations actions</clr-dg-footer
+  >
+</clr-datagrid>
+
+<!-- Modal -->
+<clr-modal [clrModalSize]="'md'" [(clrModalOpen)]="participationModalOpened">
+  <h3 class="modal-title">
+    <cds-icon shape="bullseye" status="info" size="lg" solid></cds-icon>
+    Spécification d'une sortie espérée
+  </h3>
+
+  <div class="modal-body">
+    <div
+      cds-text="title uppercase"
+      style="color: var(--cds-alias-status-info)"
+      cds-layout="m-t:xl"
+    >
+      {{ selectedParticipation?.sa?.financement?.projet.nom }}
+    </div>
+
+    <cds-divider
+      cds-layout="m-t:lg m-b:sm"
+      class="htitled-divider"
+      [title]="
+        'Souscription en actions du ' +
+        (selectedParticipation?.sa?.dateBulletin | date : 'dd/MM/yyyy')
+      "
+    ></cds-divider>
+
+    <form [formGroup]="participationForm" clrForm clrLabelSize="5">
+      <clr-date-container>
+        <label
+          ><cds-icon shape="calendar" status="info" solid=""></cds-icon> Date de
+          sortie espérée</label
+        >
+        <input
+          clrDate
+          type="date"
+          formControlName="dateSortieEsperee"
+          name="dateSortieEsperee"
+        />
+      </clr-date-container>
+
+      <clr-select-container>
+        <label
+          ><cds-icon shape="logout" status="info" solid=""></cds-icon> Type de
+          sortie espérée</label
+        >
+        <select
+          clrSelect
+          name="typeSortieEsperee"
+          formControlName="typeSortieEsperee"
+          [compareWith]="equals"
+        >
+          <option *ngFor="let t of types" [ngValue]="t" [attr.data-value]="t">
+            {{ t.libelle }}
+          </option>
+        </select>
+      </clr-select-container>
+
+      <clr-input-container>
+        <label
+          ><cds-icon shape="calculator" status="info" solid=""></cds-icon> TRI
+          espéré:</label
+        >
+        <input
+          clrInput
+          type="number"
+          formControlName="triEspere"
+          name="triEspere"
+          class="small-input"
+        />
+        <clr-control-helper>%</clr-control-helper>
+      </clr-input-container>
+    </form>
+  </div>
+
+  <div class="modal-footer" cds-layout="horizontal gap:sm">
+    <button class="btn btn-outline" (click)="participationModalOpened = false">
+      Annuler
+    </button>
+    <button
+      class="btn btn-primary"
+      [disabled]="participationForm.invalid"
+      (click)="updateParticipationsAction()"
+    >
+      <cds-icon shape="floppy" status="info"></cds-icon> Sauvegarder
+    </button>
+  </div>
+</clr-modal>

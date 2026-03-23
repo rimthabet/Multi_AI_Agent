@@ -1,0 +1,223 @@
+<!-- Header -->
+<div cds-layout="m-y:md">
+  <span cds-text="title">
+    <cds-icon
+      shape="bullseye"
+      size="lg"
+      status="info"
+      cds-layout="m-b:sm"
+    ></cds-icon>
+    Business Plan</span
+  >
+</div>
+
+<!-- Form -->
+<form clrForm [formGroup]="bpForm" class="clr-form-compact">
+  <clr-input-container>
+    <label for="label" style="padding-top: 7px" class="clr-required-mark"
+      >Libellé du Business Plan
+    </label>
+    <input
+      clrInput
+      type="text"
+      formControlName="label"
+      name="label"
+      style="width: 400px !important"
+    />
+  </clr-input-container>
+  <clr-date-container>
+    <label
+      for="elaboration_date"
+      style="padding-top: 7px"
+      class="clr-required-mark"
+      >Date d'élaboration:
+    </label>
+    <input
+      clrDate
+      type="date"
+      formControlName="elaboration_date"
+      name="elaboration_date"
+      style="width: 175px"
+    />
+  </clr-date-container>
+  <clr-number-input-container>
+    <label for="year" style="padding-top: 7px" class="clr-required-mark"
+      >Année
+    </label>
+    <input
+      clrNumberInput
+      type="number"
+      formControlName="year"
+      name="year"
+      style="width: 145px"
+    />
+    <clr-control-helper>Cinquième année du business plan !</clr-control-helper>
+  </clr-number-input-container>
+
+  <div cds-layout="horizontal">
+    <div class="btn-group" cds-layout="m-y:lg">
+      <cds-button [disabled]="bpForm.invalid" (click)="saveBP()">
+        Ajouter le Business Plan
+      </cds-button>
+    </div>
+
+    <div cds-layout="horizontal align:right m-y:lg">
+      <button
+        class="btn btn-outline"
+        (click)="exportFinancialDataToExcel()"
+        [disabled]="isExporting"
+      >
+        <cds-icon shape="xls-file" size="md"></cds-icon>
+        {{ isExporting ? "Export en cours..." : "Export sur Excel" }}
+      </button>
+    </div>
+  </div>
+</form>
+
+<!-- Alert -->
+<div class="alert alert-info" role="alert">
+  <div class="alert-items">
+    <div class="alert-item static">
+      <div class="alert-icon-wrapper">
+        <cds-icon
+          class="alert-icon"
+          shape="exclamation-triangle"
+          size="md"
+        ></cds-icon>
+      </div>
+      <div class="alert-text">
+        Une fois vous céez le business plan, vous faites entrer les données
+        financières en bas.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Financial statement -->
+<div cds-layout="horizontal  m-y:md">
+  <span cds-text="title" cds-layout="horizontal align:left">
+    {{
+      selectedBP?.label ||
+        "Veuillez saisir les données financières pour ce Business Plan"
+    }}
+  </span>
+
+  <div
+    cds-layout="horizontal align:right gap:md"
+    [style.display]="selectedBP ? 'inherit' : 'none'"
+  >
+    <cds-button
+      action="outline"
+      status="neutral"
+      (click)="bp_name_edit_mode = true"
+      title="Donner un nom plus siginificatif au BP"
+    >
+      <cds-icon shape="pencil"></cds-icon> Renommer le BP
+    </cds-button>
+
+    <cds-button
+      action="outline"
+      (click)="bp_name_copy_mode = true"
+      title="Cloner le BP afin de faire des tests approfondis"
+    >
+      <cds-icon shape="copy"></cds-icon> Cloner ce BP
+    </cds-button>
+
+    <cds-button status="danger" action="outline" (click)="deleteBP()">
+      <cds-icon shape="trash"></cds-icon> Supprimer ce BP ?
+    </cds-button>
+
+    <cds-divider orientation="vertical"></cds-divider>
+
+    <clr-dropdown cds-layout="m-y:none">
+      <div class="btn-group">
+        <cds-button clrDropdownTrigger>
+          Changer le BP
+          <cds-icon shape="angle" direction="down"></cds-icon>
+        </cds-button>
+      </div>
+      <clr-dropdown-menu clrPosition="bottom-right" *clrIfOpen>
+        @for(bp of bps; track bp) {
+        <div clrDropdownItem (click)="selectBP(bp)">
+          {{ bp.label }}
+        </div>
+        }
+      </clr-dropdown-menu>
+    </clr-dropdown>
+  </div>
+</div>
+
+<financial-statement
+  [prospection]="prospection()"
+  [ref2]="selectedBP?.id"
+  [ref3]="-1"
+  [ref4]="-1"
+  [ref5]="-1"
+  [item]="item"
+  [data]="items"
+  [year]="selectedBP?.year"
+></financial-statement>
+
+<!-- Rename a BP -->
+<clr-modal [(clrModalOpen)]="bp_name_edit_mode">
+  <h3 class="modal-title">Renommer ce Business Plan</h3>
+  <div class="modal-body">
+    <form clrForm clrLabelSize="4">
+      <clr-input-container>
+        <label for="new-label" class="clr-required-mark">Nouveau Label: </label>
+        <input
+          clrInput
+          type="text"
+          name="new-label"
+          [(ngModel)]="bp_name"
+          required
+          [style.width]="'350px'"
+        />
+      </clr-input-container>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <cds-button action="outline" (click)="bp_name_edit_mode = false">
+      Cancel
+    </cds-button>
+    <cds-button
+      (click)="saveBP(selectedBP); bp_name_edit_mode = false"
+      [disabled]="bp_name == '' || bp_name == undefined"
+    >
+      Sauvegarder
+    </cds-button>
+  </div>
+</clr-modal>
+
+<!-- Clone a BP -->
+<clr-modal [(clrModalOpen)]="bp_name_copy_mode">
+  <h3 class="modal-title">Donnez un nom à la copie du BP</h3>
+  <div class="modal-body">
+    <form clrForm clrLabelSize="4">
+      <clr-input-container>
+        <label for="new-label" class="clr-required-mark"
+          >Label de la copie:
+        </label>
+        <input
+          clrInput
+          type="text"
+          name="new-label"
+          [(ngModel)]="bp_name"
+          required
+          [style.width]="'350px'"
+        />
+      </clr-input-container>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <cds-button action="outline" (click)="bp_name_copy_mode = false">
+      Cancel
+    </cds-button>
+    <cds-button
+      (click)="saveBP(selectedBP); bp_name_edit_mode = false"
+      [disabled]="bp_name == '' || bp_name == undefined"
+    >
+      Sauvegarder
+    </cds-button>
+  </div>
+</clr-modal>

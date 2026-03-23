@@ -1,0 +1,23 @@
+<div class="map-wrapper" [style.height]="height()">
+  <div #mapContainer class="map-container"></div>
+</div>
+
+<!-- Bloc Adresse -->
+@if (projet()?.projet) {
+<div cds-layout="vertical p:sm">
+  <div>
+    <span style="color: var(--cds-alias-status-disabled-shade)"
+      >Siège social:</span
+    >
+    {{ projet().projet.adresseSiege }}
+  </div>
+  @if (projet().projet.adresseUsine) {
+  <div>
+    <span style="color: var(--cds-alias-status-disabled-shade)"
+      >Adresse Usine:</span
+    >
+    {{ projet().projet.adresseUsine }}
+  </div>
+  }
+</div>
+}

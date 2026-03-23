@@ -1,0 +1,43 @@
+<!-- Bloc signalétique -->
+<app-kpi-badge-01
+  [value]="projet()?.projet?.actualCapital || projet()?.projet?.capitalSocial"
+  [color]="'var(--cds-alias-status-info)'"
+  [type]="'currency'"
+  [title]="'Capital social'"
+  [size]="'large'"
+></app-kpi-badge-01>
+
+<!-- Bloc KPI -->
+<div class="kpi" cds-layout="horizontal gap:md m-t:xl align:stretch">
+  <span class="name"
+    ><cds-icon shape="coin-bag" status="info"></cds-icon> Coût du projet:</span
+  >
+  <div class="value digit" style="text-align: right">
+    {{ projet()?.projet?.cout | currency : "tnd" : "symbol" : "1.0-0" }}
+  </div>
+</div>
+
+<div class="kpi" cds-layout="horizontal gap:md align:stretch">
+  <span class="name"
+    ><cds-icon shape="factory" status="info"></cds-icon> Secteur:</span
+  >
+  <span class="value" cds-layout="align:right" style="text-align: right">
+    {{ projet()?.projet?.secteurs[0]?.libelle }}
+  </span>
+</div>
+
+<div class="kpi" cds-layout="horizontal gap:md align:stretch">
+  <span class="name"
+    ><cds-icon shape="bank" status="info"></cds-icon> RNE:</span
+  >
+  <div class="value" style="text-align: right">{{ projet()?.projet?.rne }}</div>
+</div>
+
+<div class="kpi" cds-layout="horizontal gap:md align:stretch">
+  <span class="name"
+    ><cds-icon shape="calendar" status="info"></cds-icon> Date de création:
+  </span>
+  <span class="value" cds-layout="align:right" style="text-align: right">
+    {{ projet()?.projet?.dateLancement | date : "dd/MM/yyyy" }}
+  </span>
+</div>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Private Assets Management System :: PAMS</title>
+    <base href="/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/x-icon" href="pams.ico" />
+
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css"
+    />
+    <!-- <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBuK6b68DDky0fgRw0HFLm8yKD3KrBbER0"></script> -->
+
+    <script type="application/javascript">
+      var global = window;
+    </script>
+    <style>
+      .copyright {
+        position: absolute;
+        top: calc(50% + 50px);
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: fit-content;
+        text-align: center;
+      }
+
+      .loader {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: fit-content;
+
+        font-size: 40px;
+        line-height: 1.5;
+        font-family: system-ui, sans-serif;
+        font-weight: bold;
+        text-transform: uppercase;
+        color: #0000;
+        -webkit-text-stroke: 1px #000;
+        background: radial-gradient(1.13em at 50% 1.6em, #000 99%, #0000 101%)
+            calc(50% - 1.6em) 0/3.2em 100% text,
+          radial-gradient(1.13em at 50% -0.8em, #0000 99%, #000 101%) 50% 0.8em/3.2em
+            100% repeat-x text;
+        animation: l9 2s linear infinite;
+      }
+
+      .loader:before {
+        content: "P.A.M.S";
+      }
+
+      @keyframes l9 {
+        to {
+          background-position: calc(50% + 1.6em) 0, calc(50% + 3.2em) 0.8em;
+        }
+      }
+    </style>
+  </head>
+
+  <body cds-theme="light" clr-density="regular">
+    <app-root>
+      <div class="loader"></div>
+      <div class="copyright">
+        Private Assets Management System
+        <br />
+        By NASoft&copy;
+        <a href="http://www.nasoft.net" target="_blank">www.nasoft.net</a>
+      </div>
+    </app-root>
+  </body>
+</html>

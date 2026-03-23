@@ -1,0 +1,66 @@
+@media only screen and (min-width: 1399px) {
+    .with-background {
+      background-image: var(--bg-image); //url("/assets/images/enlight.jpg");
+      background-position: right top;
+      background-size: auto 150px;
+      background-repeat: no-repeat;
+      margin-bottom: -3em !important;
+    }
+  }
+  
+  .with-background {
+    height: 150px;
+    margin-bottom: 0;
+  
+    h5 {
+      padding: 0 3em;
+      margin-top: 0em;
+      color: var(--cds-alias-utility-gray);
+    }
+  }
+  
+  .modal-title {
+    font-size: 24px !important;
+    font-weight: 500 !important;
+    color: var(--cds-alias-status-info-shade);
+  }
+  
+  .modal-body {
+    h4 {
+      letter-spacing: 1px;
+      font-variant: small-caps;
+      font-weight: 700;
+    }
+  
+    h5 {
+      color: var(--cds-alias-object-interaction-color-disabled);
+    }
+  }
+  
+  a {
+    font-variant: small-caps;
+  
+    cds-icon {
+      visibility: hidden;
+    }
+  
+    &:hover {
+      cds-icon {
+        visibility: visible;
+      }
+    }
+  }
+  
+  li {
+    width: 100%;
+    span {
+      font-variant: small-caps;
+      font-size: 110%;
+      letter-spacing: 1px;
+      color: var(--cds-alias-status-info);
+      text-align: justify;
+    }
+  }
+  
+
+  

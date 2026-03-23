@@ -1,0 +1,132 @@
+<div class="documentation-layout">
+  <!-- Sidebar Toggle Button (Mobile) -->
+  <button
+    class="sidebar-toggle"
+    (click)="toggleSidebar()"
+    [class.collapsed]="sidebarCollapsed"
+  >
+    <span class="hamburger"></span>
+    <span class="hamburger"></span>
+    <span class="hamburger"></span>
+  </button>
+
+  <!-- Left Sidebar - Table of Contents -->
+  <aside class="sidebar" [class.collapsed]="sidebarCollapsed">
+    <div class="sidebar-header">
+      <h3>Table des matières</h3>
+      <button
+        class="collapse-btn"
+        (click)="toggleSidebar()"
+        title="Réduire le menu"
+      >
+        ←
+      </button>
+    </div>
+
+    <nav class="toc-nav">
+      <ul class="toc-list">
+        <ng-container *ngFor="let item of tableOfContents">
+          <li class="toc-item" [attr.data-level]="item.level">
+            <a
+              [href]="'#' + item.id"
+              (click)="scrollToSection(item.id); $event.preventDefault()"
+              [class.active]="activeSection === item.id"
+              class="toc-link"
+            >
+              {{ item.title }}
+            </a>
+
+            <!-- Nested items -->
+            <ul
+              class="toc-sublist"
+              *ngIf="item.children && item.children.length > 0"
+            >
+              <ng-container *ngFor="let subItem of item.children">
+                <li class="toc-item" [attr.data-level]="subItem.level">
+                  <a
+                    [href]="'#' + subItem.id"
+                    (click)="
+                      scrollToSection(subItem.id); $event.preventDefault()
+                    "
+                    [class.active]="activeSection === subItem.id"
+                    class="toc-link"
+                  >
+                    {{ subItem.title }}
+                  </a>
+
+                  <!-- Third level nesting -->
+                  <ul
+                    class="toc-sublist"
+                    *ngIf="subItem.children && subItem.children.length > 0"
+                  >
+                    <ng-container *ngFor="let subSubItem of subItem.children">
+                      <li class="toc-item" [attr.data-level]="subSubItem.level">
+                        <a
+                          [href]="'#' + subSubItem.id"
+                          (click)="
+                            scrollToSection(subSubItem.id);
+                            $event.preventDefault()
+                          "
+                          [class.active]="activeSection === subSubItem.id"
+                          class="toc-link"
+                        >
+                          {{ subSubItem.title }}
+                        </a>
+                      </li>
+                    </ng-container>
+                  </ul>
+                </li>
+              </ng-container>
+            </ul>
+          </li>
+        </ng-container>
+      </ul>
+    </nav>
+
+    <!-- Sidebar Footer -->
+    <div class="sidebar-footer">
+      <small>Navigation automatique</small>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main
+    class="main-content"
+    [class.expanded]="sidebarCollapsed"
+    cds-layout="p:sm"
+  >
+    <!-- Header -->
+    <section cds-layout="Vertical gap:sm">
+      <h1>Documentation Technique</h1>
+      <p cds-text="subtitle">Guide des processus d'investissement</p>
+    </section>
+
+    <!-- Markdown Content -->
+    <div class="markdown-container" #markdownContainer>
+      <markdown
+        [data]="documentationMarkdown"
+        (error)="onMarkdownError($event)"
+        (load)="onMarkdownLoad()"
+        class="markdown-content"
+      >
+      </markdown>
+    </div>
+
+    <!-- Back to top button -->
+    <button
+      class="back-to-top"
+      (click)="scrollToSection('documentation')"
+      title="Retour en haut"
+    >
+      ↑
+    </button>
+  </main>
+</div>
+
+<!-- Loading overlay -->
+<div class="loading-overlay" *ngIf="false">
+  <div class="loading-content">
+    <div class="spinner"></div>
+    <p>Chargement de la documentation...</p>
+  </div>
+</div>

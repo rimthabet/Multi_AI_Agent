@@ -1,0 +1,206 @@
+<!-- Bloc formulaire et gauge -->
+<div cds-layout="horizontal align:stretch gap:md p-y:xxl">
+  <!-- Bloc formulaire -->
+  <div cds-layout="vertical">
+    <p cds-text="title" cds-layout="m-b:lg">Veuillez entrer vos données</p>
+    <form
+      clrForm
+      [formGroup]="paramsForm!"
+      class="clr-form-compact"
+      clrLabelSize="5"
+    >
+      <clr-select-container>
+        <label for="basis" class="clr-required-mark">
+          <cds-icon shape="tags" solid status="info"></cds-icon> Base de calcul
+        </label>
+        <select
+          clrSelect
+          name="basis"
+          formControlName="basis"
+          [compareWith]="equals"
+        >
+          <option [ngValue]="undefined">Choisir un critère de calcul</option>
+          @for(p of irrCalculationBasis; track p.id) {
+          <option [ngValue]="p" [attr.data-value]="p.id">
+            {{ p.libelle }}
+          </option>
+          }
+        </select>
+        <clr-control-error>
+          Veuillez sélectionner un critère de calcul
+        </clr-control-error>
+      </clr-select-container>
+
+      <clr-number-input-container>
+        <label for="multiplier" class="clr-required-mark">
+          <cds-icon shape="calculator" solid status="info"></cds-icon> Multiple
+          de {{ businessPlans()?.[0]?.libelle }}
+        </label>
+        <input
+          clrNumberInput
+          type="number"
+          formControlName="multiplier"
+          name="multiplier"
+        />
+        <clr-control-error> Veuillez entrer un multiple </clr-control-error>
+      </clr-number-input-container>
+
+      <clr-number-input-container>
+        <label for="realization" class="clr-required-mark">
+          <cds-icon
+            shape="resource-pool"
+            status="info"
+            badge="info"
+            solid
+          ></cds-icon>
+          % de réalisation du BP
+        </label>
+        <input
+          clrNumberInput
+          type="number"
+          formControlName="realization"
+          name="realization"
+          step="10"
+        />
+        <clr-control-error>
+          Veuillez entrer un pourcentage de réalisation
+        </clr-control-error>
+      </clr-number-input-container>
+
+      <clr-select-container>
+        <label for="businessPlan" class="clr-required-mark">
+          <cds-icon shape="bullseye" solid status="info"></cds-icon> Business
+          Plan
+        </label>
+        <select
+          clrSelect
+          name="businessPlan"
+          formControlName="businessPlan"
+          [compareWith]="equals"
+        >
+          <option [ngValue]="undefined">Choisir un business plan...</option>
+          @for(bp of businessPlans(); track bp) {
+          <option [ngValue]="bp">
+            {{ bp?.label }}
+          </option>
+          }
+        </select>
+        <clr-control-error>
+          Veuillez sélectionner un business plan
+        </clr-control-error>
+      </clr-select-container>
+    </form>
+  </div>
+
+  <!-- Bloc gauge -->
+  <div cds-layout="vertical align:center p:lg" class="panel">
+    <gauge-02
+      [title]="'Pourcentage de détention du FCPR dans le capital'"
+      [value1]="participation()?.part * 100"
+      [value2]="format(participation()?.montantActions)"
+      [value3]="formatInt(participation()?.actions)"
+    >
+    </gauge-02>
+  </div>
+</div>
+
+<cds-button
+  (click)="calculateIRR()"
+  [disabled]="paramsForm.invalid"
+  [loadingState]="loading ? 'loading' : 'default'"
+>
+  <cds-icon shape="calculator" solid status="info"></cds-icon> Calculer le Taux
+  de Rendement Interne - TRI
+</cds-button>
+
+<!-- IRR Data -->
+<div cds-layout="m-y:md">
+  <table class="table table-vertical">
+    <tbody>
+      <tr>
+        <th></th>
+        @for(r of irrCalculationData; track r.year){
+        <td style="text-align: right; font: 700">
+          {{ r.year }}
+        </td>
+        }
+      </tr>
+
+      <tr>
+        <th>
+          {{ paramsForm.controls.basis.value?.libelle || "N/A" }}
+          <sup>TND</sup>
+          <div class="comment">
+            Données du BP : {{ businessPlans()?.[0]?.label }}
+          </div>
+        </th>
+        @for(r of irrCalculationData; track r.year){
+        <td class="text-right">
+          {{ r.value | number : "1.0-0" }}
+        </td>
+        }
+      </tr>
+
+      <tr>
+        <th>Flux de trésorerie net <sup>TND</sup></th>
+        <td class="text-right">
+          {{ -1 * participation()?.montantActions | number : "1.0-0" }}
+        </td>
+        <td class="text-right" colspan="3">&nbsp;</td>
+        <td class="text-right">{{ lastYearCashFlow | number : "1.0-0" }}</td>
+      </tr>
+
+      <tr>
+        <th>Dettes Nettes</th>
+        <td colspan="5" style="text-align: right">
+          {{ netDeptEntity ? (netDeptDatum?.value | number : "1.0-0") : "N/A" }}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Stats -->
+
+@if(isPreviousData){
+<div class="alert alert-warning alert-sm" role="alert">
+  <div class="alert-items">
+    <div class="alert-item static">
+      <div class="alert-icon-wrapper">
+        <cds-icon class="alert-icon" shape="warning-standard"></cds-icon>
+      </div>
+      <div class="alert-text">
+        Ces valeurs proviennent de la dernière simulation TRI calculée.
+      </div>
+    </div>
+  </div>
+</div>
+}
+<div cds-layout="horizontal align:stretch m-t:lg gap:xxl">
+  <app-kpi-badge-01
+    [title]="'Valeur de sortie'"
+    [value]="exitValue"
+    [type]="'currency'"
+    [size]="'large'"
+    [color]="'var(--cds-alias-status-info)'"
+  >
+  </app-kpi-badge-01>
+
+  <app-kpi-badge-01
+    [title]="'TRI Capital'"
+    [value]="irr"
+    [type]="'ratio'"
+    [size]="'large'"
+    [color]="'var(--cds-alias-status-success)'"
+  >
+  </app-kpi-badge-01>
+</div>
+
+<div cds-layout="horizontal m-y:lg">
+  <cds-button
+    (click)="persistIRR()"
+    [disabled]="paramsForm.invalid || isPreviousData || !irr || !exitValue"
+  >
+    <cds-icon shape="floppy"></cds-icon> Sauvegarder
+  </cds-button>
+</div>

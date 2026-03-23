@@ -1,0 +1,73 @@
+<!-- Financing Switch -->
+<financing-switch
+  (financementChanged)="financementChanged($event)"
+  [prospection]="prospection()"
+  [message]="
+    'Veuillez spécifier le plan de financement pour précisier les particiaptions des fonds impliqués!'
+  "
+></financing-switch>
+
+<!-- Gauge -->
+<div cds-layout=" m-y:md">
+  <app-horizontal-scroller>
+    @for (f of fonds_actionnaires; track f) {
+    <ng-template #itemTemplate>
+      <gauge-01
+        [style.minWidth]="'560px'"
+        [title]="f.libelle"
+        [value1]="(f.nbrActionsApAugmentation / totalActions) * 100.0"
+        [value3]="f.nbrActionsApAugmentation * valeurAction"
+        [value2]="formatInt(f.nbrActionsApAugmentation)"
+      >
+      </gauge-01>
+    </ng-template>
+    }
+  </app-horizontal-scroller>
+</div>
+
+<!-- Tabs -->
+<clr-tabs clrLayout="horizontal">
+  <!-- Tab1 Avant participation -->
+  <clr-tab>
+    <button clrTabLink>Avant participation</button>
+    <clr-tab-content *clrIfActive="true">
+      <be-investment-structure
+        #be_investment_structure
+        [valeurAction]="valorisationActionAv"
+        [actionnaires]="actionnaires"
+        [financement]="financement()"
+        (refreshEvent)="loadActionnaires()"
+        [loading]="loading"
+      ></be-investment-structure>
+    </clr-tab-content>
+  </clr-tab>
+  <!-- Tab2 Après participation -->
+  <clr-tab>
+    <button clrTabLink>Après participation</button>
+    <clr-tab-content *clrIfActive>
+      <af-investment-structure
+        #af_investment_structure
+        [valeurAction]="valorisationActionAp"
+        [actionnaires]="actionnaires"
+        [financement]="financement()"
+        (refreshEvent)="loadActionnaires()"
+        [loading]="loading"
+      ></af-investment-structure>
+    </clr-tab-content>
+  </clr-tab>
+  <!-- Tab3 Structure du capital -->
+  <clr-tab>
+    <button clrTabLink>Structure du capital</button>
+    <clr-tab-content *clrIfActive>
+      <non-fundraising-structure
+        #non_fundraising_structure
+        [valeurAction]="valorisationActionAp"
+        [valorisationAction]="valorisationActionAp"
+        [actionnaires]="actionnaires_hl"
+        [financement]="financement()"
+        (refreshEvent)="loadActionnaires()"
+        [loading]="loading"
+      ></non-fundraising-structure>
+    </clr-tab-content>
+  </clr-tab>
+</clr-tabs>

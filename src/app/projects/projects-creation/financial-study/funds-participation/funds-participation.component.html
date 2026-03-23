@@ -1,0 +1,16 @@
+<!-- Financing Switch -->
+<financing-switch (financementChanged)="financementChanged($event)" [prospection]="prospection()" [message]="
+  'Veuillez spécifier le plan de financement pour précisier les particiaptions des fonds impliqués!'
+"></financing-switch>
+
+
+<!-- participations -->
+<div cds-layout="m-y:md">
+  @if(loading){
+  <span class="spinner spinner-inline"> Loading... </span>
+  }
+  @for(p of participations; track $index) {
+  <funds-participation-form (update)="loadParticipations(p?.financement?.id)" [participation]="p"
+    [prospection]="prospection()" [valeurAction]="valeurAction" [primeEmission]="primeEmission"></funds-participation-form>
+  }
+</div>

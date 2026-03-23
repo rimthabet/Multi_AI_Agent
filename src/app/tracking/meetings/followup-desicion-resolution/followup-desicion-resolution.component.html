@@ -1,0 +1,386 @@
+<!-- Header -->
+<span cds-text="title">
+  <cds-icon shape="gavel" status="info" solid="" size="lg"></cds-icon>
+  Suivi des décisions / résolutions sous réserves</span
+>
+
+<!-- Search fonds -->
+<div cds-layout="horizontal align:left gap:md m-t:xl m-b:none">
+  <clr-dropdown>
+    <cds-button size="md" action="outline" clrDropdownTrigger>
+      {{ selectedProjet?.nom || "Sélectionner un projet" }}
+      <cds-icon shape="angle" status="info" direction="down"></cds-icon>
+    </cds-button>
+
+    <clr-dropdown-menu *clrIfOpen>
+      <div
+        clrDropdownItem
+        *ngFor="let p of projets"
+        (click)="setProjet(p)"
+        onkeypress=""
+      >
+        {{ p.nom | uppercase }}
+      </div>
+    </clr-dropdown-menu>
+  </clr-dropdown>
+
+  <!-- Project name -->
+  <div
+    class="project-name {{ selectedProjet ? 'active' : '' }}"
+    style="margin-top: 0px !important"
+  >
+    {{ selectedProjet ? selectedProjet.nom : "Nom du projet ..." }}
+    <cds-icon
+      onkeypress=""
+      shape="dashboard"
+      size="lg"
+      title="Cliquer pour consulter la fiche projet"
+      style="cursor: pointer"
+      (click)="goToFiche()"
+    ></cds-icon>
+  </div>
+</div>
+
+<cds-divider
+  cds-layout="m-y:md"
+  class="htitled-divider"
+  title="Inventaire des décisions / résolutions sous réserves"
+></cds-divider>
+
+<!-- Content inside the scrollable div -->
+<table class="table" cds-layout="m-t:none">
+  <thead>
+    <th>Organe</th>
+    <th>Date de la réunion</th>
+    <th></th>
+  </thead>
+  <tbody>
+    <!-- meetings type and dates (2 first columns) -->
+    @for (r of reunions; track r.id) {
+    <tr>
+      <td [attr.rowSpan]="decisions[r.id] ? decisions[r.id].length + 1 : 1">
+        {{ r.typeReunion.libelle }}
+      </td>
+      <td
+        [attr.rowSpan]="decisions[r.id] ? decisions[r.id].length + 1 : 1"
+        [style.align]="'left !important'"
+      >
+        {{ r.dateReunion | date : "dd/MM/yyyy" }}
+      </td>
+      <td [style.display]="'none'"></td>
+    </tr>
+
+    @for (decision of decisions[r.id]; track decision.id) {
+    <tr>
+      <td
+        class="left"
+        [style.backgroundColor]="
+          $odd
+            ? 'var(--cds-alias-viz-sequential-blue-50) !important'
+            : 'var(--cds-alias-viz-severity-free-space-fill) !important'
+        "
+        [style.padding]="'2em'"
+      >
+        <!-- decision actions buttons -->
+        <div class="btn-group" cds-layout="horizontal align:left gap:xs m-b:lg">
+          <cds-button
+            status="warning"
+            action="flat-inline"
+            (click)="edit(decision)"
+            onkeypress=""
+          >
+            <cds-icon shape="pencil" solid=""></cds-icon> Éditer
+          </cds-button>
+
+          <cds-divider orientation="vertical"></cds-divider>
+          <cds-button
+            action="flat-inline"
+            (click)="displayActionsModal(decision)"
+            onkeypress=""
+          >
+            <cds-icon shape="wand" solid=""></cds-icon> Actions à entreprendre
+          </cds-button>
+          <cds-divider orientation="vertical"></cds-divider>
+          <cds-button
+            status="success"
+            action="flat-inline"
+            (click)="displayEtatChangeModal(decision)"
+            onkeypress=""
+          >
+            <cds-icon shape="launchpad" solid=""></cds-icon> État d'avancement
+          </cds-button>
+
+          <cds-divider orientation="vertical"></cds-divider>
+          <cds-button
+            action="flat-inline"
+            status="danger"
+            (click)="deleteDecision(decision)"
+            onkeypress=""
+          >
+            <cds-icon shape="trash" solid=""></cds-icon> Supprimer
+          </cds-button>
+        </div>
+
+        <!-- decision content -->
+        <cds-divider
+          cds-layout="m-y:md"
+          title="Décision / Résolution"
+          class="htitled-divider"
+        ></cds-divider>
+        <section
+          cds-text="body justify"
+          cds-layout="p-b:lg p-t:none p-x:lg"
+          class="panel"
+          [innerHTML]="formatMD2HTML(decision.libelle)"
+        ></section>
+
+        <!-- decision type vote -->
+        <div cds-layout="horizontal align:left gap:xs m-y:lg">
+          <cds-icon
+            shape="cursor-hand"
+            size="md"
+            solid=""
+            [status]="
+              decision.typeVote?.libelle == 'avec réserve' ? 'info' : 'success'
+            "
+          ></cds-icon>
+          <span style="padding-top: 8px">Votée</span>
+          <span
+            [style]="{
+              marginTop: '5px',
+              letterSpacing: '2px',
+              borderRadius: '3px',
+            }"
+            [class]="
+              decision.typeVote?.libelle == 'avec réserve'
+                ? 'badge badge-info reserve'
+                : ' badge badge-success reserve'
+            "
+            >{{ decision.typeVote?.libelle }}</span
+          >
+        </div>
+
+        <cds-divider
+          cds-layout="m-y:md"
+          title="Réserves"
+          class="htitled-divider"
+        ></cds-divider>
+
+        <!-- decision reserves -->
+        <section>
+          @if(decision.reserve){
+          <cds-icon
+            shape="warning-standard"
+            status="warning"
+            size="md"
+            cds-layout="m-b:xs"
+          ></cds-icon>
+          {{ decision.reserve }}
+          }@else{
+          <cds-icon
+            shape="happy-face"
+            status="info"
+            size="md"
+            cds-layout="m-b:xs"
+          ></cds-icon>
+          Aucune réserve }
+        </section>
+
+        <cds-divider
+          cds-layout="m-y:md"
+          title="Actions à entreprendre"
+          class="htitled-divider"
+        ></cds-divider>
+
+        <!-- decision actions -->
+        @if(decision.action){
+        <cds-icon
+          shape="warning-standard"
+          status="info"
+          size="md"
+          cds-layout="m-b:xs"
+        ></cds-icon>
+        [{{ decision.action }}] } @else {
+        <cds-icon
+          shape="neutral-face"
+          status="info"
+          size="md"
+          cds-layout="m-b:xs"
+        ></cds-icon>
+        Aucune action à entreprendre }
+
+        <cds-divider
+          cds-layout="m-y:md"
+          title="État d'avancement"
+          class="htitled-divider"
+        ></cds-divider>
+
+        <!-- decision etat avancement -->
+        @if(decision.etatAvancement){
+        <cds-icon
+          shape="stop"
+          solid=""
+          [style]="{
+            color: decision.etatAvancement?.couleur,
+          }"
+        ></cds-icon>
+        {{ decision.etatAvancement?.libelle }}
+        }@else{
+        <cds-icon
+          shape="sad-face"
+          status="info"
+          size="md"
+          cds-layout="m-b:xs"
+        ></cds-icon>
+        Aucun état d'avancement }
+      </td>
+    </tr>
+    } }
+  </tbody>
+</table>
+
+<!-- Modal etat change -->
+<clr-modal [clrModalSize]="'md'" [(clrModalOpen)]="etatChangeModalOpened">
+  <div class="modal-title">
+    <cds-icon shape="note" status="info" size="lg" solid=""></cds-icon> Modifier
+    l'état d'avancement
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="etatForm" clrForm clrLayout="vertical">
+      <clr-control-container>
+        <label>Décision / Résolution:</label>
+        <label
+          cds-layout="p:sm p-t:none"
+          class="info panel"
+          [style.fontVariant]="'small-caps'"
+          [style.fontWeight]="700"
+          [innerHTML]="formatMD2HTML(selectedDecision?.libelle)"
+        ></label>
+      </clr-control-container>
+
+      <clr-combobox-container>
+        <label class="clr-required-mark">État d'avancement:</label>
+        <clr-combobox formControlName="etat" name="policies">
+          <ng-container *clrOptionSelected="let selected">
+            <cds-icon
+              shape="filter-grid"
+              role="img"
+              aria-label="policies list"
+            ></cds-icon>
+            {{ selected?.libelle }}
+          </ng-container>
+          <clr-options>
+            <clr-option
+              *clrOptionItems="let etat of etats; field: 'libelle'"
+              [clrValue]="etat"
+            >
+              <cds-icon
+                shape="stop"
+                [style]="{ color: etat.couleur + '!important' }"
+                solid
+              ></cds-icon>
+              {{ etat.libelle }}
+            </clr-option>
+            <clr-option
+              *clrOptionItems="let etat of etats_rejets; field: 'libelle'"
+              [clrValue]="etat"
+            >
+              <cds-icon
+                shape="stop"
+                [style]="{ color: etat.couleur + '!important' }"
+                solid
+              ></cds-icon>
+              {{ etat.libelle }}
+            </clr-option>
+          </clr-options>
+        </clr-combobox>
+      </clr-combobox-container>
+    </form>
+  </div>
+
+  <div class="modal-footer">
+    <!-- Buttons -->
+    <cds-button action="outline" (click)="etatChangeModalOpened = false"
+      >Annuler</cds-button
+    >
+    <cds-button
+      status="primary"
+      [disabled]="etatForm.invalid"
+      (click)="updateEtatAvancementDecision(selectedDecision)"
+      onkeypress=""
+    >
+      Sauvegarder
+    </cds-button>
+  </div>
+</clr-modal>
+
+<!-- Modal decision edit -->
+<clr-modal [(clrModalOpen)]="opened" [clrModalSize]="'lg'">
+  <h1 class="modal-title">
+    <cds-icon shape="gavel" size="25" solid status="info"></cds-icon> Modifier
+    la décision/résolution
+  </h1>
+  <div class="modal-body">
+    <!-- Form -->
+    <decision-resolution
+      [decision]="selectedDecision"
+      [reunion]="selectedDecision?.reunion"
+      (refresh)="handleDecisionSaved($event)"
+    ></decision-resolution>
+  </div>
+</clr-modal>
+
+<!-- Modal Actions à entreprendre avec editable-field -->
+<clr-modal [clrModalSize]="'md'" [(clrModalOpen)]="actionsModalOpened">
+  <div class="modal-title">
+    <cds-icon shape="wand" status="info" size="lg" solid=""></cds-icon>
+    Actions à entreprendre
+  </div>
+  <div class="modal-body">
+    <!-- <app-editable-field
+              [data]="selectedDecision"
+              [field]="'action'"
+              [type]="'text'"
+              (updateEvent)="updateDecision($event)"
+            >
+            </app-editable-field> -->
+
+    <form [formGroup]="actionForm" vertical="true" clrForm>
+      <clr-textarea-container>
+        <label style="display: none">Actions à entreprendre:</label>
+        <textarea
+          class="clr-col-12"
+          clrTextarea
+          name="libelle"
+          rows="4"
+          cols="69"
+          formControlName="action"
+          placeholder="Ajouter les actions à entreprendre."
+        ></textarea>
+      </clr-textarea-container>
+      <clr-control-helper>
+        Vous pouvez utiliser la synthaxe
+        <a href="https://www.markdownguide.org/basic-syntax/" target="_blank"
+          >Markdown</a
+        >
+        pour formater votre ordre du jour</clr-control-helper
+      >
+    </form>
+  </div>
+  <div class="modal-footer">
+    <cds-button
+      action="outline"
+      (click)="actionsModalOpened = false"
+      onkeypress=""
+    >
+      Annuler
+    </cds-button>
+    <cds-button
+      status="primary"
+      (click)="updateDecision(selectedDecision)"
+      onkeypress=""
+      ><cds-icon shape="floppy" solid=""></cds-icon>
+      Sauvegarder
+    </cds-button>
+  </div>
+</clr-modal>

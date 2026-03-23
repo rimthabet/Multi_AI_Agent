@@ -1,0 +1,19 @@
+td,
+th {
+    font-size: 90%;
+    font-weight: 500 !important;
+    padding: 0.75em;
+}
+  
+
+td {
+    &.digit {
+        text-align: right !important;
+    }
+
+    &:first-of-type {
+        text-align: left;
+        font-size: 100%;
+    }
+}
+

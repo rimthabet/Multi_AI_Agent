@@ -1,0 +1,384 @@
+<div cds-layout="m-t:md m-r:md m-b:md">
+  <!-- Conversion OCA -->
+  @if (conversion && !show_isa ) {
+  <div cds-layout="vertical gap:lg p-x:none p-y:md align:stretch">
+    <span cds-text="title" cds-layout="align:left"
+      ><cds-icon size="lg" shape="recycle" class="info"></cds-icon> Les OCA ont
+      été converties en Actions
+    </span>
+
+    <div cds-layout="horizontal align:stretch">
+      <span cds-text="section" cds-layout="horizontal align:left">
+        <cds-button
+          (click)="show_isa = true"
+          action="flat"
+          cds-layout="align:left"
+        >
+          <cds-icon shape="link" size="md"></cds-icon> Aperçu sur la
+          souscription OCA
+        </cds-button></span
+      ><span
+        cds-text="section"
+        cds-layout="horizontal align:right"
+        (click)="deleteConversion()"
+      >
+        <cds-button cds-layout="align:right" status="danger">
+          <cds-icon shape="ban" size="md" status="danger"></cds-icon>
+          Annuler
+        </cds-button>
+      </span>
+    </div>
+
+    <cds-divider orientation="horizontal"></cds-divider>
+
+    <div cds-layout="vertical gap:md p:sm horizontal-stretch">
+      <div cds-layout="horizontal align:stretch">
+        <span cds-text="section" cds-layout="horizontal align:left"
+          >Montant de souscription en OCA:</span
+        ><span
+          cds-text="section"
+          cds-layout="horizontal align:right"
+          class="digit"
+        >
+          {{ conversion?.montant | number : "1.0-0" }} &nbsp;<small>tnd</small>
+        </span>
+      </div>
+
+      <div cds-layout="horizontal align:stretch">
+        <span cds-text="section" cds-layout="horizontal align:left"
+          >Actions converties:</span
+        ><span
+          cds-text="section"
+          cds-layout="horizontal align:right"
+          class="digit"
+        >
+          {{ conversion?.nbrActions | number : "1.0-0" }}
+        </span>
+      </div>
+      <div cds-layout="horizontal align:stretch">
+        <span cds-text="section" cds-layout="horizontal align:left"
+          >Date de l'AGE:</span
+        ><span
+          cds-text="section"
+          cds-layout="horizontal align:right"
+          class="digit"
+        >
+          {{ conversion?.dateAge | date : "dd/MM/yyyy" }}</span
+        >
+      </div>
+    </div>
+
+    <cds-divider orientation="horizontal"></cds-divider>
+
+    @for(conformite of conversion_conformite_documentaire; track $index) {
+    <document-upload
+      #doc_upload
+      [compliance]="{ document: undefined, conformite: conformite }"
+      [data]="conversion"
+      [task_row]="7"
+      [phase_row]="3"
+    ></document-upload>
+    }
+  </div>
+  }
+
+  <!-- Header -->
+  @if (!conversion || conversion == undefined || show_isa) {
+  <span cds-text="title" class="title"> Souscription en OCA </span>
+
+  <!-- Alert conversion -->
+  @if(conversion != undefined) {
+  <div cds-layout="m-t:md">
+    <cds-alert-group
+      status="warning"
+      aria-label="This is an example warning alert group"
+    >
+      <cds-alert>
+        <span [style.color]="'var(--cds-alias-typography-color-500)'"
+          >Ces OCA ont été converties en actions &nbsp;</span
+        >
+        <span
+          (click)="show_isa = false"
+          [style.cursor]="'pointer'"
+          [style.color]="'var(--cds-alias-typography-color-500)'"
+          >(Voir les détails)</span
+        >
+      </cds-alert>
+    </cds-alert-group>
+  </div>
+  }
+
+  <!-- PROGRESS BAR -->
+  @if (loading) {
+  <div cds-layout="m-t:md">
+    <label for="demoProgressBar">Téléchargement </label>
+    <clr-progress-bar id="progressBar" clrLoop></clr-progress-bar>
+  </div>
+  }
+
+  <!-- Form oca -->
+  <form
+    clrForm
+    cds-layout="m-t:lg"
+    [formGroup]="ocaSaveForm!"
+    clrLayout="horizontal compact"
+    clrLabelSize="3"
+    class="clr-form-compact"
+  >
+    <clr-date-container>
+      <label for="date_bulletin_souscription"
+        ><cds-icon shape="calendar" solid></cds-icon> Date du bulletin de
+        souscription (OCA):
+      </label>
+      <input
+        clrDate
+        type="date"
+        formControlName="date_bulletin_souscription"
+        name="date_bulletin_souscription"
+      />
+    </clr-date-container>
+    <clr-number-input-container>
+      <label for="montant"
+        ><cds-icon shape="dollar-bill" solid></cds-icon> Montant de souscription
+        (tnd):</label
+      >
+      <input
+        clrNumberInput
+        type="number"
+        formControlName="montant"
+        name="montant"
+        min="0"
+        step="0.01"
+      />
+      <clr-control-helper
+        >{{
+          ocaSaveForm.controls["montant"].value != 0
+            ? (ocaSaveForm.controls["montant"].value
+              | currency : "tnd" : "symbol" : "1.0-0")
+            : ""
+        }}
+      </clr-control-helper>
+    </clr-number-input-container>
+
+    <clr-number-input-container>
+      <label for="nombre_oca"
+        ><cds-icon shape="hashtag" solid></cds-icon> Nombre des OCA:</label
+      >
+      <input
+        clrNumberInput
+        type="number"
+        formControlName="nombre_oca"
+        name="nombre_oca"
+        min="0"
+        step="1"
+      />
+      <clr-control-helper>
+        {{
+          ocaSaveForm.controls["nombre_oca"].value != 0
+            ? (ocaSaveForm.controls["nombre_oca"].value | number : "1.0-0")
+            : ""
+        }}
+      </clr-control-helper>
+    </clr-number-input-container>
+
+    <clr-number-input-container>
+      <label for="valeur_nominale_oca"
+        ><cds-icon shape="dollar" solid></cds-icon> Valeur nominale des OCA
+        (tnd):</label
+      >
+      <input
+        clrNumberInput
+        type="number"
+        formControlName="valeur_nominale_oca"
+        name="valeur_nominale_oca"
+        min="0"
+        step="0.01"
+      />
+      <clr-control-helper>
+        {{
+          ocaSaveForm.controls["valeur_nominale_oca"].value != 0
+            ? (ocaSaveForm.controls["valeur_nominale_oca"].value
+              | currency : "tnd" : "symbol" : "1.2-2")
+            : ""
+        }}
+      </clr-control-helper>
+    </clr-number-input-container>
+
+    <clr-number-input-container>
+      <label for="taux_oca"
+        ><cds-icon shape="plugin" solid></cds-icon> Taux d'intérêt OCA:</label
+      >
+      <input
+        clrNumberInput
+        type="number"
+        formControlName="taux_oca"
+        name="taux_oca"
+      />
+    </clr-number-input-container>
+
+    <clr-number-input-container>
+      <label for="maturite"
+        ><cds-icon shape="shield-check" solid></cds-icon> Maturité (ans):</label
+      >
+      <input
+        clrNumberInput
+        type="number"
+        formControlName="maturite"
+        name="maturite"
+      />
+    </clr-number-input-container>
+
+    <clr-select-container>
+      <label for="indexee"
+        ><cds-icon shape="container-volume" solid></cds-icon> Indexée
+        sur:</label
+      >
+      <select clrSelect name="options" formControlName="indexee">
+        @for(indexee of indexees; track $index) {
+        <option>
+          {{ indexee?.label }}
+        </option>
+        }
+      </select>
+    </clr-select-container>
+  </form>
+
+  <!-- Buttons save and delete  -->
+  <div cds-layout="horizontal gap:sm m-t:lg">
+    <div class="btn-group">
+      <cds-button
+        action="flat-inline"
+        status="primary"
+        [disabled]="ocaSaveForm.invalid"
+        (click)="saveSouscription()"
+      >
+        <cds-icon shape="floppy" size="md" solid></cds-icon> Sauvegarder
+      </cds-button>
+    </div>
+
+    <cds-divider orientation="vertical"></cds-divider>
+
+    <div class="btn-group">
+      <cds-button
+        action="flat-inline"
+        status="danger"
+        [disabled]="souscription == undefined"
+        (click)="deleteSouscription()"
+      >
+        <cds-icon shape="trash" size="md" status="danger" solid></cds-icon>
+        Supprimer
+      </cds-button>
+    </div>
+  </div>
+
+  <!-- Bulletin de souscription OCA -->
+  <div class="label bs" cds-layout="m-t:lg m-b:sm">
+    <span class="badge badge-info">Bulletin de souscription:</span>
+    <cds-button
+      action="flat"
+      status="primary"
+      [disabled]="souscription == undefined"
+      (click)="showBankAccountModal()"
+    >
+      <cds-icon shape="scroll" size="md" solid></cds-icon> Générer
+    </cds-button>
+
+    <cds-button
+      action="flat"
+      status="primary"
+      [disabled]="souscription == undefined"
+      (click)="openBulletinSubscription()"
+    >
+      <cds-icon shape="upload" size="md" solid></cds-icon> Télécharger
+    </cds-button>
+
+    <cds-button
+      action="flat"
+      status="primary"
+      (click)="openBulletinLink()"
+      [disabled]="
+        souscription == undefined || bulletin_souscription_link == undefined
+      "
+    >
+      <cds-icon shape="eye" size="md" solid></cds-icon> Visualiser
+    </cds-button>
+  </div>
+
+  <!-- Liberation form -->
+  <vesting-create-form
+    [souscription]="souscription"
+    [type]="'oca'"
+  ></vesting-create-form>
+  }
+</div>
+
+<!-- Conversion form -->
+<cds-button
+  status="warning"
+  (click)="conversion_modal_open = true"
+  [disabled]="souscription == undefined"
+>
+  <cds-icon shape="recycle" solid size="md"></cds-icon> Convertir en Actions
+</cds-button>
+
+<!-- Modal bulletin de souscription -->
+<clr-modal [clrModalSize]="'lg'" [(clrModalOpen)]="openedBulletinSubscription">
+  <!-- Modal header -->
+  <h3 class="modal-title">
+    <cds-icon shape="upload" size="lg" solid=""></cds-icon> Télécharger le
+    bulletin de souscription
+  </h3>
+  <!-- Modal body -->
+  <div class="modal-body">
+    <document-upload
+      #docUpload
+      [mode]="'flat'"
+      [compliance]="{
+        document: undefined,
+        conformite: souscription_conformite_documentaire[0]
+      }"
+      [data]="souscription"
+      [task_row]="2"
+      [phase_row]="3"
+      (documentUploadedEvent)="loadSouscription()"
+    ></document-upload>
+  </div>
+  <div class="modal-footer" style="display: none"></div>
+</clr-modal>
+
+<!-- Modal Conversion OCA -->
+<clr-modal [(clrModalOpen)]="conversion_modal_open" [clrModalSize]="'md'">
+  <!-- Modal header -->
+  <h3 class="modal-title">
+    <cds-icon shape="recycle" size="lg" status="warning" solid=""></cds-icon>
+    Conversion des OCA en Actions
+  </h3>
+  <!-- Modal body -->
+  <div class="modal-body" cds-layout="p-b:md">
+    <oca-convertion-create-form
+      #ocaConversionForm
+      (refreshEvent)="refreshEvent($event)"
+      [souscription]="souscription"
+      [conversion]="conversion"
+      [fonds]="fonds()"
+      [financement]="financement()"
+    ></oca-convertion-create-form>
+  </div>
+</clr-modal>
+
+<!-- Modal Bank Account-->
+<clr-modal [clrModalSize]="'lg'" [(clrModalOpen)]="openedBankAccount">
+  <!-- Modal header -->
+  <h3 class="modal-title">
+    <cds-icon shape="bank" size="lg" solid=""></cds-icon> Les informations du
+    compte bancaire
+  </h3>
+  <!-- Modal body -->
+  <div class="modal-body" cds-layout="p-b:md">
+    <oca-bank-account-form
+      [souscription]="souscription"
+      (closeEvent)="openedBankAccount = false"
+    ></oca-bank-account-form>
+  </div>
+  <div class="modal-footer" style="display: none"></div>
+</clr-modal>

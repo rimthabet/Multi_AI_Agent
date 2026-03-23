@@ -1,0 +1,221 @@
+<!-- Header -->
+<span cds-text="title">
+  <cds-icon shape="cog" size="lg" status="info" cds-layout="m-b:sm"></cds-icon>
+  Comités stratégiques des fonds</span
+>
+
+<!-- Divider -->
+<cds-divider
+  cds-layout="m-t:lg "
+  class="htitled-divider"
+  title="Inventaire des comités stratégiques par fonds"
+></cds-divider>
+
+<!-- Search fonds -->
+<div cds-layout="horizontal align:left gap:md m-t:xl">
+  <clr-combobox-container style="margin-top: 0.7em !important">
+  <clr-combobox
+    [(ngModel)]="selectedFonds"
+    name="fondsName"
+    (ngModelChange)="switchTheFund($event)"
+  >
+
+    <!-- Affichage du fonds sélectionné -->
+    <ng-container *clrOptionSelected="let selected">
+      <cds-icon
+        shape="filter-grid"
+        role="img"
+        aria-label="fonds list"
+      ></cds-icon>
+      {{ selected?.denomination }}
+    </ng-container>
+
+    <!-- Options -->
+    <clr-options>
+      <clr-option
+        *clrOptionItems="let f of fonds; field: 'denomination'"
+        [clrValue]="f"
+      >
+        <cds-icon
+          shape="filter-grid"
+          role="img"
+          aria-label="fonds list"
+        ></cds-icon>
+        {{ f.denomination }}
+      </clr-option>
+    </clr-options>
+
+  </clr-combobox>
+
+</clr-combobox-container>
+
+  <div
+    class="fund-name {{ selectedFonds ? 'active' : '' }}"
+    style="margin-top: 0px !important"
+  >
+    {{ selectedFonds ? selectedFonds.denomination : "Nom du projet ..." }}
+    <cds-icon
+      onkeypress=""
+      shape="dashboard"
+      size="lg"
+      title="Cliquer pour consulter la fiche projet"
+      style="cursor: pointer"
+      (click)="goToFiche()"
+    ></cds-icon>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div cds-layout="m-t:sm">
+  <clr-tabs>
+    <!-- Tab new comite -->
+    <clr-tab>
+      <button clrTabLink id="link1">
+        <cds-icon shape="add-text" size="md"></cds-icon>
+        Nouveau comité
+      </button>
+      <clr-tab-content id="content1" *clrIfActive="true">
+        @if(selectedFonds) {
+        <comite-create-form
+          [create]="true"
+          [fonds]="selectedFonds"
+          (refreshEvent)="loadComitesStrategiques()"
+        ></comite-create-form>
+        }
+      </clr-tab-content>
+    </clr-tab>
+
+    <!-- Tab comites -->
+    <clr-tab>
+      <button clrTabLink>
+        <cds-icon shape="history" size="md"></cds-icon>
+        Historique des comités
+      </button>
+      <clr-tab-content *clrIfActive>
+        <clr-datagrid
+          style="clear: both; height: calc(100vh - 285px)"
+          [clrDgLoading]="comites_loading"
+        >
+          <clr-dg-column [clrDgField]="'dateComite'" [style.maxWidth]="'250px'"
+            >Date du comité</clr-dg-column
+          >
+          <clr-dg-column>Ordre du jour</clr-dg-column>
+
+          <!-- Rows -->
+          <clr-dg-row
+            *clrDgItems="let c of comitesStrategie!; let odd = odd"
+            [style.backgroundColor]="
+              odd
+                ? 'var(--cds-alias-viz-sequential-blue-50) !important'
+                : 'var(--cds-alias-viz-severity-free-space-fill) !important'
+            "
+          >
+            <!-- Actions -->
+            <clr-dg-action-overflow>
+              <button class="action-item" (click)="openEditModal(c)">
+                <cds-icon shape="note" sise="md" solid status="info"></cds-icon>
+                Modifier le comité
+              </button>
+              <button class="action-item" (click)="deleteComite(c)">
+                <cds-icon
+                  shape="trash"
+                  status="danger"
+                  [style.cursor]="'pointer'"
+                  solid
+                  (click)="deleteComite(c)"
+                ></cds-icon>
+                Supprimer le comité
+              </button>
+            </clr-dg-action-overflow>
+
+            <!-- Cells -->
+            <clr-dg-cell [style.maxWidth]="'250px'">{{
+              c.dateComite | date : "dd/MM/yyyy"
+            }}</clr-dg-cell>
+            <clr-dg-cell>
+              <cds-divider
+                cds-layout="m-y:lg"
+                class="htitled-divider"
+                title="PV de la réunion"
+              ></cds-divider>
+
+              <div cds-layout="horizontal align:left gap:md">
+                @for(document of c.documents; track $index) {
+
+                <a
+                  [href]="trimPath(document.chemin)"
+                  target="_blank"
+                  cds-layout="align:left"
+                  class="label"
+                >
+                  {{ document.nomFichier }}</a
+                >
+
+                } @if(c.documents?.length == 0) {
+                <span
+                  ><cds-icon
+                    shape="no-access"
+                    solid=""
+                    size="18"
+                    status="danger"
+                  ></cds-icon>
+                  Document manquant!
+                </span>
+                }
+              </div>
+
+              <cds-divider
+                cds-layout="m-y:lg"
+                class="htitled-divider"
+                title="Télécharement"
+              ></cds-divider>
+
+              <document-upload
+                [mode]="'modal'"
+                [compliance]="{
+                  conformite: comite_conformite_documentaire[0]
+                }"
+                [data]="c"
+                [task_row]="12"
+                [phase_row]="1"
+                (documentUploadedEvent)="loadComitesStrategiques()"
+              ></document-upload>
+
+              <cds-divider
+                cds-layout="m-y:lg"
+                class="htitled-divider"
+                title="Ordre du jour"
+              ></cds-divider>
+
+              <section
+                cds-text="body justify"
+                cds-layout="p:lg m-b:lg"
+                class="panel"
+                [innerHTML]="formatMD2HTML(c.commentaires)"
+              ></section>
+            </clr-dg-cell>
+          </clr-dg-row>
+
+          <!-- Footer -->
+          <clr-dg-footer
+            >{{ comitesStrategie!.length }} comités de stratégie</clr-dg-footer
+          >
+        </clr-datagrid>
+      </clr-tab-content>
+    </clr-tab>
+  </clr-tabs>
+</div>
+
+<!-- Modal open edit -->
+<clr-modal [clrModalSize]="'lg'" [(clrModalOpen)]="openedComiteStrategique">
+  <h3 class="modal-title">
+    <cds-icon shape="cog" size="md" solid></cds-icon> Comité de stratégie
+  </h3>
+  <div class="modal-body">
+    <comite-create-form
+      [comite]="selectedComiteStrategique"
+      [fonds]="selectedFonds"
+      (refreshEvent)="onComiteRefresh($event)"
+    ></comite-create-form>
+  </div>
+</clr-modal>

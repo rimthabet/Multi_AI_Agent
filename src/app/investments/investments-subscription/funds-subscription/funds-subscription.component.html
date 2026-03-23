@@ -1,0 +1,44 @@
+<!-- ACCORDION SUBSCRIPTIONS -->
+<clr-accordion>
+  <!-- STOCK -->
+  <clr-accordion-panel
+    [clrAccordionPanelOpen]="financement()?.financementActions > 0"
+    [clrAccordionPanelDisabled]="financement()?.financementActions === 0"
+  >
+    <clr-accordion-title>ACTION</clr-accordion-title>
+    <clr-accordion-content *clrIfExpanded>
+      <shares-create-form
+        [financement]="financement()"
+        [fonds]="fonds()"
+      ></shares-create-form>
+    </clr-accordion-content>
+  </clr-accordion-panel>
+
+  <!-- OCA -->
+  <clr-accordion-panel
+    [clrAccordionPanelOpen]="financement()?.financementOCA > 0"
+    [clrAccordionPanelDisabled]="financement()?.financementOCA === 0"
+  >
+    <clr-accordion-title> OCA</clr-accordion-title>
+    <clr-accordion-content *clrIfExpanded="">
+      <oca-create-form
+        [financement]="financement()"
+        [fonds]="fonds()"
+      ></oca-create-form>
+    </clr-accordion-content>
+  </clr-accordion-panel>
+
+  <!-- CCA -->
+  <clr-accordion-panel
+    [clrAccordionPanelOpen]="financement()?.financementCCA > 0"
+    [clrAccordionPanelDisabled]="financement()?.financementCCA === 0"
+  >
+    <clr-accordion-title>CCA</clr-accordion-title>
+    <clr-accordion-content *clrIfExpanded="">
+      <cca-create-form
+        [financement]="financement()"
+        [fonds]="fonds()"
+      ></cca-create-form>
+    </clr-accordion-content>
+  </clr-accordion-panel>
+</clr-accordion>

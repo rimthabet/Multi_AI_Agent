@@ -1,0 +1,205 @@
+<!-- Loading Spinner -->
+<div
+  class="modal-backdrop"
+  aria-hidden="true"
+  [style.display]="loading ? 'block' : 'none'"
+  (click)="loading = false"
+>
+  <span
+    class="spinner"
+    style="
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    "
+    >Loading...</span
+  >
+</div>
+
+<!-- Header -->
+<span cds-text="title">
+  <cds-icon
+    shape="login"
+    size="lg"
+    status="info"
+    cds-layout="m-b:sm"
+  ></cds-icon>
+  Gestion des souscriptions</span
+>
+
+<!-- Search fonds + Fund title -->
+<div cds-layout="horizontal align:left gap:md m-t:xl">
+  <clr-dropdown>
+    <!-- Button trigger -->
+    <cds-button action="outline" clrDropdownTrigger>
+      {{ selectedFonds?.denomination }}
+      <cds-icon shape="angle" status="info" direction="down"></cds-icon>
+    </cds-button>
+
+    <!-- Dropdown menu -->
+    <clr-dropdown-menu *clrIfOpen>
+      @for(f of fonds; track f.id) {
+      <div clrDropdownItem (click)="switchTheFund(f)">
+        {{ f.denomination }}
+      </div>
+      }
+    </clr-dropdown-menu>
+  </clr-dropdown>
+
+  <div
+    class="project-name {{ selectedFonds ? 'active' : '' }}"
+    style="margin-top: 0px !important"
+  >
+    {{ selectedFonds ? selectedFonds.denomination : "Nom du fonds ..." }}
+    <cds-icon
+      onkeypress=""
+      shape="dashboard"
+      size="lg"
+      title="Cliquer pour consulter la fiche projet"
+      style="cursor: pointer"
+      (click)="goToFiche()"
+    ></cds-icon>
+  </div>
+</div>
+
+<cds-divider
+  cds-layout="m-t:lg "
+  class="htitled-divider"
+  title="Montants souscrit et libéré"
+></cds-divider>
+
+<!-- Total souscrit and libéré -->
+<div cds-layout="horizontal align:stretch m-t:lg gap:xxl">
+  <app-kpi-badge-01
+    [title]="'Montant Total souscrit'"
+    [value]="total_souscrit"
+    [type]="'currency'"
+    [size]="'large'"
+  >
+  </app-kpi-badge-01>
+
+  <app-kpi-badge-01
+    [title]="'Montant Total libéré'"
+    [value]="total_libere"
+    [type]="'currency'"
+    [size]="'large'"
+    [color]="'var(--cds-alias-status-success)'"
+  >
+  </app-kpi-badge-01>
+</div>
+
+<cds-divider
+  cds-layout="m-y:xl "
+  class="htitled-divider"
+  title="Souscriptions par période de souscription"
+></cds-divider>
+
+<!-- Vesting periodes Tabs -->
+<clr-tabs>
+  @for (sub_periode of subscription_periodes; track sub_periode) {
+  <!-- Period Tab -->
+  <clr-tab>
+    <button clrTabLink class="btn-periode">
+      <span class="vesting-period">
+        {{ sub_periode.dateDebut | date : "dd/MM/yyyy" }}</span
+      >
+      <cds-icon
+        size="24"
+        cds-layout="m-b:xs m-x:none"
+        shape="arrow"
+        direction="right"
+      ></cds-icon>
+      <span class="vesting-period">{{
+        sub_periode.dateFin | date : "dd/MM/yyyy"
+      }}</span>
+    </button>
+
+    <clr-tab-content *clrIfActive="$first">
+      <div
+        cds-layout="col@sm:12 col@md:12 col@lg:12 col@xl:12 col@2xl:12 p:none m:none"
+      >
+        <period-subscriptions
+          [subscription_periode]="sub_periode"
+          [fonds]="selectedFonds"
+          [subscriptions]="subscriptions"
+          [subscribers]="subscribers"
+          [liberation_conformite_documentaire]="
+            liberation_conformite_documentaire
+          "
+          [prospection_conformite_documentaire]="
+            prospection_conformite_documentaire
+          "
+          (refreshEvent)="loadSubscriptionsData()"
+        >
+        </period-subscriptions>
+      </div>
+    </clr-tab-content>
+  </clr-tab>
+  }
+  <!-- Wrong subscriptions tab -->
+  @if (wrong_subscriptions && wrong_subscriptions.length > 0){
+  <clr-tab>
+    <button clrTabLink class="btn-periode" [style.color]="'red'">
+      Hors périodes
+      <cds-icon shape="warning-standard" [style.color]="'red'"></cds-icon>
+    </button>
+    <clr-tab-content>
+      <div class="alert alert-warning alert-sm" role="alert">
+        <div class="alert-items">
+          <div class="alert-item static">
+            <div class="alert-icon-wrapper">
+              <cds-icon
+                class="alert-icon"
+                shape="exclamation-triangle"
+              ></cds-icon>
+            </div>
+            <div class="alert-text">
+              Toutes ces souscriptions doivent être supprimées car elles
+              présentent des dates de souscription n'appartenant pas à aucune
+              période de souscription!
+            </div>
+          </div>
+        </div>
+        <button type="button" class="close" aria-label="Close">
+          <cds-icon aria-hidden="true" shape="close"></cds-icon>
+        </button>
+      </div>
+
+      <table class="table" style="width: 100%; line-height: 3em">
+        <caption></caption>
+        <thead>
+          <tr>
+            <th class="left secret">Souscripteur</th>
+            <th>Date de souscription</th>
+            <th class="right">Montant souscrit (tnd)</th>
+            <th>Supprimer</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for(ws of wrong_subscriptions; track ws) {
+          <tr>
+            <td class="left secret">
+              {{ ws.souscription?.souscripteur?.libelle }}
+            </td>
+            <td>
+              {{ ws.souscription?.dateSouscription | date : "dd/MM/yyyy" }}
+            </td>
+            <td class="right">
+              {{ ws.souscription?.montantSouscription | number : "1.0-0" }}
+            </td>
+            <td>
+              <cds-icon
+                shape="trash"
+                class="failure"
+                [style.cursor]="'pointer'"
+              ></cds-icon>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </clr-tab-content>
+  </clr-tab>
+  }
+</clr-tabs>

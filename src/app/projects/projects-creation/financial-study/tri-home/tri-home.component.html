@@ -1,0 +1,24 @@
+<!-- Financing Switch -->
+<financing-switch (financementChanged)="financementChanged($event)" [prospection]="prospection()"
+  [message]="'Veuillez spécifier le plan de financement pour le calcul du TRI!'"></financing-switch>
+
+<h2 cds-layout="m-t:xxl">Calcul du Taux de Rendement Interne :</h2>
+<h3>
+  Relatif au plan de financement du
+  <span>{{ selectedFinancement?.dateDemandeFinancement | date }}</span>
+</h3>
+
+<div cds-layout="m-t:xl">
+  <clr-tabs>
+    @for(f of selectedFinancement?.fonds; track f; let i = $index) {
+    <clr-tab>
+      <button clrTabLink (click)="selectedTab = i">{{ f.denomination }}</button>
+      <clr-tab-content *clrIfActive="i == selectedTab">
+        <internal-rate-of-return [prospection]="prospection()" [financement]="selectedFinancement"
+          [participation]="findFundParticipation(f)" [fonds]="f"
+          [valorisationAction]="valorisation_action"></internal-rate-of-return>
+      </clr-tab-content>
+    </clr-tab>
+    }
+  </clr-tabs>
+</div>

@@ -1,0 +1,183 @@
+<!-- Search -->
+
+<cds-input-group style="margin-left: -1em">
+  <cds-select
+    [(ngModel)]="criteria"
+    name="criteria"
+    cds-layout="align:shrink"
+    ngDefaultControl
+  >
+    <label>Recherche par:</label>
+    <select>
+      <option [value]="'code'">Recherche par code</option>
+      <option [value]="'libelle'">Recherche par libellé</option>
+    </select>
+  </cds-select>
+  <cds-input cds-layout="m-b:md">
+    <label>Recherche</label>
+    <input
+      type="search"
+      name="pattern"
+      [(ngModel)]="pattern"
+      placeholder="Saisir le pattern de recherche"
+    />
+    <cds-control-action action="prefix" readonly></cds-control-action>
+    <cds-control-action
+      action="suffix"
+      readonly
+      aria-label="host status stable"
+      title="host status stable"
+    >
+      <cds-icon shape="search"></cds-icon>
+    </cds-control-action>
+  </cds-input>
+</cds-input-group>
+<!---->
+
+<div class="code-div" cds-layout="p-y:xl">
+  <!-- Tree -->
+  <clr-tree>
+    <clr-tree-node [clrExpanded]="true">
+      <!-- Actions -->
+      <cds-button action="flat-inline" (click)="deleteItem(item())">
+        <cds-icon shape="trash"></cds-icon>
+      </cds-button>
+
+      <cds-button action="flat-inline" (click)="selectItem(item())">
+        <cds-icon shape="note"></cds-icon>
+      </cds-button>
+      {{ item()?.code + " - " + item()?.libelle }}
+
+      <!-- Tooltip -->
+      @if (!item()?.input) {
+      <a role="tooltip" aria-haspopup="true" class="tooltip tooltip-lg">
+        <sup class="badge badge-light-blue">F</sup>
+        <span class="tooltip-content">{{ item()?.formula }}</span>
+      </a>
+      }
+
+      <!-- Subtree -->
+      @for (item of tree_data; track item.id) {
+      <clr-tree-node [clrExpanded]="true">
+        <!-- Actions -->
+        <cds-button
+          action="flat-inline"
+          title="Supprimer"
+          (click)="deleteItem(item)"
+        >
+          <cds-icon shape="trash"></cds-icon>
+        </cds-button>
+
+        <cds-button
+          action="flat-inline"
+          (click)="selectItem(item)"
+          title="Modifier"
+        >
+          <cds-icon shape="note"></cds-icon>
+        </cds-button>
+        {{ item.code + " - " + item.libelle }}
+
+        <!-- Tooltip -->
+        @if (!item.input) {
+        <a role="tooltip" aria-haspopup="true" class="tooltip tooltip-lg">
+          <sup class="badge badge-light-blue">F</sup>
+          <span class="tooltip-content">{{ item.formula }}</span>
+        </a>
+        }
+
+        <!-- Subtree -->
+        @for (it of item.items; track it.id) {
+        <clr-tree-node [clrExpanded]="true">
+          <cds-button
+            action="flat-inline"
+            title="Supprimer"
+            (click)="deleteItem(it)"
+          >
+            <cds-icon shape="trash"></cds-icon>
+          </cds-button>
+
+          <cds-button
+            action="flat-inline"
+            (click)="selectItem(it)"
+            title="Modifier"
+          >
+            <cds-icon shape="note"></cds-icon>
+          </cds-button>
+          {{ it.code + " - " + it.libelle }}
+
+          <!-- Tooltip -->
+          @if (!it.input) {
+          <a role="tooltip" aria-haspopup="true" class="tooltip tooltip-lg">
+            <sup class="badge badge-light-blue">F</sup>
+            <span class="tooltip-content">{{ it.formula }}</span>
+          </a>
+          }
+
+          <!-- Subtree -->
+          @for (i of it.items; track i.id) {
+          <clr-tree-node [clrExpanded]="true">
+            <cds-button
+              action="flat-inline"
+              title="Supprimer"
+              (click)="deleteItem(i)"
+            >
+              <cds-icon shape="trash"></cds-icon>
+            </cds-button>
+
+            <cds-button
+              action="flat-inline"
+              (click)="selectItem(i)"
+              title="Modifier"
+            >
+              <cds-icon shape="note"></cds-icon>
+            </cds-button>
+
+            {{ i.code + " - " + i.libelle }}
+
+            <!-- Tooltip -->
+            @if (!i.input) {
+            <a role="tooltip" aria-haspopup="true" class="tooltip tooltip-lg">
+              <sup class="badge badge-light-blue">F</sup>
+              <span class="tooltip-content">{{ i.formula }}</span>
+            </a>
+            }
+
+            <!-- Subtree -->
+            @for (j of i.items; track j.id) {
+            <clr-tree-node [clrExpanded]="true">
+              <cds-button
+                action="flat-inline"
+                title="Supprimer"
+                (click)="deleteItem(j)"
+              >
+                <cds-icon shape="trash"></cds-icon>
+              </cds-button>
+
+              <cds-button
+                action="flat-inline"
+                (click)="selectItem(j)"
+                title="Modifier"
+              >
+                <cds-icon shape="note"></cds-icon>
+              </cds-button>
+
+              {{ j.code + " - " + j.libelle }}
+
+              <!-- Tooltip -->
+              @if (!j.input) {
+              <a role="tooltip" aria-haspopup="true" class="tooltip tooltip-lg">
+                <sup class="badge badge-light-blue">F</sup>
+                <span class="tooltip-content">{{ j.formula }}</span>
+              </a>
+              }
+            </clr-tree-node>
+            }
+          </clr-tree-node>
+          }
+        </clr-tree-node>
+        }
+      </clr-tree-node>
+      }
+    </clr-tree-node>
+  </clr-tree>
+</div>

@@ -1,0 +1,41 @@
+<div cds-layout="m-y:lg">
+  <div class="project-name" cds-layout="m-y:xl" style="opacity: 1">
+    {{ fonds()?.denomination }}
+  </div>
+
+  <clr-tabs>
+    @if(participation()?.montantActions > 0) {
+    <clr-tab>
+      <button clrTabLink id="link1">
+        <cds-icon shape="coin-bag" solid></cds-icon> TRI Capital
+      </button>
+      <clr-tab-content *clrIfActive="true">
+        <capital-irr
+          [prospection]="prospection()"
+          [financement]="financement()"
+          [participation]="participation()"
+          [businessPlans]="bps"
+          [fonds]="fonds()"
+          [valorisationAction]="valorisationAction()"
+        ></capital-irr>
+      </clr-tab-content>
+    </clr-tab>
+    } @if(participation()?.montantOCA > 0) {
+    <clr-tab>
+      <button clrTabLink>
+        <cds-icon shape="bank" solid></cds-icon> TRI OCA
+      </button>
+      <clr-tab-content *clrIfActive>
+        <oca-irr
+          [prospection]="prospection()"
+          [financement]="financement()"
+          [participation]="participation()"
+          [businessPlans]="bps"
+          [fonds]="fonds()"
+          [valorisationAction]="valorisationAction()"
+        ></oca-irr>
+      </clr-tab-content>
+    </clr-tab>
+    }
+  </clr-tabs>
+</div>

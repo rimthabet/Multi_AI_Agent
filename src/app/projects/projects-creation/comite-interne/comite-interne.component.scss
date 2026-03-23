@@ -1,0 +1,12 @@
+form.details {
+    padding-left: 1.5em;
+    padding-top: 0;
+    border-left: 2px dashed var(--cds-alias-status-info);
+    margin-left: .5em;
+
+    span {
+        font-weight: 500;
+        font-size: 110%;
+        letter-spacing: 1px;
+    }
+}

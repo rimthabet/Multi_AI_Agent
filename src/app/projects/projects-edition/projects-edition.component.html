@@ -1,0 +1,116 @@
+<!-- Loading Spinner -->
+<div
+  class="modal-backdrop"
+  aria-hidden="true"
+  [style.display]="loadingData ? 'block' : 'none'"
+  (click)="loadingData = false"
+>
+  <span
+    class="spinner"
+    style="
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    "
+    >Loading...</span
+  >
+</div>
+
+<!-- Header -->
+<span cds-text="title">
+  <cds-icon
+    shape="pencil"
+    size="lg"
+    status="info"
+    cds-layout="m-b:sm"
+  ></cds-icon>
+  Modification du projet</span
+>
+
+<!-- Header -->
+<div cds-layout="m-t:md m-b:lg">
+  <span
+    class="project-name"
+    [class]="selectedProjet ? 'active' : ''"
+    (click)="selectedProjet ? goToFiche() : null"
+  >
+    {{ selectedProjet ? selectedProjet.nom : "Nom du projet ..." }}
+    <cds-icon
+      shape="dashboard"
+      size="lg"
+      title="Cliquer pour consulter la fiche projet"
+      (click)="goToFiche()"
+      style="cursor: pointer"
+    ></cds-icon>
+  </span>
+</div>
+
+<cds-divider
+  class="htitled-divider"
+  title="Gerer tout le cycle de creation des projets"
+></cds-divider>
+
+<!-- Tabs -->
+<div cds-layout="m-y:sm">
+  <clr-tabs>
+    <clr-tab>
+      <button clrTabLink>
+        <cds-icon shape="announcement" size="md"></cds-icon> Prospection
+        <span class="badge badge-info">1</span>
+      </button>
+      <clr-tab-content id="content1" *clrIfActive="true">
+        <prospection
+          [prospection]="selectedProjet"
+          [(loading)]="loadingData"
+        ></prospection>
+      </clr-tab-content>
+    </clr-tab>
+    <clr-tab>
+      <button clrTabLink>
+        <cds-icon shape="cursor-hand-click" size="md"></cds-icon>
+        Présélection
+        <span class="badge badge-info">2</span>
+      </button>
+      <clr-tab-content *clrIfActive>
+        <preselection
+          [(prospection)]="selectedProjet"
+          [(loading)]="loadingData"
+        ></preselection>
+      </clr-tab-content>
+    </clr-tab>
+    <clr-tab>
+      <button clrTabLink [disabled]="selectedProjet?.statut == 3">
+        <cds-icon shape="recycle" size="md"></cds-icon> Étude
+        <span class="badge badge-info">3</span>
+      </button>
+      <clr-tab-content *clrIfActive>
+        <financial-study
+          [prospection]="selectedProjet"
+          [(loading)]="loadingData"
+        ></financial-study>
+      </clr-tab-content>
+    </clr-tab>
+    <clr-tab>
+      <button clrTabLink [disabled]="selectedProjet?.statut == 3">
+        <cds-icon shape="employee-group" solid size="md"></cds-icon> Comités
+        Internes <span class="badge badge-info">4</span>
+      </button>
+      <clr-tab-content *clrIfActive>
+        <comite-interne
+          [prospection]="selectedProjet"
+          [(loading)]="loadingData"
+        ></comite-interne>
+      </clr-tab-content>
+    </clr-tab>
+    <clr-tab>
+      <button clrTabLink [disabled]="selectedProjet?.statut == 3">
+        <cds-icon shape="gavel" solid size="md"></cds-icon> Comités
+        d'Investissement <span class="badge badge-info">5</span>
+      </button>
+      <clr-tab-content *clrIfActive>
+        <comite-investment [prospection]="selectedProjet"></comite-investment>
+      </clr-tab-content>
+    </clr-tab>
+  </clr-tabs>
+</div>

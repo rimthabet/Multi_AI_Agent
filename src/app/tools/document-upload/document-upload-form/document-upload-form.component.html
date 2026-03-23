@@ -1,0 +1,142 @@
+<!-- Flat or embedded mode -->
+@if(mode() == 'flat'){
+  <h5
+    style="
+      color: var(--cds-alias-utility-blue);
+      margin-bottom: -1em;
+      margin-left: -3px;
+      letter-spacing: 1px;
+      font-variant: small-caps;
+    "
+  >
+    <cds-icon shape="library" size="md" solid=""></cds-icon>
+    {{ compliance()?.conformite?.documentType?.libelle }}
+    <small style="color: var(--cds-global-color-construction-600)"
+      >({{ documents?.length }} document{{
+        documents && documents.length > 1 ? "s" : ""
+      }})</small
+    >
+  </h5>
+  
+  }
+  
+  <!-- Modal mode -->
+  <div
+    style="
+      background-color: var(
+        --cds-alias-object-interaction-neutral-secondary-hover
+      );
+      border-left: 2px solid var(--cds-alias-status-info);
+      padding-left: 1em;
+    "
+  >
+    <table class="table table-noborder table-compact" style="width: 100%">
+      <caption>
+        @if(uploading){
+        <clr-progress-bar clrLoop [style.height]="'5px'"></clr-progress-bar>
+        }
+      </caption>
+      <tbody>
+        @for(doc of documents; track $index){
+        <tr>
+          <td style="text-align: left" [style.borderBottom]="'1px dashed #ccc'">
+            <a
+              class="doc-name"
+              [href]="trimPath(doc.chemin)"
+              target="_blank"
+              [title]="doc.titre"
+              style="
+                letter-spacing: 1px;
+                font-weight: 500;
+                text-decoration: none;
+                color: var(--cds-alias-status-info) !important;
+              "
+            >
+              <cds-icon shape="file" status="info" solid=""></cds-icon>
+              {{ doc.titre.replaceAll("_", " ") }}
+            </a>
+            @if(doc.description != undefined && doc.description != '' &&
+            doc.description != 'undefined' && doc.description != 'null'){
+            <clr-signpost>
+              <clr-signpost-content>
+                <label>{{ doc.description }}</label>
+              </clr-signpost-content>
+            </clr-signpost>
+            }
+          </td>
+          <td style="text-align: right" [style.borderBottom]="'1px dashed #ccc'">
+            <cds-icon
+              solid=""
+              shape="trash"
+              size="sm"
+              class="failure"
+              onkeypress=""
+              [style.cursor]="'pointer'"
+              aria-haspopup="true"
+              (click)="supprimerDocument(doc)"
+            ></cds-icon>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  
+    <form clrForm clrLayout="vertical" style="margin-top: 0 !important">
+      <div style="padding: 0 0.5em">
+        <div class="clr-row">
+          <div class="clr-col-12 clr-col-lg-12">
+            @if(with_description()){
+  
+            <clr-textarea-container>
+              <label>Description : </label>
+              <textarea
+                clrTextarea
+                [(ngModel)]="fileDescription"
+                name="fileDescription"
+                style="width: 480px !important; height: 120px"
+              ></textarea>
+            </clr-textarea-container>
+  
+            }
+          </div>
+        </div>
+        <div class="clr-row">
+          <div class="clr-col-12 clr-col-lg-12">
+            <clr-input-container class="display_block">
+              <input
+                style="width: 480px !important"
+                type="text"
+                clrInput
+                name="fileTitle"
+                [(ngModel)]="fileTitle"
+                placeholder="Titre préférentiel du document"
+              />
+            </clr-input-container>
+          </div>
+        </div>
+        <div class="clr-row" style="width: 500px !important">
+          <div class="clr-col-7" style="padding-top: 0.5em">
+            <cds-file layout="vertical" buttonLabel="Explorer" label="Explorer">
+              <label style="height: 0"> </label>
+              <input type="file" (change)="selectFile($event)" />
+            </cds-file>
+          </div>
+          <div
+            class="clr-col-5"
+            style="text-align: right; padding: 0.5em !important"
+          >
+            <cds-button
+              (click)="uploadDocument()"
+              action="solid"
+              status="primary"
+              size="sm"
+              cds-layout="m-t:xs"
+            >
+              <cds-icon shape="upload" class="md"></cds-icon> Télécharger
+            </cds-button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+  

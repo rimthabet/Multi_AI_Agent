@@ -1,0 +1,56 @@
+<!-- Bloc signalétique -->
+
+<app-kpi-badge-01
+  [value]="projet()?.projet?.promoteur.nom"
+  [color]="'var(--cds-alias-status-info)'"
+  [type]="'text'"
+  [title]="'Promoteur'"
+  [size]="'large'"
+></app-kpi-badge-01>
+
+<!-- Bloc KPI -->
+<div class="kpi" cds-layout="horizontal gap:md m-t:xl align:stretch">
+  <span class="name"
+    ><cds-icon shape="hourglass" status="info"></cds-icon> Age:</span
+  >
+  <div class="value digit" style="text-align: right">
+    {{ projet()?.projet?.promoteur.age }} ans
+  </div>
+</div>
+
+<div class="kpi" cds-layout="horizontal gap:md align:stretch">
+  <span class="name"
+    ><cds-icon shape="certificate" status="info"></cds-icon> Expérience /
+    Diplôme:
+  </span>
+  <span class="value" cds-layout="align:right" style="text-align: right">
+    {{ projet()?.projet?.promoteur.poste }}
+  </span>
+</div>
+
+<div class="kpi" cds-layout="horizontal gap:md align:stretch">
+  <span class="name"
+    ><cds-icon shape="envelope" status="info"></cds-icon> Adresse E-mail:</span
+  >
+  <div class="value" style="text-align: right">
+    {{ projet()?.projet?.promoteur.email }}
+  </div>
+</div>
+
+<div class="kpi" cds-layout="horizontal gap:md align:stretch">
+  <span class="name"
+    ><cds-icon shape="phone-handset" status="info"></cds-icon> Téléphone:</span
+  >
+  <span class="value" cds-layout="align:right" style="text-align: right">
+    {{ projet()?.projet?.promoteur.telephone }}
+  </span>
+</div>
+
+<div class="kpi" cds-layout="horizontal gap:md align:stretch">
+  <span class="name"
+    ><cds-icon shape="calendar" status="info"></cds-icon> Date de création:
+  </span>
+  <span class="value" cds-layout="align:right" style="text-align: right">
+    {{ projet()?.projet?.promoteur.dateLancement | date : "dd/MM/yyyy" }}
+  </span>
+</div>

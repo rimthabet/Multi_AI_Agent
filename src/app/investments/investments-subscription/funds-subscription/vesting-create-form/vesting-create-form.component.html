@@ -1,0 +1,195 @@
+<!-- Header -->
+<div cds-layout="m-t:lg m-r:md m-b:md">
+  <span cds-text="title">
+    <cds-icon shape="logout" size="lg" status="info"></cds-icon> Libérations
+  </span>
+
+  <!-- Divider -->
+  <cds-divider
+    cds-layout="m-t:xl "
+    class="htitled-divider"
+    title="Inventaire des libérations"
+  ></cds-divider>
+
+  <!-- Datagrid -->
+  <clr-datagrid
+    style="width: 100%; height: 300px"
+    [(clrDgSingleSelected)]="selectedLiberation"
+    [clrDgLoading]="loading"
+  >
+    <!-- Actions Bar -->
+    <clr-dg-action-bar>
+      <div class="btn-group">
+        <cds-button
+          action="outline"
+          status="primary"
+          (click)="showLiberationModal(true)"
+          [disabled]="souscription() == undefined"
+        >
+          <cds-icon shape="plus" size="md"></cds-icon> Ajouter
+        </cds-button>
+      </div>
+
+      <div class="btn-group">
+        <cds-button
+          action="outline"
+          status="warning"
+          [disabled]="!selectedLiberation"
+          (click)="showLiberationModal(false)"
+        >
+          <cds-icon shape="note" size="md"></cds-icon> Modifier
+        </cds-button>
+      </div>
+
+      <div class="btn-group">
+        <cds-button
+          action="outline"
+          status="danger"
+          [disabled]="!selectedLiberation"
+          (click)="deleteLiberation()"
+        >
+          <cds-icon shape="trash" size="md"></cds-icon> Supprimer
+        </cds-button>
+      </div>
+    </clr-dg-action-bar>
+
+    <!-- Columns -->
+    <clr-dg-column>Date</clr-dg-column>
+    <clr-dg-column>Montant</clr-dg-column>
+    <clr-dg-column>Ordre de virement/Chèque</clr-dg-column>
+    <clr-dg-column style="width: 200px"
+      ><cds-icon shape="upload"></cds-icon
+    ></clr-dg-column>
+
+    <!-- Rows -->
+    @for (l of liberations; track $index) {
+    <clr-dg-row [clrDgItem]="l">
+      <clr-dg-cell>{{ l.dateLiberation | date : "dd/MM/yyyy" }}</clr-dg-cell>
+      <clr-dg-cell style="text-align: right">
+        {{ l.montantLiberation ?? 0 | number : "1.2-2" }} tnd
+      </clr-dg-cell>
+      <clr-dg-cell>
+        @for (lcd of liberation_conformite_documentaire; track $index) { @if
+        (verifierLiberationDocument(l, lcd).status === 'success') {
+        <div cds-layout="horizontal align:stretch">
+          <span cds-layout="horizontal align:left"
+            ><a [href]="verifierLiberationDocument(l, lcd).url" target="_blank">
+              <cds-icon
+                shape="success-standard"
+                solid=""
+                status="success"
+                size="18"
+              ></cds-icon>
+              {{ verifierLiberationDocument(l, lcd).message }}</a
+            >
+          </span>
+
+          <span
+            cds-layout="horizontal align:right"
+            (click)="supprimerDocument(l)"
+            [style.cursor]="'pointer'"
+          >
+            <cds-icon shape="trash" status="danger"></cds-icon>
+          </span>
+        </div>
+        } @if (verifierLiberationDocument(l, lcd).status === 'failure') {
+        <cds-icon
+          shape="no-access"
+          solid=""
+          size="18"
+          status="danger"
+        ></cds-icon>
+
+        <span class="failure">
+          {{ verifierLiberationDocument(l, lcd).message }}
+        </span>
+
+        } }
+      </clr-dg-cell>
+
+      <clr-dg-cell>
+        <document-upload
+          #doc_upload
+          [mode]="'modal'"
+          [button_style]="'icon'"
+          [data]="l"
+          [task_row]="type() == 'action' ? 4 : type() == 'oca' ? 5 : 6"
+          [phase_row]="3"
+          [compliance]="{ conformite: liberation_conformite_documentaire![0] }"
+          (documentUploadedEvent)="loadLiberations()"
+        ></document-upload>
+      </clr-dg-cell>
+    </clr-dg-row>
+    }
+
+    <!-- Footer -->
+    <clr-dg-footer>{{ liberations?.length }} Liberations</clr-dg-footer>
+  </clr-datagrid>
+</div>
+
+<!-- MODAL LIBERATION -->
+<clr-modal [(clrModalOpen)]="liberationModal">
+  <!-- Header -->
+  <h3 class="modal-title">
+    <cds-icon shape="logout" size="lg" solid status="info"></cds-icon>
+    Ajouter/Modifier une libération
+  </h3>
+
+  <!-- Body -->
+  <div class="modal-body">
+    <form
+      clrForm
+      [formGroup]="liberationSaveForm!"
+      clrLabelSize="5"
+      clrLayout="horizontal compact"
+    >
+      <clr-date-container>
+        <label for="date_liberation"
+          ><cds-icon shape="calendar" solid status="info" size="md"></cds-icon>
+          Date de libération:</label
+        >
+        <input
+          clrDate
+          type="date"
+          formControlName="date_liberation"
+          name="date_liberation"
+        />
+      </clr-date-container>
+
+      <clr-number-input-container>
+        <label for="montant_libere"
+          ><cds-icon shape="dollar" solid status="info" size="md"></cds-icon>
+          Montant libéré:</label
+        >
+        <input
+          clrNumberInput
+          type="number"
+          formControlName="montant_libere"
+          name="montant_libere"
+          min="0"
+          step="0.01"
+        />
+        <clr-control-helper>{{
+          liberationSaveForm.controls["montant_libere"].value != 0
+            ? (liberationSaveForm.controls["montant_libere"].value
+              | currency : "tnd" : "symbol" : "1.0-0")
+            : ""
+        }}</clr-control-helper>
+      </clr-number-input-container>
+    </form>
+  </div>
+
+  <!-- Footer -->
+  <div class="modal-footer">
+    <cds-button action="outline" status="primary" (click)="hideModal()">
+      Annuler
+    </cds-button>
+    <cds-button
+      status="primary"
+      [disabled]="liberationSaveForm.invalid"
+      (click)="saveLiberation()"
+    >
+      <cds-icon shape="floppy" size="md"></cds-icon> Sauvegarder
+    </cds-button>
+  </div>
+</clr-modal>

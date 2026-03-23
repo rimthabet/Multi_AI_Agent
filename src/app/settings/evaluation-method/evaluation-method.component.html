@@ -1,0 +1,42 @@
+<!-- Header -->
+<span cds-text="title">
+  <cds-icon shape="update" status="info" badge="info" size="lg"></cds-icon>
+  Méthode d'évaluation
+</span>
+
+<!-- Data grid -->
+<clr-datagrid [(clrDgSingleSelected)]="selectedItem" [clrDgLoading]="loading"
+  style="height: calc(100vh - 150px); margin-top: 1em">
+  <clr-dg-action-bar>
+    <!-- Actions -->
+    <div class="btn-group">
+      <cds-button action="outline" status="primary" (click)="openAddModal()">
+        <cds-icon shape="plus" size="md"></cds-icon> Ajouter
+      </cds-button>
+    </div>
+    <div class="btn-group">
+      <cds-button action="outline" status="warning" [disabled]="!selectedItem?.id"
+        (click)="toggleShowEdit(selectedItem)">
+        <cds-icon shape="note" size="md"></cds-icon> Modifier
+      </cds-button>
+    </div>
+    <div class="btn-group">
+      <cds-button action="outline" status="danger" (click)="deleteMethod()" [disabled]="!selectedItem?.id">
+        <cds-icon shape="trash" size="md"></cds-icon> Supprimer
+      </cds-button>
+    </div>
+    <!-- Divider -->
+    <cds-divider cds-layout="m-t:lg m-b:sm" class="htitled-divider" title="Méthodes d'évaluation"></cds-divider>
+  </clr-dg-action-bar>
+
+  <clr-dg-column [clrDgField]="'libelle'">Type de méthode d'évaluation</clr-dg-column>
+  <clr-dg-row *clrDgItems="let methode of methodesEvaluation" [clrDgItem]="methode">
+    <clr-dg-cell>{{ methode.libelle }}</clr-dg-cell>
+  </clr-dg-row>
+  <clr-dg-footer>{{ methodesEvaluation.length }} Méthodes</clr-dg-footer>
+</clr-datagrid>
+
+<!-- Modal form -->
+<evaluation-method-form [selectedItem]="selectedItem" [isOpen]="openModal" (refreshEvent)="refresh()"
+  (closeModalEvent)="modalClose()">
+</evaluation-method-form>

@@ -1,0 +1,30 @@
+<div
+  class="scrollable-container"
+  [style.height]="containerHeight"
+  [style.width]="'100%'"
+  #scrollContainer
+  (scroll)="onScrollEvent($event)"
+>
+  <!-- Progress bar -->
+  @if(showProgress){
+  <div class="scroll-progress" [style.width.%]="scrollProgress"></div>
+  }
+
+  <!-- Content projection -->
+  <div class="content-wrapper" [style.width]="'100%'">
+    <ng-content></ng-content>
+  </div>
+
+  <!-- Back to top button -->
+  @if(showButton){
+  <button
+    class="back-to-top"
+    [class.visible]="isVisible"
+    (click)="scrollToTop()"
+    [attr.aria-label]="ariaLabel"
+  >
+    <div class="arrow-up" *ngIf="!useIcon"></div>
+    <span class="icon" *ngIf="useIcon">{{ icon }}</span>
+  </button>
+  }
+</div>

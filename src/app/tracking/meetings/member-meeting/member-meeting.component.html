@@ -1,0 +1,151 @@
+<clr-dropdown>
+  <cds-button size="md" action="outline" clrDropdownTrigger>
+    Nature du membre
+    <cds-icon shape="angle" direction="down"></cds-icon>
+  </cds-button>
+  <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
+    @for(type of types; track type.id) {
+    <div onkeypress="" (click)="selectedMemberNature = type.libelle" aria-label="Dropdown header Action 1"
+      clrDropdownItem>
+      @if(type.libelle != 'Fonds') {
+      <cds-icon shape="user" solid></cds-icon>
+      }
+      @if (type.libelle == 'Fonds') {
+      <cds-icon shape="coin-bag" solid=""></cds-icon>
+      }
+      @else {
+      {{ type.libelle }}
+      }
+    </div>
+    }
+    <div class="dropdown-divider" role="separator" aria-hidden="true"></div>
+    <div onkeypress="" (click)="selectedMemberNature = 'Autre'" clrDropdownItem>
+      <cds-icon shape="user"></cds-icon> Autre
+    </div>
+  </clr-dropdown-menu>
+</clr-dropdown>
+
+<!-- Form for Actionnaire -->
+@if (selectedMemberNature == 'Actionnaire') {
+<form clrForm [formGroup]="membreSaveForm" clrLayout="horizontal" clrLabelSize="4" class="clr-form-compact">
+  <clr-select-container>
+    <label class="clr-required-mark">Actionnaire:</label>
+    <select clrSelect name="actionnaire" formControlName="actionnaire">
+      @for (act of actionnaires(); track $index) {
+      <option [ngValue]="act" [attr.data-value]="act">
+        {{ act.libelle }}
+      </option>
+      }
+    </select>
+  </clr-select-container>
+
+  <clr-toggle-container>
+    <clr-toggle-wrapper>
+      <input type="checkbox" clrToggle name="luiMeme" formControlName="luiMeme" /><label>Représenté par lui-même
+        ?</label>
+    </clr-toggle-wrapper>
+  </clr-toggle-container>
+
+  @if (!membreSaveForm.get('luiMeme')!.value) {
+  <clr-input-container>
+    <label><cds-icon shape="child-arrow" size="22"></cds-icon>
+      <cds-icon shape="user" status="info" size="18" solid=""></cds-icon>
+      Représenté par:</label>
+    <input placeholder="Veuillez indiquer la personne qui a représenté cet actionnaire" clrInput type="text"
+      formControlName="libelle" name="libelle" size="55" />
+  </clr-input-container>
+  }
+</form>
+}
+<!-- Form for Administrateur -->
+@if (selectedMemberNature == 'Administrateur') {
+<form clrForm [formGroup]="membreSaveForm" clrLayout="horizontal" clrLabelSize="4" class="clr-form-compact">
+  <clr-select-container>
+    <label class="clr-required-mark">Administrateur:</label>
+    <select clrSelect name="administrateur" formControlName="administrateur" [compareWith]="equals">
+      @for (ad of administrateurs(); track $index) {
+      <option [ngValue]="ad" [attr.data-value]="ad">
+        {{ ad.nom }}
+      </option>
+      }
+    </select>
+  </clr-select-container>
+
+  <clr-toggle-container>
+    <clr-toggle-wrapper>
+      <input type="checkbox" clrToggle name="luiMeme" formControlName="luiMeme" />
+      <label>Représenté par lui-même ?</label>
+    </clr-toggle-wrapper>
+  </clr-toggle-container>
+
+  @if (!membreSaveForm.get('luiMeme')!.value) {
+  <clr-input-container>
+    <label><cds-icon shape="child-arrow" size="22"></cds-icon>
+      <cds-icon shape="user" status="info" size="18" solid=""></cds-icon>
+      Représenté par:</label>
+    <input clrInput type="text" formControlName="libelle" name="libelle" size="55"
+      placeholder="Veuillez indiquer la personne qui a représenté cet administrateur" />
+  </clr-input-container>
+  }
+</form>
+}
+<!-- Form for commisaire aux comptes -->
+@if (selectedMemberNature == 'Commissaire aux comptes') {
+<form clrForm [formGroup]="membreSaveForm" clrLayout="horizontal" clrLabelSize="4" class="clr-form-compact">
+  <clr-select-container>
+    <label class="clr-required-mark">
+      <cds-icon shape="user" status="info" size="18" solid=""></cds-icon>
+      Commisaire aux comptes:</label>
+    <select clrSelect name="commisaire" formControlName="commisaire">
+      @for (cac of commisaires_aux_comptes(); track $index) {
+      <option [ngValue]="cac" [attr.data-value]="cac">
+        {{ cac.commissaire.libelle }}
+      </option>
+      }
+    </select>
+  </clr-select-container>
+</form>
+}
+<!-- Form for fonds -->
+@if (selectedMemberNature == 'Fonds') {
+<form clrForm [formGroup]="membreSaveForm" clrLayout="horizontal" clrLabelSize="3" class="clr-form-compact">
+  <clr-select-container>
+    <label class="clr-required-mark">Fonds:</label>
+    <select clrSelect name="fonds" formControlName="fonds">
+      @for (f of fonds(); track $index) {
+      <option [ngValue]="f" [attr.data-value]="f">
+        {{ f.denomination }}
+      </option>
+      }
+    </select>
+  </clr-select-container>
+  <clr-input-container>
+    <label class="clr-required-mark"><cds-icon shape="user" status="info" size="20" solid=""></cds-icon>
+      Représenté par:</label>
+    <input clrInput type="text" formControlName="libelle" name="libelle" size="60" />
+  </clr-input-container>
+</form>
+}
+<!-- Form for autres -->
+@if (selectedMemberNature == 'Autre') {
+<form clrForm [formGroup]="membreSaveForm" clrLayout="horizontal" clrLabelSize="2" class="clr-form-compact">
+  <clr-input-container>
+    <label class="clr-required-mark">
+      <cds-icon shape="user" status="info" size="20"></cds-icon>
+      Autre:</label>
+    <input placeholder="Une personne tierce, autonone qui représente soi même" clrInput type="text"
+      formControlName="autre" name="autre" size="45" />
+  </clr-input-container>
+
+  <clr-textarea-container>
+    <label>Description:</label>
+    <textarea clrTextarea type="text" formControlName="description" name="description" cols="45" rows="2"
+      placeholder="Veuillez saisir une description brève du membre. (Exemple son role, sa companie, son expertise etc.)"></textarea>
+  </clr-textarea-container>
+</form>
+}
+<div cds-layout="horizontal align:right">
+  <cds-button size="md" action="outline" [disabled]="invalidForm() || !selectedMemberNature" (click)="saveMembre()">
+    <cds-icon shape="floppy"></cds-icon> Sauvegarder
+  </cds-button>
+</div>

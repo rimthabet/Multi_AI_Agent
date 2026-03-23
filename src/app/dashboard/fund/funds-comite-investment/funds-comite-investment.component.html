@@ -1,0 +1,45 @@
+<!-- Header -->
+<div cds-layout="m-y:sm">
+  <span cds-text="title">
+    <cds-icon shape="gavel" size="lg" status="info"></cds-icon>
+    Derniers comités d'investissements</span
+  >
+</div>
+
+<!-- Data grid -->
+<clr-datagrid cds-layout="m-y:md" style="height: 210px">
+  <clr-dg-column>Date</clr-dg-column>
+  <clr-dg-column>Nom du projet</clr-dg-column>
+  <clr-dg-column>Mnt approuvé </clr-dg-column>
+
+  <clr-dg-row
+    *clrDgItems="let comite of comitesInvestissement() ?? []; let i = index"
+    [clrDgItem]="comite"
+  >
+    <clr-dg-cell>{{
+      comite?.ci?.dateComite | date : "dd/MM/yyyy"
+    }}</clr-dg-cell>
+    <clr-dg-cell>
+      <a
+        class="show-hide-icon"
+        [routerLink]="[
+          '/dashboard/projects/',
+          comite?.ci?.financement?.projet?.id
+        ]"
+      >
+        <span style="font-size: 90%" class="info">
+          {{ comite?.ci?.financement?.projet.nom?.toUpperCase() }}
+          <cds-icon shape="link" size="sm"></cds-icon> </span></a
+    ></clr-dg-cell>
+
+    <clr-dg-cell
+      style="
+        text-align: right;
+        white-space: nowrap;
+        color: var(--cds-alias-status-info);
+      "
+    >
+      {{ calculateMontantTotal(comite) | number : "1.0-0" }} <sup>tnd</sup>
+    </clr-dg-cell>
+  </clr-dg-row>
+</clr-datagrid>

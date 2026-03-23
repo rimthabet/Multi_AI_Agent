@@ -1,0 +1,409 @@
+<!-- Card -->
+<cds-card style="width: 420px; display: inline-block">
+  <div cds-layout="vertical gap:sm">
+    <!-- Header -->
+    <div cds-layout="horizontal align:stretch">
+      <h2 cds-text="section">
+        <cds-icon shape="gavel" size="md" solid=""></cds-icon> Comité
+        d'investissement
+      </h2>
+
+      <h2
+        cds-text="subsection"
+        cds-layout="align:right"
+        style="text-align: right"
+      >
+        {{ comite()?.ci?.dateComite | date : "dd/MM/yyyy" }}
+      </h2>
+    </div>
+
+    <!-- Divider -->
+    <cds-divider cds-card-remove-margin></cds-divider>
+
+    <!-- Body -->
+    <div cds-text="body light" style="width: 100%">
+      <h3 cds-text="subsection">Nature(s) d'investissement</h3>
+      <cds-divider></cds-divider>
+      <div
+        cds-layout="vertical align:stretch gap:sm"
+        style="width: 100%; margin-top: 1em"
+      >
+        @for (nature of comite()?.ci.financement?.naturesInvestissement; track
+        $index) {
+        <span class="item">
+          {{ nature.libelle }}
+        </span>
+        }
+      </div>
+    </div>
+
+    <!-- Divider -->
+    <cds-divider cds-card-remove-margin></cds-divider>
+
+    <!-- Body -->
+    <div cds-text="body light" style="width: 100%">
+      <h3 cds-text="subsection">Participation(s) approuvées</h3>
+      <cds-divider></cds-divider>
+      <div
+        cds-layout="vertical align:stretch gap:sm"
+        style="width: 100%; margin-top: 1em"
+      >
+        <div cds-layout="horizontal align:stretch" class="item">
+          <span class="digit">{{
+            comite()?.sa?.montant | currency : "tnd" : "symbol" : "1.0-0"
+          }}</span>
+          <span cds-layout="align:right" style="text-align: right">
+            Actions</span
+          >
+        </div>
+
+        <div cds-layout="horizontal align:stretch" class="item">
+          <span class="digit">{{
+            comite()?.so?.montant | currency : "tnd" : "symbol" : "1.0-0"
+          }}</span>
+          <span cds-layout="align:right" style="text-align: right"> OCA</span>
+        </div>
+
+        <div cds-layout="horizontal align:stretch" class="item">
+          <span class="digit">{{
+            comite()?.sc?.montant | currency : "tnd" : "symbol" : "1.0-0"
+          }}</span>
+          <span cds-layout="align:right" style="text-align: right"> CCA</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Divider -->
+    <cds-divider cds-card-remove-margin></cds-divider>
+
+    <!-- Body -->
+    <div cds-text="body light" style="width: 100%">
+      <h3 cds-text="subsection">Libérations Actions</h3>
+      <cds-divider></cds-divider>
+      <div
+        cds-layout="vertical align:stretch gap:sm"
+        style="width: 100%; margin-top: 0.5em"
+      >
+        @for(lib of comite()?.la; track $index){
+        <div cds-layout="horizontal align:stretch" class="item">
+          <span class="digit" style="color: var(--cds-global-color-yellow-500)">
+            {{
+              lib.la?.montantLiberation | currency : "tnd" : "symbol" : "1.0-0"
+            }}
+          </span>
+
+          <!-- Tooltip -->
+          @if(lib?.la?.ineligible == true){
+          <clr-tooltip class="ineligible">
+            <span clrTooltipTrigger class="label label-danger">
+              <span cds-layout="horizontal align:left">SOTUGAR</span>
+              <span cds-layout="horizontal align:right">
+                <cds-icon
+                  shape="dot-circle"
+                  size="sm"
+                  status="danger"
+                ></cds-icon>
+              </span> </span
+            ><clr-tooltip-content [clrPosition]="'top-right'" [clrSize]="'sm'">
+              Inéligible à la SOTUGAR
+            </clr-tooltip-content>
+          </clr-tooltip>
+          }
+
+          <!-- Tooltip -->
+          @if(lib?.la?.ineligible != true){ @if(lib?.so == null){
+          <clr-tooltip class="non_assuree">
+            <span
+              clrTooltipTrigger
+              class="label"
+              style="
+                text-decoration: line-through;
+                text-decoration-color: red;
+                text-decoration-thickness: 1.5px;
+              "
+            >
+              SOTUGAR</span
+            >
+            <clr-tooltip-content [clrPosition]="'top-right'" [clrSize]="'sm'">
+              N'est pas assurée
+            </clr-tooltip-content>
+          </clr-tooltip>
+          }
+
+          <!-- Tooltip -->
+          @if(lib?.so != null && lib.so.acceptee == true){
+          <clr-tooltip class="assuree">
+            <span clrTooltipTrigger class="label label-success">
+              <span cds-layout="horizontal align:left">SOTUGAR</span>
+              <span cds-layout="horizontal align:right">
+                <cds-icon
+                  shape="success-standard"
+                  size="sm"
+                  status="success"
+                  solid=""
+                ></cds-icon>
+              </span>
+            </span>
+            <clr-tooltip-content [clrPosition]="'top-right'" [clrSize]="'sm'">
+              Assurance SOTUGAR acceptée
+            </clr-tooltip-content>
+            (<clr-signpost>
+              <cds-icon
+                shape="asterisk"
+                class="warning"
+                solid
+                clrSignpostTrigger
+              ></cds-icon>
+              <clr-signpost-content
+                class="headless"
+                [clrPosition]="'top-middle'"
+                *clrIfOpen
+              >
+                <span cds-text="subsection" cds-layout="vertical gap:none">
+                  Déclaration SOTUGAR</span
+                >
+
+                <table class="table table-compact table-vertical">
+                  <tbody>
+                    <tr>
+                      <th>Date de décision</th>
+                      <td>
+                        {{ lib.so.dateDecision | date : "dd/MM/yyyy" }}
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>Décision</th>
+                      <td>
+                        {{ lib.so.acceptee ? "Acceptée" : "Refusée" }}
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>Montant à garantir</th>
+                      <td>
+                        {{ lib.so.montantAGarantir | number : "1.0-0"
+                        }}<sup>tnd</sup>
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>% de garantie</th>
+                      <td>{{ lib.so.pourcentageDeGarantie }}%</td>
+                    </tr>
+                    <tr>
+                      <th>% de contribution</th>
+                      <td>{{ lib.so.pourcentageDeContribution }}%</td>
+                    </tr>
+                    <tr>
+                      <th>Montant à régler</th>
+                      <td>
+                        {{ lib.so.montantARegler | number : "1.0-0"
+                        }}<sup>tnd</sup>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </clr-signpost-content> </clr-signpost
+            >)
+          </clr-tooltip>
+          } }
+
+          <!-- Tooltip -->
+          @if(lib?.so != null && lib.so.acceptee == false){
+          <clr-tooltip class="refusee">
+            <span clrTooltipTrigger class="label label-danger">
+              <span cds-layout="horizontal align:left">SOTUGAR</span>
+              <span cds-layout="horizontal align:right">
+                <cds-icon
+                  shape="times-circle"
+                  size="sm"
+                  status="danger"
+                  solid=""
+                ></cds-icon>
+              </span> </span
+            ><clr-tooltip-content [clrPosition]="'top-right'" [clrSize]="'sm'">
+              Assurance SOTUGAR refusée
+            </clr-tooltip-content>
+          </clr-tooltip>
+          }
+
+          <span cds-layout="align:right" class="lib-date">
+            {{ lib.la?.dateLiberation | date : "dd/MM/yyyy" }}</span
+          >
+        </div>
+        }
+      </div>
+    </div>
+    <div cds-text="body light" style="width: 100%">
+      <h3 cds-text="subsection">Libérations OCA</h3>
+      <cds-divider></cds-divider>
+      <div
+        cds-layout="vertical align:stretch gap:sm"
+        style="width: 100%; margin-top: 0.5em"
+      >
+        <div
+          cds-layout="horizontal align:stretch"
+          class="item"
+          *ngFor="let lib of comite()?.lo"
+        >
+          <span class="digit" style="color: var(--cds-global-color-yellow-500)"
+            >{{ lib.lo?.montantLiberation | number : "1.0-0" }} tnd</span
+          >
+
+          @if(lib?.lo?.ineligible == true){
+          <clr-tooltip class="ineligible">
+            <span clrTooltipTrigger class="label label-danger">
+              <span cds-layout="horizontal align:left">SOTUGAR</span>
+              <span cds-layout="horizontal align:right">
+                <cds-icon
+                  shape="dot-circle"
+                  size="sm"
+                  status="danger"
+                ></cds-icon>
+              </span> </span
+            ><clr-tooltip-content [clrPosition]="'top-right'" [clrSize]="'sm'">
+              Inéligible à la SOTUGAR
+            </clr-tooltip-content>
+          </clr-tooltip>
+          } @if(lib?.lo?.ineligible != true){ @if(lib?.so == null){
+          <clr-tooltip class="non_assuree">
+            <span
+              clrTooltipTrigger
+              class="label"
+              style="
+                text-decoration: line-through;
+                text-decoration-color: red;
+                text-decoration-thickness: 1.5px;
+              "
+            >
+              SOTUGAR</span
+            >
+            <clr-tooltip-content [clrPosition]="'top-right'" [clrSize]="'sm'">
+              N'est pas assurée
+            </clr-tooltip-content>
+          </clr-tooltip>
+          }
+
+          <!-- Tooltip -->
+          @if(lib?.so != null && lib.so.acceptee == true){
+          <clr-tooltip class="assuree">
+            <span clrTooltipTrigger class="label label-success">
+              <span cds-layout="horizontal align:left">SOTUGAR</span>
+              <span cds-layout="horizontal align:right">
+                <cds-icon
+                  shape="success-standard"
+                  size="sm"
+                  status="success"
+                  solid=""
+                ></cds-icon>
+              </span>
+            </span>
+            <clr-tooltip-content [clrPosition]="'top-right'" [clrSize]="'sm'">
+              Assurance SOTUGAR acceptée
+            </clr-tooltip-content>
+            (<clr-signpost>
+              <cds-icon
+                shape="asterisk"
+                class="warning"
+                solid
+                aria-label="Icon Button Trigger"
+                clrSignpostTrigger
+              ></cds-icon>
+              <clr-signpost-content
+                [clrPosition]="'top-middle'"
+                *clrIfOpen
+                class="headless"
+              >
+                <span cds-text="subsection" cds-layout="vertical gap:none">
+                  Déclaration SOTUGAR</span
+                >
+
+                <table class="table table-compact table-vertical">
+                  <tbody>
+                    <tr>
+                      <th>Date de décision</th>
+                      <td>
+                        {{ lib.so.dateDecision | date : "dd/MM/yyyy" }}
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>Décision</th>
+                      <td>
+                        {{ lib.so.acceptee ? "Acceptée" : "Refusée" }}
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>Montant à garantir</th>
+                      <td>
+                        {{ lib.so.montantAGarantir | number : "1.0-0"
+                        }}<sup>tnd</sup>
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>% de garantie</th>
+                      <td>{{ lib.so.pourcentageDeGarantie }}%</td>
+                    </tr>
+                    <tr>
+                      <th>% de contribution</th>
+                      <td>{{ lib.so.pourcentageDeContribution }}%</td>
+                    </tr>
+                    <tr>
+                      <th>Montant à régler</th>
+                      <td>
+                        {{ lib.so.montantARegler | number : "1.0-0"
+                        }}<sup>tnd</sup>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </clr-signpost-content> </clr-signpost
+            >)
+          </clr-tooltip>
+          }
+
+          <!-- Tooltip -->
+          @if(lib?.so != null && lib.so.acceptee == false){
+          <clr-tooltip class="refusee">
+            <span clrTooltipTrigger class="label label-danger">
+              <span cds-layout="horizontal align:left">SOTUGAR</span>
+              <span cds-layout="horizontal align:right">
+                <cds-icon
+                  shape="times-circle"
+                  size="sm"
+                  status="danger"
+                  solid=""
+                ></cds-icon>
+              </span> </span
+            ><clr-tooltip-content [clrPosition]="'top-right'" [clrSize]="'sm'">
+              Assurance SOTUGAR refusée
+            </clr-tooltip-content>
+          </clr-tooltip>
+          } }
+
+          <span cds-layout="align:right" class="lib-date">
+            {{ lib.lo?.dateLiberation | date : "dd/MM/yyyy" }}</span
+          >
+        </div>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div cds-text="body light" style="width: 100%">
+      <h3 cds-text="subsection">Libérations CCA</h3>
+      <cds-divider></cds-divider>
+      <div
+        cds-layout="vertical align:stretch gap:sm"
+        style="width: 100%; margin-top: 1em"
+      >
+        @for(lib of comite()?.lc; track $index){
+        <div cds-layout="horizontal align:stretch" class="item">
+          <span class="digit" style="color: var(--cds-global-color-yellow-500)"
+            >{{ lib.montantLiberation | number : "1.0-0" }} tnd</span
+          >
+          <span cds-layout="align:right" class="lib-date">
+            {{ lib.dateLiberation | date : "dd/MM/yyyy" }}</span
+          >
+        </div>
+        }
+      </div>
+    </div>
+  </div>
+</cds-card>

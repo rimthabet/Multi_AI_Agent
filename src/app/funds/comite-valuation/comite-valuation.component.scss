@@ -1,0 +1,21 @@
+th {
+    font-size: 105%;
+    font-weight: 500;
+}
+
+tfoot th {
+    font-size: 150% !important;
+}
+
+.clr-timeline-step-body {
+    width: 100vw
+}
+
+label {
+    white-space: nowrap;
+}
+
+
+:host ::ng-deep clr-combobox .clr-combobox-input {
+  min-width: 300px !important;
+}

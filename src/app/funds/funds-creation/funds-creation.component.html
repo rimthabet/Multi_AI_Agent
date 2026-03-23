@@ -1,0 +1,113 @@
+<div
+  class="modal-backdrop"
+  aria-hidden="true"
+  [style.display]="loading ? 'block' : 'none'"
+  (dblclick)="loading = false"
+>
+  <span
+    class="spinner"
+    style="
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    "
+    >Loading...</span
+  >
+</div>
+
+<!-- Header -->
+<span cds-text="title">
+  <cds-icon
+    shape="coin-bag"
+    size="lg"
+    status="info"
+    cds-layout="m-b:sm"
+  ></cds-icon>
+  Ajouter un nouveau Fonds</span
+>
+
+<!-- Divider -->
+<cds-divider
+  cds-layout="m-t:xl "
+  class="htitled-divider"
+  title="Phases du fonds"
+></cds-divider>
+
+<div cds-layout="m-t:md" class="fund-name {{ fund ? 'active' : '' }}">
+  {{ fund ? fund.denomination : "Dénomination du fonds ..." }}
+</div>
+
+<!-- Tabs -->
+<div cds-layout="m-t:lg m-b:lg">
+  <clr-tabs>
+    <!-- Details -->
+    <clr-tab>
+      <button clrTabLink id="link1">
+        <cds-icon shape="bars" status="info"></cds-icon>
+        Détails <span class="badge badge-info">1</span>
+      </button>
+      <clr-tab-content id="content1" *clrIfActive="true">
+        <funds-create-form-v2
+          [(fonds)]="fund"
+          [(loading)]="loading"
+        ></funds-create-form-v2>
+      </clr-tab-content>
+    </clr-tab>
+    <!-- Statutory auditors -->
+    <clr-tab>
+      <button clrTabLink [disabled]="!fund">
+        <cds-icon shape="gavel" status="info"></cds-icon>
+        Commissaire(s) aux comptes <span class="badge badge-info">2</span>
+      </button>
+      <clr-tab-content *clrIfActive>
+        <funds-statutory-auditors-form
+          [fonds]="fund"
+        ></funds-statutory-auditors-form>
+      </clr-tab-content>
+    </clr-tab>
+    <!-- Subscriptions periods -->
+    <clr-tab>
+      <button clrTabLink [disabled]="!fund">
+        <cds-icon shape="calendar" status="info"></cds-icon> Périodes de
+        souscription <span class="badge badge-info">3</span>
+      </button>
+      <clr-tab-content *clrIfActive>
+        <funds-subcription-create-form
+          [fonds]="fund"
+        ></funds-subcription-create-form>
+      </clr-tab-content>
+    </clr-tab>
+    <!-- Documents -->
+    <clr-tab>
+      <button clrTabLink [disabled]="!fund">
+        <cds-icon shape="library" status="info"></cds-icon> Documents
+        <span class="badge badge-info">4</span>
+      </button>
+      <clr-tab-content *clrIfActive>
+        <div>
+          @for (conformite of conformite_documentaires; track $index) {
+          <document-upload
+            #docUploads
+            [mode]="'flat'"
+            [compliance]="{ document: undefined, conformite: conformite }"
+            [data]="fund"
+            [task_row]="1"
+            [phase_row]="1"
+          ></document-upload>
+          }
+        </div>
+      </clr-tab-content>
+    </clr-tab>
+    <!-- Review -->
+    <clr-tab>
+      <button clrTabLink [disabled]="!fund">
+        <cds-icon shape="digital-signature" status="info"></cds-icon> Révision
+        <span class="badge badge-info">5</span>
+      </button>
+      <clr-tab-content *clrIfActive>
+        <funds-review-form [fonds]="fund"></funds-review-form>
+      </clr-tab-content>
+    </clr-tab>
+  </clr-tabs>
+</div>

@@ -1,0 +1,92 @@
+<!-- Form  conversion CCA -->
+<form
+  clrForm
+  [formGroup]="conversionSaveForm!"
+  clrLayout="horizontal"
+  clrLabelSize="6"
+>
+  <clr-date-container>
+    <label for="dateDeConversion" class="clr-required-mark"
+      ><cds-icon shape="calendar" status="warning" solid></cds-icon> Date de
+      l'AGE:
+    </label>
+    <input
+      clrDate
+      type="date"
+      formControlName="dateDeConversion"
+      name="dateDeConversion"
+    />
+  </clr-date-container>
+  <clr-control-container>
+    <label for="montant" class="clr-required-mark"
+      ><cds-icon shape="dollar-bill" status="warning" solid></cds-icon> Montant
+      de souscription:</label
+    >
+    <span style="font-weight: 600">
+      {{
+        conversionSaveForm.controls["montant"].value
+          | currency : "tnd" : "symbol" : "1.0-0"
+      }}
+    </span>
+  </clr-control-container>
+
+  <clr-number-input-container>
+    <label for="montantInteretRembourse" class="clr-required-mark"
+      ><cds-icon shape="dollar" status="warning" solid></cds-icon> Montant des
+      intérêts à rembourser:</label
+    >
+    <input
+      clrNumberInput
+      type="number"
+      formControlName="montantInteretRembourse"
+      name="montantInteretRembourse"
+    />
+    <clr-control-helper>{{
+      conversionSaveForm.controls["montantInteretRembourse"].value
+        | currency : "tnd" : "symbol" : "1.2-2"
+    }}</clr-control-helper>
+  </clr-number-input-container>
+
+  <clr-number-input-container>
+    <label for="nbrActions" class="clr-required-mark"
+      ><cds-icon shape="hashtag" status="warning" solid></cds-icon> Actions
+      converties:</label
+    >
+    <input
+      clrNumberInput
+      type="number"
+      formControlName="nbrActions"
+      name="nbrActions"
+      min="0"
+      step="1"
+    />
+    <clr-control-helper>{{
+      conversionSaveForm.controls["nbrActions"].value
+        | currency : "tnd" : "symbol" : "1.0-0"
+    }}</clr-control-helper>
+  </clr-number-input-container>
+</form>
+
+<!-- Buttons  conversion CCA -->
+<div cds-layout="horizontal m-t:lg align:right">
+  <div class="btn-group">
+    <cds-button
+      status="primary"
+      [disabled]="conversionSaveForm.invalid"
+      (click)="saveConversion()"
+    >
+      <cds-icon shape="floppy" size="md" solid></cds-icon> Convertir
+    </cds-button>
+  </div>
+
+  <div class="btn-group">
+    <cds-button
+      status="danger"
+      [disabled]="conversionSaveForm.invalid"
+      (click)="deleteConversion()"
+    >
+      <cds-icon shape="trash" size="md" status="danger" solid></cds-icon>
+      Supprimer
+    </cds-button>
+  </div>
+</div>

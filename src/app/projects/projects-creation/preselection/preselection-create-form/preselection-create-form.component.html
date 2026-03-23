@@ -1,0 +1,205 @@
+<!-- Form prospection -->
+<form
+  clrForm
+  [formGroup]="prospectionSaveForm!"
+  [clrLabelSize]="3"
+  cds-layout="m-y:lg"
+>
+  <clr-control-container>
+    <label for="promoteur"
+      ><cds-icon shape="user" status="info"></cds-icon>Promoteur:</label
+    >
+    <span style="font-size: 16px; font-weight: 500">{{
+      prospection()?.promoteur?.nom
+    }}</span>
+  </clr-control-container>
+  <clr-control-container>
+    <label for="activite"
+      ><cds-icon shape="employee" status="info"></cds-icon>Activité:</label
+    >
+    <span
+      style="
+        font-size: 16px;
+        font-weight: 500;
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      "
+      [title]="prospection()?.activite"
+      >{{ prospection()?.activite }}</span
+    >
+  </clr-control-container>
+  <clr-control-container>
+    <label for="formeJuridique"
+      ><cds-icon shape="gavel" status="info"></cds-icon>Forme juridique:</label
+    >
+    <span style="font-size: 16px; font-weight: 500">{{
+      prospection()?.formeJuridique
+    }}</span>
+  </clr-control-container>
+  <clr-control-container>
+    <label for="adresseUsine"
+      ><cds-icon shape="map-marker" status="info"></cds-icon>Lieu
+      (usine):</label
+    >
+    <span style="font-size: 16px; font-weight: 500">{{
+      prospection()?.adresseUsine
+    }}</span>
+  </clr-control-container>
+  <clr-control-container>
+    <label for="typeInvestissement"
+      ><cds-icon shape="contract" status="info"></cds-icon>Type / nature
+      d'investissement:</label
+    >
+    <span style="font-size: 16px; font-weight: 500">{{
+      prospection()?.typeInvestissement?.libelle
+    }}</span>
+  </clr-control-container>
+</form>
+
+<cds-divider
+  class="htitled-divider"
+  title="Informations modifiables"
+  cds-layout="m-t:xl"
+></cds-divider>
+
+<!-- Form preselection -->
+<form
+  clrForm
+  [formGroup]="preselectionSaveForm!"
+  [clrLabelSize]="3"
+  cds-layout="m-y:lg"
+>
+  <clr-date-container>
+    <label for="dateLancement" class="clr-required-mark"
+      >Date de création
+    </label>
+    <input
+      clrDate
+      type="date"
+      formControlName="dateLancement"
+      name="dateLancement"
+    />
+  </clr-date-container>
+
+  <clr-date-container>
+    <label for="dateAffectation" class="clr-required-mark"
+      >Date d'affectation
+    </label>
+    <input
+      clrDate
+      type="date"
+      formControlName="dateAffectation"
+      name="dateAffectation"
+    />
+  </clr-date-container>
+
+  <clr-number-input-container>
+    <label for="cout" class="clr-required-mark">Coût du projet</label>
+    <input clrNumberInput type="number" formControlName="cout" name="cout" />
+    <clr-control-helper>
+      <span style="font-size: 110%; font-weight: 500"
+        >{{
+          preselectionSaveForm!.value.cout
+            | currency : "symbol" : "tnd" : "1.2-2"
+        }}
+      </span>
+    </clr-control-helper>
+  </clr-number-input-container>
+
+  <clr-number-input-container>
+    <label for="effectif" class="clr-required-mark">Effectif</label>
+    <input
+      clrNumberInput
+      type="number"
+      formControlName="effectif"
+      name="effectif"
+    />
+  </clr-number-input-container>
+
+  <clr-combobox-container>
+    <label for="criteresPreselection" class="clr-required-mark"
+      >Critères de présélection</label
+    >
+    <clr-combobox
+      formControlName="criteresPreselection"
+      name="policies"
+      clrMulti="true"
+    >
+      <ng-container *clrOptionSelected="let selected">
+        <cds-icon
+          shape="filter-grid"
+          role="img"
+          aria-label="policies list"
+        ></cds-icon>
+        {{ selected?.libelle }}
+      </ng-container>
+      <clr-options>
+        <clr-option
+          *clrOptionItems="
+            let critere of criteresPreselection;
+            field: 'libelle'
+          "
+          [clrValue]="critere"
+        >
+          <cds-icon
+            shape="filter-grid"
+            role="img"
+            aria-label="policies list of choice"
+          ></cds-icon>
+          {{ critere.libelle }}
+        </clr-option>
+      </clr-options>
+    </clr-combobox>
+    <clr-control-helper
+      >Veuillez choisir un ou plusieurs critères de présélection
+    </clr-control-helper>
+  </clr-combobox-container>
+
+  <clr-combobox-container>
+    <label for="chargesInvestissement" class="clr-required-mark"
+      >Chargés d'investissement</label
+    >
+    <clr-combobox
+      formControlName="chargesInvestissement"
+      name="policies"
+      clrMulti="false"
+    >
+      <ng-container *clrOptionSelected="let selected">
+        <cds-icon
+          shape="filter-grid"
+          role="img"
+          aria-label="policies list"
+        ></cds-icon>
+        {{ selected?.nom }}
+      </ng-container>
+      <clr-options>
+        <clr-option
+          *clrOptionItems="let ci of chargesInvestissement; field: 'nom'"
+          [clrValue]="ci"
+        >
+          <cds-icon
+            shape="filter-grid"
+            role="img"
+            aria-label="policies list of choice"
+          ></cds-icon>
+          {{ ci.nom }}
+        </clr-option>
+      </clr-options>
+    </clr-combobox>
+    <clr-control-helper
+      >Veuillez choisir un ou plusieurs chargés d'investissement
+    </clr-control-helper>
+  </clr-combobox-container>
+</form>
+
+<!-- Button -->
+
+<cds-button
+  action="outline"
+  status="primary"
+  [disabled]="preselectionSaveForm!.invalid"
+  (click)="savePreselection()"
+>
+  <cds-icon shape="floppy" size="md"></cds-icon> Sauvegarder la présélection
+</cds-button>

@@ -1,0 +1,48 @@
+<!-- Header -->
+<span cds-text="title">
+  <cds-icon shape="tree-view" status="info" solid="" size="lg"></cds-icon> Les
+  états financiers</span
+>
+
+<!-- Search fonds -->
+<div cds-layout="horizontal align:left gap:md m-t:xl">
+  <clr-dropdown>
+    <cds-button size="md" action="outline" clrDropdownTrigger>
+      {{ selectedProjet?.nom || "Sélectionner un projet" }}
+      <cds-icon shape="angle" status="info" direction="down"></cds-icon>
+    </cds-button>
+
+    <clr-dropdown-menu *clrIfOpen>
+      <div
+        clrDropdownItem
+        *ngFor="let p of projets"
+        (click)="setProjet(p)"
+        onkeypress=""
+      >
+        {{ p.nom | uppercase }}
+      </div>
+    </clr-dropdown-menu>
+  </clr-dropdown>
+
+  <!-- Project name -->
+  <div
+    class="project-name {{ selectedProjet ? 'active' : '' }}"
+    style="margin-top: 0px !important"
+  >
+    {{ selectedProjet ? selectedProjet.nom : "Nom du projet ..." }}
+    <cds-icon
+      onkeypress=""
+      shape="dashboard"
+      size="lg"
+      title="Cliquer pour consulter la fiche projet"
+      style="cursor: pointer"
+      (click)="goToFiche()"
+    ></cds-icon>
+  </div>
+</div>
+
+<!-- Financial statements -->
+<!-- <financial-statements-wrapper
+  [prospection]="selectedProjet"
+></financial-statements-wrapper> -->
+<financial-data [prospection]="selectedProjet"></financial-data>

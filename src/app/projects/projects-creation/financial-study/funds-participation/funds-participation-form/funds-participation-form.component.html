@@ -1,0 +1,388 @@
+<h3 class="fund-name">{{ _participation?.fonds?.denomination }}</h3>
+<clr-tabs>
+  <!-- Tab 1 Study phase -->
+  <clr-tab>
+    <button clrTabLink>Phase d'étude</button>
+    <clr-tab-content *clrIfActive="true">
+      <!-- Form -->
+      <form
+        clrForm
+        [formGroup]="myForm"
+        clrLayout="horizontal"
+        clrLabelSize="2"
+        class="clr-form-compact"
+        [style.paddingLeft]="'1em'"
+      >
+        <clr-number-input-container>
+          <label for="montantActions" class="clr-required-mark"
+            >Montant en actions
+            <sup role="tooltip" aria-haspopup="true" class="tooltip tooltip-lg">
+              <cds-icon shape="info-circle" size="18" status="info"></cds-icon>
+              <span class="tooltip-content"
+                >Montant Total (capital + prime d'émission) investis par le
+                fonds.</span
+              >
+            </sup>
+            :</label
+          >
+          <input
+            clrNumberInput
+            type="number"
+            formControlName="montantActions"
+            name="montantActions"
+            min="0"
+            step="1"
+            size="20"
+          />
+          <clr-control-helper>
+            <span style="font-size: 110%; font-weight: 500"
+              >{{
+                myForm.controls["montantActions"].value != 0
+                  ? (myForm.controls["montantActions"].value | number : "1.2-2")
+                  : ""
+              }}
+              <sup>tnd</sup></span
+            >
+          </clr-control-helper>
+        </clr-number-input-container>
+
+        <clr-number-input-container>
+          <label for="montantOCA" class="clr-required-mark"
+            >Montant en OCA
+            <sup role="tooltip" aria-haspopup="true" class="tooltip tooltip-lg">
+              <cds-icon shape="info-circle" size="18"></cds-icon>
+              <span class="tooltip-content"
+                >L'Obligation Convertible en Actions (OCA) est un titre de
+                créance qui peut être converti en actions</span
+              >
+            </sup>
+            :</label
+          >
+          <input
+            clrNumberInput
+            type="number"
+            formControlName="montantOCA"
+            name="montantOCA"
+            size="20"
+            min="0"
+            step="0.01"
+          />
+          <clr-control-helper>
+            <span style="font-size: 110%; font-weight: 500"
+              >{{
+                myForm.controls["montantOCA"].value != 0
+                  ? (myForm.controls["montantOCA"].value | number : "1.2-2")
+                  : ""
+              }}
+              <sup>tnd</sup></span
+            >
+          </clr-control-helper>
+        </clr-number-input-container>
+
+        <clr-number-input-container>
+          <label for="montantCCA" cclass="clr-required-mark"
+            >Montant en CCA
+            <sup role="tooltip" aria-haspopup="true" class="tooltip tooltip-lg">
+              <cds-icon shape="info-circle" size="18"></cds-icon>
+              <span class="tooltip-content"
+                >Les apports en Compte Courant d'Associé (CCA) correspondent à
+                des avances de fonds réalisées par les investisseurs.</span
+              >
+            </sup>
+            :</label
+          >
+          <input
+            clrNumberInput
+            type="number"
+            formControlName="montantCCA"
+            name="montantCCA"
+            min="0"
+            step="0.01"
+            size="20"
+          />
+          <clr-control-helper>
+            <span style="font-size: 110%; font-weight: 500"
+              >{{
+                myForm.controls["montantCCA"].value != 0
+                  ? (myForm.controls["montantCCA"].value | number : "1.2-2")
+                  : ""
+              }}
+              <sup>tnd</sup></span
+            >
+          </clr-control-helper>
+        </clr-number-input-container>
+
+        <clr-control-container>
+          <label for="nbrActions" class="clr-required-mark"
+            >Nombre d'actions:</label
+          >
+          <label>{{ nbrActions | number : "1.2-2" }} </label>
+        </clr-control-container>
+
+        <clr-control-container>
+          <label for="prime" class="clr-required-mark">Prime d'émission:</label>
+          <label
+            >{{ primeEmission() | currency : "TND" : "symbol" : "1.2-2" }}
+          </label>
+        </clr-control-container>
+      </form>
+
+      <!-- Total -->
+      <div class="total_div">
+        Montant total du fonds en dinar tunisien :
+        <span style="font-size: 110%; font-weight: 500"
+          >{{
+            myForm.controls["montantOCA"].value != 0 ||
+            myForm.controls["montantCCA"].value != 0 ||
+            myForm.controls["montantActions"].value != 0
+              ? (myForm.controls["montantOCA"].value +
+                  myForm.controls["montantCCA"].value +
+                  myForm.controls["montantActions"].value | number : "1.2-2")
+              : ""
+          }}
+          <sup>tnd</sup></span
+        >
+      </div>
+
+      <!-- Buttons -->
+      <div cds-layout="horizontal m-t:lg">
+        <div class="btn-group">
+          <cds-button (click)="saveParticipation()" [disabled]="myForm.invalid">
+            <cds-icon shape="add-text" size="md"></cds-icon> Sauvegarder
+          </cds-button>
+        </div>
+        <div class="btn-group">
+          <cds-button
+            status="danger"
+            (click)="deleteParticipation()"
+            [disabled]="_participation?.id <= 0"
+          >
+            <cds-icon shape="trash"></cds-icon> Supprimer
+          </cds-button>
+        </div>
+      </div>
+    </clr-tab-content>
+  </clr-tab>
+
+  <!-- Tab 2 Committee investment -->
+  <clr-tab>
+    <button clrTabLink>Comité d'investissement</button>
+    <clr-tab-content *clrIfActive>
+      <form
+        clrForm
+        [formGroup]="myForm"
+        clrLayout="horizontal"
+        clrLabelSize="2"
+        class="clr-form-compact"
+        [style.paddingLeft]="'1em'"
+      >
+        <clr-control-container>
+          <label for="montantActions" class="clr-required-mark"
+            >Montant en actions
+            <sup role="tooltip" aria-haspopup="true" class="tooltip tooltip-lg">
+              <cds-icon shape="info-circle" size="18"></cds-icon>
+              <span class="tooltip-content"
+                >Montant Total (capital + prime d'émission) investis par le
+                fonds.</span
+              >
+            </sup>
+            :</label
+          >
+          <label
+            >{{
+              participation_comite_investissement?.montantActions != 0
+                ? (participation_comite_investissement?.montantActions
+                  | currency : "TND" : "symbol" : "1.2-2")
+                : ""
+            }}
+          </label>
+        </clr-control-container>
+
+        <clr-control-container>
+          <label for="montantOCA" class="clr-required-mark"
+            >Montant en OCA
+            <sup role="tooltip" aria-haspopup="true" class="tooltip tooltip-lg">
+              <cds-icon shape="info-circle" size="18"></cds-icon>
+              <span class="tooltip-content"
+                >L'Obligation Convertible en Actions (OCA) est un titre de
+                créance qui peut être converti en actions</span
+              >
+            </sup>
+            :</label
+          >
+          <label
+            >{{
+              participation_comite_investissement?.montantOCA != 0
+                ? (participation_comite_investissement?.montantOCA
+                  | currency : "TND" : "symbol" : "1.2-2")
+                : ""
+            }}
+          </label>
+        </clr-control-container>
+
+        <clr-control-container>
+          <label for="montantCCA" class="clr-required-mark"
+            >Montant en CCA
+            <sup role="tooltip" aria-haspopup="true" class="tooltip tooltip-lg">
+              <cds-icon shape="info-circle" size="18"></cds-icon>
+              <span class="tooltip-content"
+                >Les apports en Compte Courant d'Associé (CCA) correspondent à
+                des avances de fonds réalisées par les investisseurs.</span
+              >
+            </sup>
+            :</label
+          >
+          <label
+            >{{
+              participation_comite_investissement?.montantCCA != 0
+                ? (participation_comite_investissement?.montantCCA
+                  | currency : "TND" : "symbol" : "1.2-2")
+                : ""
+            }}
+          </label>
+        </clr-control-container>
+
+        <clr-control-container>
+          <label for="nbrActions" class="clr-required-mark"
+            >Nombre d'actions:</label
+          >
+          <label
+            >{{
+              participation_comite_investissement?.actions | number : "1.0-0"
+            }}
+          </label>
+        </clr-control-container>
+
+        <clr-control-container>
+          <label for="prime" class="clr-required-mark">Prime d'émission:</label>
+          <label
+            >{{
+              participation_comite_investissement?.primeEmission
+                | currency : "TND" : "symbol" : "1.2-2"
+            }}
+          </label>
+        </clr-control-container>
+      </form>
+
+      <div class="total_div">
+        Montant total du fonds en dinar tunisien :
+        <span style="font-size: 110%; font-weight: 500"
+          >{{
+            participation_comite_investissement?.montantActions +
+              participation_comite_investissement?.montantOCA +
+              participation_comite_investissement?.montantCCA
+              | currency : "TND" : "symbol" : "1.2-2"
+          }}
+        </span>
+      </div>
+    </clr-tab-content>
+  </clr-tab>
+
+  <!-- Tab 3 Investment phase -->
+  <clr-tab>
+    <button clrTabLink>Phase d'investissement</button>
+    <clr-tab-content *clrIfActive>
+      <form
+        clrForm
+        [formGroup]="myForm"
+        clrLayout="horizontal"
+        clrLabelSize="2"
+        class="clr-form-compact"
+        [style.paddingLeft]="'1em'"
+      >
+        <clr-control-container>
+          <label for="montantActions" class="clr-required-mark"
+            >Montant en actions
+            <sup role="tooltip" aria-haspopup="true" class="tooltip tooltip-lg">
+              <cds-icon shape="info-circle" size="18"></cds-icon>
+              <span class="tooltip-content"
+                >Montant Total (capital + prime d'émission) investis par le
+                fonds.</span
+              >
+            </sup>
+            :</label
+          >
+          <label
+            >{{
+              inv_souscription_action_investissement?.montant
+                | currency : "TND" : "symbol" : "1.2-2"
+            }}
+          </label>
+        </clr-control-container>
+
+        <clr-control-container>
+          <label for="montantOCA" class="clr-required-mark"
+            >Montant en OCA
+            <sup role="tooltip" aria-haspopup="true" class="tooltip tooltip-lg">
+              <cds-icon shape="info-circle" size="18"></cds-icon>
+              <span class="tooltip-content"
+                >L'Obligation Convertible en Actions (OCA) est un titre de
+                créance qui peut être converti en actions</span
+              >
+            </sup>
+            :</label
+          >
+          <label
+            >{{
+              inv_souscription_oca_investissement?.montant
+                | currency : "TND" : "symbol" : "1.2-2"
+            }}
+          </label>
+        </clr-control-container>
+
+        <clr-control-container>
+          <label for="montantCCA" class="clr-required-mark"
+            >Montant en CCA
+            <sup role="tooltip" aria-haspopup="true" class="tooltip tooltip-lg">
+              <cds-icon shape="info-circle" size="18"></cds-icon>
+              <span class="tooltip-content"
+                >Les apports en Compte Courant d'Associé (CCA) correspondent à
+                des avances de fonds réalisées par les investisseurs.</span
+              >
+            </sup>
+            :</label
+          >
+          <label
+            >{{
+              inv_souscription_cca_investissement?.montant
+                | currency : "TND" : "symbol" : "1.2-2"
+            }}
+          </label>
+        </clr-control-container>
+
+        <clr-control-container>
+          <label for="nbrActions" class="clr-required-mark"
+            >Nombre d'actions:</label
+          >
+          <label
+            >{{
+              inv_souscription_action_investissement?.actions | number : "1.0-0"
+            }}
+          </label>
+        </clr-control-container>
+
+        <clr-control-container>
+          <label for="prime" class="clr-required-mark">Prime d'émission:</label>
+          <label
+            >{{
+              inv_souscription_action_investissement?.primeEmission
+                | currency : "TND" : "symbol" : "1.2-2"
+            }}
+          </label>
+        </clr-control-container>
+      </form>
+
+      <div class="total_div">
+        Montant total du fonds en dinar tunisien :
+        <span style="font-size: 110%; font-weight: 500"
+          >{{
+            inv_souscription_action_investissement?.montant +
+              inv_souscription_oca_investissement?.montant +
+              inv_souscription_cca_investissement?.montant | number : "1.2-2"
+          }}
+          <sup>tnd</sup></span
+        >
+      </div>
+    </clr-tab-content>
+  </clr-tab>
+</clr-tabs>

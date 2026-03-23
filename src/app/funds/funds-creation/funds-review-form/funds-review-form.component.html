@@ -1,0 +1,211 @@
+<!-- Review form -->
+<form clrForm clrLayout="horizontal">
+    <!-- Dénomination -->
+    <clr-input-container>
+        <label for="denomination" class="clr-required-mark">Dénomination:</label>
+        <input clrInput [(ngModel)]="denomination" name="denomination" readonly />
+    </clr-input-container>
+
+    <!-- Alias -->
+    <clr-input-container>
+        <label for="alias" class="clr-required-mark">Alias:</label>
+        <input clrInput [(ngModel)]="alias" name="alias" readonly />
+    </clr-input-container>
+
+    <!-- Adresse -->
+    <clr-input-container>
+        <label for="adresseFonds" class="clr-required-mark">Adresse:</label>
+        <input clrInput [(ngModel)]="adresseFonds" name="adresseFonds" readonly />
+    </clr-input-container>
+
+    <!-- Montant projeté -->
+    <clr-input-container>
+        <label for="montant_projete" class="clr-required-mark">Montant projeté:</label>
+        <input clrInput [(ngModel)]="montant" name="montant_projete" readonly />
+    </clr-input-container>
+
+    <!-- Durée -->
+    <clr-input-container>
+        <label for="duree" class="clr-required-mark">Durée:</label>
+        <input clrInput [(ngModel)]="duree" name="duree" readonly />
+    </clr-input-container>
+
+    <!-- Divider -->
+    <cds-divider cds-layout="m-t:xl m-b:md" class="htitled-divider" title="Dates"></cds-divider>
+
+    <!-- Date du lancement -->
+    <clr-input-container>
+        <label for="date_lancement" class="clr-required-mark">Date du lancement:</label>
+        <input clrInput [(ngModel)]="date_lancement" name="date_lancement" readonly class="calendar" />
+    </clr-input-container>
+
+    <!-- Date d'expiration -->
+    <clr-input-container>
+        <label for="date_expiration" class="clr-required-mark">Date d'expiration:</label>
+        <input clrInput [(ngModel)]="date_expiration" name="date_expiration" readonly class="calendar" />
+    </clr-input-container>
+
+    <!-- Date d'obtention du visa CMF -->
+    <clr-input-container>
+        <label for="date_visa_cmf" class="clr-required-mark">Date d'obtention du visa CMF:</label>
+        <input clrInput [(ngModel)]="date_visa_cmf" name="date_VisaCMF" class="calendar" readonly />
+    </clr-input-container>
+
+    <!-- Divider -->
+    <cds-divider cds-layout="m-t:xl m-b:md" class="htitled-divider" title="Identité financière"></cds-divider>
+
+    <!-- N° du visa CMF -->
+    <clr-input-container>
+        <label for="num_visa_cmf" class="clr-required-mark">N° du visa CMF:</label>
+        <input clrInput [(ngModel)]="num_visa_cmf" name="num_visaCMF" readonly />
+    </clr-input-container>
+
+    <!-- Matricule fiscale -->
+    <clr-input-container>
+        <label for="matriculeFiscale" class="clr-required-mark">Mtricule fiscale:</label>
+        <input clrInput [(ngModel)]="matriculeFiscale" name="matriculeFiscale" readonly />
+    </clr-input-container>
+
+    <!-- Banque -->
+    <clr-input-container>
+        <label for="banque" class="clr-required-mark">Banque dépositaire:</label>
+        <input clrInput [(ngModel)]="banque" name="banque" readonly />
+    </clr-input-container>
+
+    <!-- Divider frais -->
+    <cds-divider cds-layout="m-t:xl m-b:md" class="htitled-divider" title="Frais"></cds-divider>
+
+    <!-- Frais du dépositaire -->
+    <clr-input-container>
+        <label for="frais_depositaire" class="clr-required-mark">Frais du dépositaire (%):</label>
+        <input clrInput [(ngModel)]="frais_depositaire" name="frais_Depositaire" readonly />
+    </clr-input-container>
+
+    <!-- Frais de gestion -->
+    <clr-input-container>
+        <label for="frais_gestion" class="clr-required-mark">Frais de gestion (%):</label>
+        <input clrInput [(ngModel)]="frais_gestion" name="frais_Gestion" readonly />
+    </clr-input-container>
+
+
+    <!-- Divider profile -->
+    <cds-divider cds-layout="m-t:xl m-b:md" class="htitled-divider" title="Profile"></cds-divider>
+
+    <!-- Forme légale -->
+    <clr-input-container>
+        <label for="forme_legale" class="clr-required-mark">Forme légale:</label>
+        <input clrInput [(ngModel)]="forme_legale" name="forme_legale" readonly />
+    </clr-input-container>
+
+    <!-- Nature -->
+    <clr-input-container>
+        <label for="nature" class="clr-required-mark">Nature:</label>
+        <input clrInput [(ngModel)]="nature" name="nature" readonly size="40" />
+    </clr-input-container>
+
+    <!-- Cadres d'investissement -->
+    <clr-combobox-container>
+        <label for="cadre_investissement" class="clr-required-mark">Cadres d'investissement:</label>
+        <clr-combobox name="policies" clrMulti="true" [(ngModel)]="cadresInvestissement">
+            <ng-container *clrOptionSelected="let selected">
+                <cds-icon shape="filter-grid" role="img" aria-label="policies list"></cds-icon>
+                {{ selected?.libelle }}
+            </ng-container>
+
+        </clr-combobox>
+        <clr-control-helper>Liste des cadres d'investissement</clr-control-helper>
+    </clr-combobox-container>
+
+    <!-- Divider ratios -->
+    <cds-divider cds-layout="m-t:xl m-b:md" class="htitled-divider" title="Ratios réglementaires"></cds-divider>
+
+    <!-- Ratio réglementaire (Fonds) -->
+    <clr-input-container>
+        <label for="ratio_reglementaire" class="clr-required-mark">Ratio réglementaire (Fonds):</label>
+        <input clrInput [(ngModel)]="ratio_reglementaire" name="ratio_reglementaire" readonly />
+    </clr-input-container>
+
+    <!-- Ratio réglementaire (Souscripteurs) -->
+    <clr-input-container>
+        <label for="ratio_reglementaire_souscripteur" class="clr-required-mark">Ratio réglementaire
+            (Souscripteurs):</label>
+        <input clrInput [(ngModel)]="ratio_reglementaire_souscripteur" name="ratio_reglementaire_souscripteur"
+            readonly />
+    </clr-input-container>
+
+    <!-- Ratio d'emploi fiscale -->
+    <clr-input-container>
+        <label for="ratio_emploi_fiscale" class="clr-required-mark">Ratio d'emploi fiscale:</label>
+        <input clrInput [(ngModel)]="ratio_emploi_fiscale" name="ratio_emploi_fiscale" readonly />
+    </clr-input-container>
+
+    <!-- Divider ratios de conformité -->
+    <cds-divider cds-layout="m-t:xl m-b:md" class="htitled-divider" title="Ratios de conformité"></cds-divider>
+
+    <!-- Ratio par secteur d'activité -->
+    <clr-input-container>
+        <label for="ratio_secteur_activite" class="clr-required-mark">Ratio par secteur d'activité :</label>
+        <input clrInput [(ngModel)]="ratio_secteur_activite" name="ratio_secteur_activite" readonly />
+    </clr-input-container>
+
+    <!-- Ratio par société -->
+    <clr-input-container>
+        <label for="ratio_societe" class="clr-required-mark">Ratio par société :</label>
+        <input clrInput [(ngModel)]="ratio_societe" name="ratio_societe" readonly />
+    </clr-input-container>
+
+    <!-- Ratio en Quasi fonds propres -->
+    <clr-input-container>
+        <label for="ratio_quasi_fond_propre" class="clr-required-mark">Ratio en Quasi fonds propres :</label>
+        <input clrInput [(ngModel)]="ratio_quasi_fond_propre" name="ratio_quasi_fond_propre" readonly />
+    </clr-input-container>
+
+    <!-- Ratio de conformité OCA -->
+    <clr-input-container>
+        <label for="ratio_conformite_oca" class="clr-required-mark">Ratio de conformité OCA:</label>
+        <input clrInput [(ngModel)]="ratio_conformite_oca" name="ratio_conformite_oca" readonly />
+    </clr-input-container>
+
+    <!-- Ratio investissement sur le marché alternatif -->
+    <clr-input-container>
+        <label for="ratio_investissement" class="clr-required-mark">Ratio investissement sur le marché alternatif
+            :</label>
+        <input clrInput [(ngModel)]="ratio_investissement" name="ratio_investissement" readonly />
+    </clr-input-container>
+
+    <!-- Divider limites des souscriptions -->
+    <cds-divider cds-layout="m-t:xl m-b:md" class="htitled-divider" title="Limites des souscriptions"></cds-divider>
+
+    <!-- Durée -->
+    <clr-input-container>
+        <label for="nombre_annees" class="clr-required-mark">Durée:</label>
+        <input clrInput readonly [(ngModel)]="nombre_annees" name="nombre_annees" />
+        <clr-control-helper>Nombre d'années</clr-control-helper>
+    </clr-input-container>
+
+    <!-- Divider documents -->
+    <cds-divider cds-layout="m-t:xl m-b:md" class="htitled-divider" title="Documents"></cds-divider>
+
+    <!-- Documents -->
+    <clr-combobox-container>
+        <label for="documents" class="clr-required-mark">Documents:</label>
+        <clr-combobox name="documents">
+            <ng-container *clrOptionSelected="let selected">
+                <cds-icon shape="file" role="img" aria-label="document list"></cds-icon>
+                {{ selected?.titre }} [{{ selected?.nomFichier }}]
+            </ng-container>
+        </clr-combobox>
+        <clr-control-helper>Liste des documents</clr-control-helper>
+    </clr-combobox-container>
+
+
+    <!-- Buttons -->
+
+    <div cds-layout="horizontal m-t:lg">
+        <cds-button [disabled]="fonds.length === 0" (click)="validerFonds()">
+            <cds-icon shape="floppy" size="md"></cds-icon>
+            Sauvegarder
+        </cds-button>
+    </div>
+
+</form>

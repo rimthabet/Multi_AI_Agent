@@ -1,0 +1,82 @@
+<!-- Header -->
+<div class="info" style="font-size: 1.5em" cds-layout="m-t:lg m-b:sm">
+  <cds-icon shape="cursor-hand-click" solid="" size="md"></cds-icon>
+  Présélection
+</div>
+
+<cds-divider
+  class="htitled-divider centered"
+  title="Processus de présélection"
+></cds-divider>
+
+<!-- Tabs -->
+<clr-tabs [clrLayout]="'vertical'" class="right-bordered">
+  <!-- Details de présélection -->
+  <clr-tab>
+    <button clrTabLink id="link1">
+      <cds-icon shape="details" solid></cds-icon> Détails
+    </button>
+    <clr-tab-content id="content1" *clrIfActive="true">
+      <preselection-create-form
+        [(prospection)]="prospection"
+        [(loading)]="loading"
+        (preselectionSaved)="projectSaved($event)"
+      ></preselection-create-form>
+    </clr-tab-content>
+  </clr-tab>
+
+  <!-- Financements de présélection -->
+  <clr-tab>
+    <button clrTabLink>
+      <cds-icon shape="bank" solid></cds-icon> Financements
+    </button>
+    <clr-tab-content *clrIfActive>
+      <financing-plans
+        [(prospection)]="prospection"
+        [(loading)]="loading"
+      ></financing-plans>
+    </clr-tab-content>
+  </clr-tab>
+
+  <!-- Décision de présélection -->
+  <clr-tab>
+    <button clrTabLink>
+      <cds-icon shape="digital-signature"></cds-icon> Décision
+    </button>
+    <clr-tab-content *clrIfActive>
+      <decision-form [(prospection)]="prospection"></decision-form>
+    </clr-tab-content>
+  </clr-tab>
+
+  <!-- PV de présélection -->
+  <clr-tab>
+    <button
+      clrTabLink
+      [disabled]="
+        prospection()?.statutActuel !== 'APPROUVE' &&
+        prospection()?.statutActuel !== 'REFUSE' &&
+        prospection()?.statutActuel !== 'EN_INVESTISSEMENT'
+      "
+    >
+      <cds-icon shape="scroll" badge="info" solid></cds-icon>Procès-Verbal
+    </button>
+    <clr-tab-content *clrIfActive>
+      <div class="approval-area">
+        <cds-button action="outline" (click)="genererPDF()">
+          <cds-icon shape="details" size="90"></cds-icon>
+          Générer le PV de présélection
+        </cds-button>
+      </div>
+
+      <!-- documents -->
+      @for (conformite of conformite_documentaires; track $index) {
+      <document-upload
+        [compliance]="{ document: undefined, conformite: conformite }"
+        [data]="prospection"
+        [task_row]="5"
+        [phase_row]="2"
+      ></document-upload>
+      }
+    </clr-tab-content>
+  </clr-tab>
+</clr-tabs>

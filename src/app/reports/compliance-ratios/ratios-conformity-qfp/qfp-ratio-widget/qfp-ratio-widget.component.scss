@@ -1,0 +1,47 @@
+.gauge-row {
+  display: flex;
+  align-items: center;
+  border-radius: 10px;
+  min-width: 400px;
+  flex: 1;
+}
+
+.gauge-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.gauge-info { 
+  display: flex;
+  flex-direction: column;
+  margin-top: 5px;
+  padding: 0 0 1em 1em;
+}
+
+.title {
+  font-weight: 600;
+  font-size: 20px;
+  letter-spacing: 2px;
+  color: var(--clr-color-neutral-600);
+  max-width: 310px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  padding: .2em 0 .5em 0;
+  line-height: 1.2em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-align: left;
+}
+
+
+.gauge-volume,
+.gauge-quantity {
+  font-size: 20px;
+  margin-bottom: 6px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  font-family: 'Stardos Stencil', Georgia, 'Times New Roman', Times, serif;
+  color: var(--clr-color-action-700)
+}

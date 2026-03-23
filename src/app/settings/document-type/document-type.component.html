@@ -1,0 +1,178 @@
+<span cds-text="title">
+  <cds-icon
+    shape="library"
+    status="info"
+    size="lg"
+    cds-layout="m-b:sm"
+  ></cds-icon>
+  Gestion des types de documents</span
+>
+
+<!-- Document types repository grid -->
+<clr-datagrid
+  style="height: calc(100vh - 135px)"
+  [(clrDgSingleSelected)]="selectedItem"
+  [clrDgLoading]="loading"
+>
+  <!-- Action bar -->
+  <clr-dg-action-bar>
+    <div class="btn-group">
+      <cds-button
+        action="outline"
+        status="primary"
+        (click)="selectedItem = []; showEdit(true)"
+        onKeyPress=""
+      >
+        <cds-icon shape="plus" size="md"></cds-icon> Ajouter
+      </cds-button>
+    </div>
+    <div class="btn-group">
+      <cds-button
+        action="outline"
+        status="warning"
+        (click)="showEdit(true)"
+        [disabled]="!selectedItem"
+        onKeyPress=""
+      >
+        <cds-icon shape="note" size="md"></cds-icon> Modifier
+      </cds-button>
+    </div>
+    <div class="btn-group">
+      <cds-button
+        action="outline"
+        status="danger"
+        (click)="deleteDocumentType()"
+        [disabled]="!selectedItem"
+        onKeyPress=""
+      >
+        <cds-icon shape="trash" size="md"></cds-icon> Supprimer
+      </cds-button>
+    </div>
+
+    <!-- Filters -->
+    <div cds-layout="horizontal align:left gap:md m-t:md">
+      <span cds-text="section" cds-layout="m-t:xs" style="font-weight: 450">
+        Filtrer <cds-icon shape="filter"></cds-icon>:
+      </span>
+      <clr-dropdown>
+        <cds-button size="sm" action="outline" clrDropdownTrigger>
+          Catégorie documentaire
+          <cds-icon shape="angle" direction="down"></cds-icon>
+        </cds-button>
+        <clr-dropdown-menu *clrIfOpen>
+          @for(cat of categories; track cat.id) {
+          <div clrDropdownItem (click)="selectCategorie(cat)" onkeypress="">
+            {{ cat.libelle }}
+          </div>
+          }
+        </clr-dropdown-menu>
+      </clr-dropdown>
+    </div>
+
+    <!-- Divider -->
+    <cds-divider
+      cds-layout="m-t:lg m-b:sm"
+      class="htitled-divider"
+      title="Types de documents"
+    ></cds-divider>
+
+    <!-- Selected filters -->
+    <div class="filters-panel">
+      @for(cat of selectedCategories; track cat.id) {
+      <span class="label">
+        {{ cat.libelle }}
+        <span
+          class="badge"
+          (click)="clearCategorie(cat)"
+          style="cursor: pointer"
+          >X</span
+        >
+      </span>
+      }
+    </div>
+  </clr-dg-action-bar>
+
+  <!-- Columns -->
+  <clr-dg-column [clrDgField]="'libelle'"
+    ><cds-icon shape="library"></cds-icon> &nbsp; Libellé</clr-dg-column
+  >
+  <clr-dg-column [clrDgField]="'description'">
+    <ng-container *clrDgHideableColumn="{ hidden: true }">
+      Description
+    </ng-container>
+  </clr-dg-column>
+  <clr-dg-column>Catégorie</clr-dg-column>
+
+  <clr-dg-row *clrDgItems="let type of filtered_types" [clrDgItem]="type">
+    <clr-dg-cell>{{ type.libelle }}</clr-dg-cell>
+    <clr-dg-cell>{{ type.description }}</clr-dg-cell>
+    <clr-dg-cell>{{ type.categorie.libelle }}</clr-dg-cell>
+  </clr-dg-row>
+
+  <clr-dg-footer>{{ types.length }} Types Documents</clr-dg-footer>
+</clr-datagrid>
+
+<!-- Modal for the CRUD -->
+<clr-modal [(clrModalOpen)]="editMode">
+  <h3 class="modal-title">
+    <cds-icon status="info" shape="library" size="lg" solid=""></cds-icon> Type
+    de documents
+  </h3>
+  <div class="modal-body">
+    <form clrForm [formGroup]="saveForm" clrLabelSize="3">
+      <!-- Label -->
+      <clr-input-container>
+        <label>Libellé:</label>
+        <input
+          clrInput
+          type="text"
+          formControlName="libelle"
+          style="width: 375px"
+        />
+      </clr-input-container>
+
+      <!-- Description -->
+      <clr-textarea-container>
+        <label>Description:</label>
+        <textarea
+          clrTextarea
+          formControlName="description"
+          style="width: 375px"
+        ></textarea>
+      </clr-textarea-container>
+
+      <!-- Category -->
+      <clr-select-container>
+        <label>Catégorie:</label>
+        <select
+          clrSelect
+          formControlName="categorie"
+          [compareWith]="equals"
+          style="width: 375px"
+        >
+          @for(categorie of categories; track categorie.id) {
+          <option [ngValue]="categorie">
+            {{ categorie?.libelle }}
+          </option>
+          }
+        </select>
+      </clr-select-container>
+    </form>
+  </div>
+
+  <!-- Footer -->
+  <div class="modal-footer">
+    <cds-button action="outline" (click)="editMode = false">Annuler</cds-button>
+    <cds-button status="primary" [disabled]="saveForm.invalid" (click)="save()">
+      <cds-icon shape="floppy"></cds-icon> Sauvegarder
+    </cds-button>
+  </div>
+</clr-modal>
+
+<!-- Super admin dialog for deletion -->
+<app-multi-purpose-delete-dialog
+  #mp_delete_popup
+  [warn_message]="delete_message"
+  [pass_phrase]="selectedItem?.libelle"
+  [rest_url]="rest_url"
+></app-multi-purpose-delete-dialog>

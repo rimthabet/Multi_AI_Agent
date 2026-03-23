@@ -1,0 +1,139 @@
+<!-- Bloc formulaire et gauge -->
+<div cds-layout="horizontal align:stretch gap:xs m-y:md">
+  <!-- Bloc formulaire -->
+  <div cds-layout="vertical">
+    <h3>Veuillez entrer vos données:</h3>
+    <form
+      clrForm
+      [formGroup]="saveForm!"
+      clrLabelSize="5"
+      class="clr-form-compact"
+    >
+      <clr-number-input-container>
+        <label
+          ><cds-icon shape="calculator" status="info" solid></cds-icon> Taux de
+          Rémunération OCA:</label
+        >
+        <input
+          clrNumberInput
+          type="number"
+          formControlName="tauxRenumeration"
+          name="tauxRenumeration"
+        />
+      </clr-number-input-container>
+
+      <clr-select-container>
+        <label
+          ><cds-icon shape="bullseye" solid status="info"></cds-icon> Business
+          Plan:</label
+        >
+        <select clrSelect name="bp" formControlName="bp">
+          <option value="-1">Choisir un business plan...</option>
+          @for(bp of businessPlans(); track bp.id) {
+          <option value="{{ bp?.id }}">{{ bp?.label }}</option>
+          }
+        </select>
+      </clr-select-container>
+
+      <div cds-layout="m-y:md">
+        <cds-button
+          (click)="evaluateKPIs()"
+          [disabled]="submitBtnState"
+          style="width: 230px"
+        >
+          Simuler
+        </cds-button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Bloc gauge -->
+  <div cds-layout="vertical">
+    <gauge-02
+      [title]="'Pourcentage de détention du FCPR dans le OCA'"
+      [value1]="_participation?.part * 100"
+      [value2]="format(_participation?.montantActions)"
+      [value3]="formatInt(_participation?.actions)"
+      [title4]="'Montant en OCA'"
+      [value4]="formatInt(_participation?.montantOCA)"
+    >
+    </gauge-02>
+  </div>
+</div>
+
+<!-- Bloc table -->
+<div cds-layout="m-y:md">
+  @if(loading) {
+  <div style="text-align: center; margin: 20px">
+    <span class="spinner spinner-md">Chargement...</span>
+  </div>
+  } @if(!loading && resultatsExploitation && resultatsExploitation.length > 0) {
+  <table class="table table-vertical">
+    <tbody>
+      <tr>
+        <th></th>
+        @for(r of resultatsExploitation; track $index) { @if(r.id > 0) {
+        <th style="text-align: right">{{ r.year }}</th>
+        } }
+      </tr>
+
+      <!-- Résultats d'exploitation -->
+      <tr>
+        <th>
+          Résultat d'Exploitation <sup>TND</sup>
+          <div class="comment">Données du BP : {{ selectedBP?.label }}</div>
+        </th>
+        @for(r of resultatsExploitation; track $index) {
+        <td class="text-right">{{ r.value | number : "1.0-0" }}</td>
+        }
+      </tr>
+
+      <!-- Rémunération OCA -->
+      <tr>
+        <th>Rémunération OCA <sup>TND</sup></th>
+        <td></td>
+        @for(r of renumerationsOCA; track $index) { @if(r.id > 0) {
+        <td class="text-right">{{ r.value | number : "1.0-0" }}</td>
+        } }
+      </tr>
+
+      <!-- Cash Flow -->
+      <tr>
+        <th>Cash Flow <sup>TND</sup></th>
+        @for(c of cashFlow; track $index) {
+        <td class="text-right">{{ c.value | number : "1.0-0" }}</td>
+        }
+      </tr>
+    </tbody>
+  </table>
+  }
+
+  <!-- Stats -->
+
+  <div cds-layout="horizontal align:stretch m-t:lg gap:xxl">
+    <app-kpi-badge-01
+      [title]="'Total remboursement OCA'"
+      [value]="totalRemboursement"
+      [type]="'currency'"
+      [size]="'large'"
+      [color]="'var(--cds-alias-status-info)'"
+    >
+    </app-kpi-badge-01>
+
+    <app-kpi-badge-01
+      [title]="'TRI OCA'"
+      [value]="triOCA"
+      [type]="'ratio'"
+      [size]="'large'"
+      [color]="'var(--cds-alias-status-success)'"
+    >
+    </app-kpi-badge-01>
+  </div>
+</div>
+
+<!-- Bloc bouton -->
+<div cds-layout="horizontal m-y:lg">
+  <cds-button (click)="saveTri()">
+    <cds-icon shape="floppy"></cds-icon> Sauvegarder
+  </cds-button>
+</div>

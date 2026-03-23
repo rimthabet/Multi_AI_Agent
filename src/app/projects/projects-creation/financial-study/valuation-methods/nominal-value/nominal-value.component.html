@@ -1,0 +1,36 @@
+<div cds-layout="m-y:lg">
+
+    <!-- Year Form -->
+    <form clrForm style="margin: auto; width: 550px" [formGroup]="yearForm!" clrLabelSize="6">
+        <clr-number-input-container>
+            <label style="font-size: 130% !important">
+                <cds-icon shape="calendar" size="md" status="info"></cds-icon> Année de référence :
+            </label>
+            <input style="
+        font-weight: 500;
+        font-size: 18px;
+        color: var(--clr-color-action-700);
+      " clrNumberInput type="number" formControlName="year" name="year" size="10" />
+        </clr-number-input-container>
+    </form>
+
+    <!-- Tabs -->
+    <div cds-layout="m-y:md">
+        <clr-tabs>
+            @for(item of fin_statements; track $index) {
+            <clr-tab>
+                <button (click)="selectedTab = $index" clrTabLink [title]="item?.libelle">
+                    {{ item?.libelle }}
+                </button>
+
+                <clr-tab-content *clrIfActive="selectedTab == $index">
+                    <financial-statement [prospection]="prospection()" [ref2]="-1" [ref3]="-1" [ref4]="-1" [ref5]="-1"
+                        [item]="item" [data]="items" [year]="yearForm!.value['year']"
+                        [columns]="item?.columns"></financial-statement>
+                </clr-tab-content>
+            </clr-tab>
+            }
+        </clr-tabs>
+    </div>
+
+</div>

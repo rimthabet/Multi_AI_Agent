@@ -1,0 +1,67 @@
+<form
+  clrForm
+  [formGroup]="decisionSaveForm"
+  clrLayout="horizontal"
+  clrLabelSize="3"
+  class="clr-form-compact"
+  cds-layout="m-t:lg m-b:lg"
+>
+  <clr-textarea-container>
+    <label class="clr-required-mark">Décision/Résolution:</label>
+    <textarea
+      clrTextarea
+      name="libelle"
+      rows="7"
+      cols="69"
+      formControlName="libelle"
+      placeholder="Ajouter une description brève de la décision/résolution"
+    ></textarea>
+    <clr-control-helper>
+      Vous pouvez utiliser la synthaxe
+      <a href="https://www.markdownguide.org/basic-syntax/" target="_blank"
+        >Mark Down</a
+      >
+      pour formater votre décision/résolution
+    </clr-control-helper>
+  </clr-textarea-container>
+
+  <clr-select-container>
+    <label class="clr-required-mark">Vote:</label>
+    <select clrSelect name="typeVote" formControlName="typeVote">
+      <option
+        *ngFor="let vote of votes"
+        [ngValue]="vote"
+        [attr.data-value]="vote"
+      >
+        {{ vote.libelle }}
+      </option>
+    </select>
+  </clr-select-container>
+
+  @if(decisionSaveForm.get('typeVote')?.value?.libelle?.toUpperCase() == 'AVEC
+  RÉSERVE') {
+  <clr-textarea-container>
+    <label>Réserve:</label>
+    <textarea
+      clrTextarea
+      name="reserve"
+      cols="30"
+      rows="2"
+      formControlName="reserve"
+      placeholder="Ajouter une description brève de la réserve"
+    ></textarea>
+  </clr-textarea-container>
+  }
+</form>
+
+<div class="separator"></div>
+
+<div cds-layout="horizontal align:right">
+  <button
+    class="btn btn-primary"
+    [disabled]="decisionSaveForm.invalid"
+    (click)="saveDecision()"
+  >
+    <cds-icon shape="floppy"></cds-icon> Sauvegarder
+  </button>
+</div>

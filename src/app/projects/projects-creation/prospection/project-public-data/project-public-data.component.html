@@ -1,0 +1,99 @@
+<!-- Header -->
+<div cds-layout="m-t:lg">
+  <span cds-text="title">
+    <cds-icon shape="world" size="lg" solid status="info"></cds-icon> Données
+    publiques autour du projet</span
+  >
+</div>
+
+<!-- Form public data CRUD-->
+<div cds-layout="m-t:sm">
+  <form clrForm [formGroup]="publicDataForm!" clrLabelSize="2">
+    <clr-input-container>
+      <label for="web"
+        ><cds-icon shape="world" solid status="info"></cds-icon> Site
+        Web:</label
+      >
+      <input clrInput type="text" formControlName="web" name="web" />
+    </clr-input-container>
+    <clr-input-container>
+      <label for="email"
+        ><cds-icon shape="envelope" solid status="info"></cds-icon>
+        E-mail:</label
+      >
+      <input clrInput type="text" formControlName="email" name="email" />
+    </clr-input-container>
+    <clr-input-container>
+      <label for="telephone"
+        ><cds-icon shape="phone-handset" solid status="info"></cds-icon>
+        Téléphone:</label
+      >
+      <input
+        clrInput
+        type="text"
+        formControlName="telephone"
+        name="telephone"
+      />
+    </clr-input-container>
+    <clr-input-container>
+      <label for="activite"
+        ><cds-icon shape="factory" solid status="info"></cds-icon>
+        Activité:</label
+      >
+      <input
+        clrInput
+        type="text"
+        formControlName="activite"
+        name="activite"
+        style="width: 750px"
+      />
+      <clr-control-helper
+        >Une description brêve de l'activité de la société
+      </clr-control-helper>
+    </clr-input-container>
+    <clr-textarea-container>
+      <label for="description"
+        ><cds-icon shape="details" solid status="info"></cds-icon>
+        Description:</label
+      >
+      <textarea
+        clrTextarea
+        formControlName="description"
+        name="description"
+        cols="80"
+        rows="7"
+      ></textarea>
+      <clr-control-helper>
+        Vous pouvez utiliser la synthaxe
+        <a href="https://www.markdownguide.org/" target="_blank">Markdown</a>
+        pour formater votre ordre du jour</clr-control-helper
+      >
+    </clr-textarea-container>
+
+    <clr-input-container>
+      <label for="banner"
+        ><cds-icon shape="image" solid status="info"></cds-icon>
+        Bannière:</label
+      >
+      <input
+        (change)="selectFile($event)"
+        type="file"
+        clrInput
+        formControlName="banner"
+        name="banner"
+      />
+    </clr-input-container>
+
+    <!-- Button -->
+    <div cds-layout="horizontal m-t:xl">
+      <cds-button
+        action="outline"
+        status="primary"
+        (click)="savePublicData()"
+        [disabled]="publicDataForm!.invalid"
+      >
+        <cds-icon shape="floppy" size="md"></cds-icon> Sauvegarder
+      </cds-button>
+    </div>
+  </form>
+</div>

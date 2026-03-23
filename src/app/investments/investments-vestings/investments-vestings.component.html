@@ -1,0 +1,493 @@
+<!-- Loading Spinner -->
+<div
+  class="modal-backdrop"
+  aria-hidden="true"
+  [style.display]="loading || loadingLiberations ? 'block' : 'none'"
+  (click)="loading = false; loadingLiberations = false"
+>
+  <span
+    class="spinner"
+    style="
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    "
+    >Loading...</span
+  >
+</div>
+
+<!-- Header -->
+<span cds-text="title">
+  <cds-icon shape="file-group" size="lg" status="info"></cds-icon> {{ title }}
+</span>
+
+<!-- Divider -->
+<cds-divider
+  cds-layout="m-t:xl "
+  class="htitled-divider"
+  title="Inventaire des libérations"
+></cds-divider>
+
+<!-- Fund selector -->
+<div cds-layout="horizontal align:left gap:md m-t:xl">
+  <clr-dropdown>
+    <!-- Button trigger -->
+    <cds-button size="md" action="outline" clrDropdownTrigger>
+      {{ selectedFonds?.fonds?.denomination }}
+      <cds-icon shape="angle" status="info" direction="down"></cds-icon>
+    </cds-button>
+
+    <!-- Dropdown menu -->
+    <clr-dropdown-menu *clrIfOpen>
+      @for (f of fonds; track $index) {
+      <div clrDropdownItem (click)="selectFund(f)">
+        {{ f.fonds?.denomination }}
+      </div>
+      }
+    </clr-dropdown-menu>
+  </clr-dropdown>
+
+  <!-- Fund name -->
+  <span class="fund-name active" [style.marginBottom]="'0.2em'">
+    {{ selectedFonds?.fonds?.denomination }}
+    <cds-icon
+      onkeypress=""
+      shape="dashboard"
+      size="lg"
+      title="Cliquer pour consulter la fiche funds"
+      style="cursor: pointer"
+      (click)="goToFiche()"
+    ></cds-icon>
+  </span>
+</div>
+
+<!-- Fund status -->
+@if (selectedFonds?.fonds.etat.libelle == 'En liquidation' ||
+selectedFonds?.fonds.etat.libelle == 'En pré-liquidation') {
+<div class="badge badge-warning" cds-text="caption" cds-layout="p:sm">
+  Fonds {{ selectedFonds?.fonds.etat.libelle }}
+</div>
+}
+
+<!-- Divider -->
+<cds-divider
+  cds-layout="m-t:xl m-b:lg"
+  class="htitled-divider"
+  [title]="
+    'Détention du ' + selectedFonds?.fonds?.denomination + ' dans les projets'
+  "
+></cds-divider>
+
+<!-- Detention % gauges -->
+<app-horizontal-scroller>
+  @for (p of liberations; track p.projet.id) {
+  <ng-template #itemTemplate>
+    <ngx-gauge
+      type="semi"
+      cap="round"
+      [value]="p?.pfcp?.part"
+      [thick]="7"
+      [size]="150"
+      [min]="0"
+      [max]="100"
+      [append]="'%'"
+      [label]="p?.projet?.nom"
+      [backgroundColor]="getCodeFromColor('--cds-alias-status-disabled-tint')"
+      [foregroundColor]="getCodeFromColor('--cds-alias-status-info-shade')"
+    ></ngx-gauge>
+  </ng-template>
+  }
+</app-horizontal-scroller>
+
+<!-- LIBERATIONS TABLE -->
+<div cds-layout="horizontal gap:md">
+  <div cds-layout="m-t:xl m-b:lg align:stretch">
+    <cds-divider
+      class="htitled-divider"
+      [title]="
+        'Libérations du ' +
+        selectedFonds?.fonds?.denomination +
+        ' dans les projets'
+      "
+    ></cds-divider>
+  </div>
+  <div cds-layout="align:right m-t:xs m-b:xs">
+    <button
+      class="btn btn-outline"
+      (click)="exportLiberationsToExcel(selectedFonds)"
+    >
+      <cds-icon shape="xls-file" size="md"></cds-icon> Export sur Excel
+    </button>
+  </div>
+</div>
+
+<div
+  style="
+    width: 100%;
+    overflow-x: scroll;
+    padding: 0 !important;
+    box-sizing: content-box;
+  "
+>
+  <table class="table table-vetical" style="margin-top: 0px; width: 100%">
+    <thead>
+      <!-- header row 1 -->
+      <tr>
+        <th style="border-left: none !important" scope="col" colspan="2">
+          Participations
+        </th>
+        <th scope="col">Date de Libération</th>
+        <th scope="col">Nombre d'actions</th>
+        <th scope="col">Valeur d'émission en tnd</th>
+        <th scope="col" colspan="4">Engagé en tnd</th>
+        <th scope="col" colspan="4">Libéré en tnd</th>
+        <th scope="col">Total Participations en tnd</th>
+        <th scope="col">Capital en tnd</th>
+        <th scope="col">% de détention</th>
+      </tr>
+      <!-- header row 2 -->
+      <tr>
+        <th style="border-left: none !important" scope="col" colspan="5"></th>
+        <th scope="col">Actions</th>
+        <th scope="col">OCA</th>
+        <th scope="col">CCA</th>
+        <th scope="col">Total</th>
+        <th scope="col">Actions</th>
+        <th scope="col">OCA</th>
+        <th scope="col">CCA</th>
+        <th scope="col">Total</th>
+        <th scope="col"></th>
+        <th scope="col"></th>
+        <th scope="col"></th>
+      </tr>
+    </thead>
+
+    <!-- Table body -->
+
+    <!-- liberations table -->
+    @for (p of liberations; track $index; let i= $index) {
+    <tr>
+      <th
+        scope="row"
+        class="left"
+        [attr.rowspan]="p.rows"
+        [style.borderLeft]="'none !important'"
+      >
+        <span
+          cds-text="subsection"
+          [style.textTransform]="'uppercase'"
+          [style.fontWeight]="'500'"
+          [style.letterSpacing]="'1px'"
+          ><a
+            [routerLink]="['/dashboard/project', p.projet?.id]"
+            [title]="p.projet?.nom"
+            >{{ p.projet?.nom }} <cds-icon shape="link"></cds-icon>
+          </a>
+        </span>
+      </th>
+      <th colspan="12" scope="row" [style.borderLeft]="'none !important'"></th>
+      <th scope="row" class="center" [attr.rowspan]="p.rows">
+        <span
+          cds-text="subsection"
+          class="digit"
+          [style.color]="'var(--clr-alias-status-info)'"
+          [style.letterSpacing]="'1px'"
+          >{{ p.pfcp?.montant | number : "1.0-0" }}</span
+        >
+      </th>
+      <th scope="row" class="center" [attr.rowspan]="p.rows">
+        <span
+          cds-text="subsection"
+          class="digit"
+          [style.color]="'var(--clr-alias-status-info)'"
+          [style.letterSpacing]="'1px'"
+          >{{ p.pfcp?.capital | number : "1.0-0" }}</span
+        >
+      </th>
+      <th scope="row" class="center" [attr.rowspan]="p.rows">
+        <span
+          cds-text="subsection"
+          class="digit"
+          [style.color]="'var(--clr-alias-status-info)'"
+          [style.letterSpacing]="'1px'"
+          >{{ p.pfcp?.part / 100.0 | percent : "1.2-2" }}</span
+        >
+      </th>
+    </tr>
+
+    @for (pf of p.flrl; track $index; let j= $index) {
+    <tr>
+      <td
+        class="pf-scope"
+        [style.width]="'10px'"
+        [style.padding]="'0px !important'"
+        [attr.rowspan]="pf.rows"
+        [style.backgroundColor]="'var(--clr-alias-status-info)'"
+      ></td>
+      <th
+        colspan="11"
+        scope="row"
+        class="left"
+        [style.fontSize]="'10px'"
+        [style.color]="'var(--clr-alias-status-info)'"
+      >
+        <cds-icon shape="map" badge="info" size="sm"></cds-icon> Plan de
+        financement du
+        {{ pf.fin.dateDemandeFinancement | date }}
+        <span *ngIf="pf.convO?.length > 0" style="margin-right: 3px"
+          >(<clr-signpost>
+            <cds-icon
+              shape="asterisk"
+              class="warning"
+              solid
+              aria-label="Icon Button Trigger"
+              clrSignpostTrigger
+            ></cds-icon
+            ><clr-signpost-content [clrPosition]="'bottom-middle'" *clrIfOpen>
+              <span cds-text="subsection" cds-layout="vertical gap:md"
+                >Conversion(s) des OCA</span
+              >
+
+              <table class="table table-compact">
+                <caption></caption>
+                <thead>
+                  <th>Date de l'AGE</th>
+                  <th>Montant converti</th>
+                  <th>Actions converties</th>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let c of pf.convO">
+                    <th>{{ c.dateAge | date : "dd/MM/yyyy" }}</th>
+                    <td>{{ c.montant | number : "1.2-2" }}</td>
+                    <td>{{ c.nbrActions | number : "1.0-0" }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </clr-signpost-content></clr-signpost
+          >)</span
+        >
+        <span *ngIf="pf.convC?.length > 0"
+          >(<clr-signpost>
+            <cds-icon
+              shape="asterisk"
+              class="info"
+              solid
+              aria-label="Icon Button Trigger"
+              clrSignpostTrigger
+            ></cds-icon
+            ><clr-signpost-content [clrPosition]="'bottom-middle'" *clrIfOpen>
+              <span cds-text="subsection" cds-layout="vertical gap:md"
+                >Conversion(s) du CCA</span
+              >
+
+              <table class="table table-compact">
+                <caption></caption>
+                <thead>
+                  <th>Date de l'AGE</th>
+                  <th>Montant converti</th>
+                  <th>Actions converties</th>
+                  <th>Intêret remboursé</th>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let c of pf.convC">
+                    <th>{{ c.dateAge | date : "dd/MM/yyyy" }}</th>
+                    <td>{{ c.montant | number : "1.2-2" }}</td>
+                    <td>{{ c.nbrActions | number : "1.0-0" }}</td>
+                    <td>
+                      {{ c.montantInteretRembourse | number : "1.2-2" }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </clr-signpost-content></clr-signpost
+          >)</span
+        >
+        <span *ngIf="pf.regC?.length > 0"
+          >(<clr-signpost>
+            <cds-icon
+              shape="asterisk"
+              class="success"
+              solid
+              aria-label="Icon Button Trigger"
+              clrSignpostTrigger
+            ></cds-icon
+            ><clr-signpost-content [clrPosition]="'bottom-middle'" *clrIfOpen>
+              <span cds-text="subsection" cds-layout="vertical gap:md"
+                >Règlement(s) CCA</span
+              >
+
+              <table class="table table-compact">
+                <caption></caption>
+                <thead>
+                  <th>Date du PV</th>
+                  <th>Montant payé</th>
+                  <th>Intêret remboursé</th>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let r of pf.regC">
+                    <th>{{ r.datePV | date : "dd/MM/yyyy" }}</th>
+                    <td>{{ r.montantPaye | number : "1.2-2" }}</td>
+                    <td>{{ r.interet | number : "1.2-2" }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </clr-signpost-content></clr-signpost
+          >)</span
+        >
+      </th>
+    </tr>
+
+    @for(lib of pf.libA; track $index; let k= $index){
+    <tr>
+      <td>
+        {{ lib.dateLiberation | date : "dd/MM/yyyy" }}
+      </td>
+      <td class="digit" [attr.rowspan]="pf.libA?.length" *ngIf="k == 0">
+        {{ lib.souscription.actions | number : "1.0-0" }}
+      </td>
+      <td class="digit" [attr.rowspan]="pf.libA?.length" *ngIf="k == 0">
+        {{
+          lib.souscription.nominal + lib.souscription.primeEmission
+            | number : "1.2-2"
+        }}
+      </td>
+      <td class="digit" [attr.rowspan]="pf.libA?.length" *ngIf="k == 0">
+        {{ lib.souscription.montant | number : "1.0-0" }}
+      </td>
+      <td class="digit" [attr.rowspan]="pf.libA?.length" *ngIf="k == 0">-</td>
+      <td class="digit" [attr.rowspan]="pf.libA?.length" *ngIf="k == 0">-</td>
+      <td
+        class="digit"
+        [attr.rowspan]="pf.libA?.length + pf.libO?.length + pf.libC?.length"
+        *ngIf="k == 0"
+      >
+        {{ pf.total | number : "1.0-0" }}
+      </td>
+
+      <td class="digit">
+        {{ lib.montantLiberation | number : "1.0-0" }}
+      </td>
+      <td class="digit">-</td>
+      <td class="digit">-</td>
+      <td
+        class="digit"
+        [attr.rowspan]="pf.libA?.length + pf.libO?.length + pf.libC?.length"
+        *ngIf="k == 0"
+      >
+        {{ pf.totalLibere | number : "1.0-0" }}
+      </td>
+    </tr>
+    } @for(lib of pf.libO; track $index; let l= $index){
+    <tr>
+      <td>
+        {{ lib.dateLiberation | date : "dd/MM/yyyy" }}
+      </td>
+      <td class="digit" [attr.rowspan]="pf.libO?.length" *ngIf="l == 0">
+        {{ lib.souscription.nombreOCA | number : "1.0-0" }}
+      </td>
+      <td class="digit" [attr.rowspan]="pf.libO?.length" *ngIf="l == 0">
+        {{ lib.souscription.nominal | number : "1.2-2" }}
+      </td>
+
+      <td class="digit" [attr.rowspan]="pf.libO?.length" *ngIf="l == 0">-</td>
+      <td class="digit" [attr.rowspan]="pf.libO?.length" *ngIf="l == 0">
+        {{ lib.souscription.montant | number : "1.0-0" }}
+      </td>
+      <td class="digit" [attr.rowspan]="pf.libO?.length" *ngIf="l == 0">-</td>
+      <td
+        class="digit"
+        [attr.rowspan]="pf.libA?.length + pf.libO?.length + pf.libC?.length"
+        *ngIf="l == 0 && pf.libA == null"
+      >
+        {{ pf.total | number : "1.0-0" }}
+      </td>
+
+      <td class="digit">-</td>
+      <td class="digit">
+        {{ lib.montantLiberation | number : "1.0-0" }}
+      </td>
+      <td class="digit">-</td>
+      <td
+        class="digit"
+        [attr.rowspan]="pf.libA?.length + pf.libO?.length + pf.libC?.length"
+        *ngIf="l == 0 && pf.libA == null"
+      >
+        {{ pf.totalLibere | number : "1.0-0" }}
+      </td>
+    </tr>
+    } @for(lib of pf.libC; track $index){
+    <tr>
+      <td>
+        {{ lib.dateLiberation | date : "dd/MM/yyyy" }}
+      </td>
+      <td class="digit" [attr.rowspan]="pf.libC?.length" *ngIf="$first">-</td>
+      <td class="digit" [attr.rowspan]="pf.libC?.length" *ngIf="$first">-</td>
+
+      <td class="digit" [attr.rowspan]="pf.libC?.length" *ngIf="$first">-</td>
+      <td class="digit" [attr.rowspan]="pf.libC?.length" *ngIf="$first">-</td>
+      <td class="digit" [attr.rowspan]="pf.libC?.length" *ngIf="$first">
+        {{ lib.souscription.montant | number : "1.0-0" }}
+      </td>
+      <td
+        class="digit"
+        [attr.rowspan]="pf.libA?.length + pf.libO?.length + pf.libC?.length"
+        *ngIf="$first && pf.libA == null && pf.libO == null"
+      >
+        {{ pf.total | number : "1.0-0" }}
+      </td>
+
+      <td class="digit">-</td>
+      <td class="digit">-</td>
+      <td class="digit">
+        {{ lib.montantLiberation | number : "1.0-0" }}
+      </td>
+      <td
+        class="digit"
+        [attr.rowspan]="pf.libA?.length + pf.libO?.length + pf.libC?.length"
+        *ngIf="$first && pf.libA == null && pf.libO == null"
+      >
+        {{ pf.totalLibere | number : "1.0-0" }}
+      </td>
+    </tr>
+    } }}
+    <!-- TOTAUX -->
+    <tfoot>
+      <th scope="row" colspan="3" style="text-align: left">Totaux</th>
+      <th class="digit" scope="row">{{ totalActions | number : "1.0-0" }}</th>
+      <th class="digit" scope="row"></th>
+      <th class="digit" scope="row">{{ engageActions | number : "1.0-0" }}</th>
+      <th class="digit" scope="row">{{ engageOCA | number : "1.0-0" }}</th>
+      <th class="digit" scope="row">{{ engageCCA | number : "1.0-0" }}</th>
+      <th class="digit" scope="row">
+        {{ engageActions + engageOCA + engageCCA | number : "1.0-0" }}
+      </th>
+      <th class="digit" scope="row">{{ libereActions | number : "1.0-0" }}</th>
+      <th class="digit" scope="row">{{ libereOCA | number : "1.0-0" }}</th>
+      <th class="digit" scope="row">{{ libereCCA | number : "1.0-0" }}</th>
+      <th class="digit" scope="row">
+        {{ libereActions + libereOCA + libereCCA | number : "1.0-0" }}
+      </th>
+      <th class="digit" scope="row">
+        {{ totalParticipation | number : "1.0-0" }}
+      </th>
+      <th class="digit" scope="row" colspan="2"></th>
+    </tfoot>
+  </table>
+</div>
+<!-- LEGENDES -->
+<div>
+  (<cds-icon shape="asterisk" status="warning" solid></cds-icon>) : Le plan de
+  financement a vu des conversions des OCAs en actions ordinaires (cliquer sur
+  l'icône pour voir la liste des conversions)
+</div>
+<div>
+  (<cds-icon shape="asterisk" status="info" solid></cds-icon>) : Le plan de
+  financement a vu des conversions du CCA en actions ordinaires (cliquer sur
+  l'icône pour voir la liste des conversions)
+</div>
+<div>
+  (<cds-icon shape="asterisk" status="success" solid></cds-icon>) : Le plan de
+  financement a vu des réglements CCA (cliquer sur l'icône pour voir la liste
+  des règlements)
+</div>

@@ -1,0 +1,64 @@
+:host {
+    --clr-alert-info-border-color: var(--cds-alias-utility-blue-tint)
+}
+
+select {
+    font-weight: 500;
+    letter-spacing: 3px;
+}
+
+fieldset {
+    margin: 1em 0;
+    padding: 1em .5em;
+
+    legend {
+        font-size: 16px;
+        font-weight: 500;
+    }
+}
+
+.kpi-section {
+    font-size: .8em;
+    letter-spacing: 1px;
+    font-weight: 500;
+
+
+    padding: 1.5em 0 .51em 0;
+    font-family: 'Stardos Stencil', Georgia, 'Times New Roman', Times, serif;
+
+    span {
+        margin-right: 1em;
+    }
+}
+
+form h3 {
+    margin-left: 1.2em;
+    margin-top: 0;
+    letter-spacing: 1px;
+
+    span {
+        font-weight: 500;
+    }
+}
+
+.alert-text {
+    font-size: 18px !important;
+    font-weight: 500;
+    font-variant: small-caps;
+    letter-spacing: 1px;
+}
+
+.total_div {
+    text-align: center;
+    font-weight: 500;
+    font-size: 110%;
+    margin-top: 1em;
+    padding: 0.5em 1em;
+    border: 1px solid var(--cds-alias-utility-gray-tint);
+    border-radius: 7px;
+    letter-spacing: 2px;
+}
+
+.switcher-form {
+    padding: 0 !important;
+}

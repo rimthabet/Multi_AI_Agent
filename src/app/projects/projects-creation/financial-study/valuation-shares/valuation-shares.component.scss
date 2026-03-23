@@ -1,0 +1,24 @@
+hr {
+    border: .3px dashed #EEE;
+    width: 50%;
+    margin-left: 0;
+}
+
+fieldset {
+    margin: 1em 0;
+    padding: 1em .5em;
+
+    legend {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--clr-color-action-500);
+        font-variant: small-caps;
+        letter-spacing: 1px;
+    }
+}
+
+h2 {
+    font-weight: 500;
+    color: var(--clr-color-action-600);
+}
+

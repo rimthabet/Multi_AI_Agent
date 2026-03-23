@@ -1,0 +1,124 @@
+<!-- Header -->
+<span cds-text="title">
+  <cds-icon
+    shape="factory"
+    size="lg"
+    status="info"
+    cds-layout="m-b:sm"
+  ></cds-icon>
+  Projets en investissement
+</span>
+
+<!-- Divider -->
+<cds-divider
+  cds-layout="m-t:xl "
+  class="htitled-divider"
+  title="Inventaire des projets en investissement"
+></cds-divider>
+
+<div cds-layout="horizontal gap:sm m-t:lg">
+  <!-- Left: Filter fonds -->
+  <span cds-text="section" cds-layout="m-t:xs" style="font-weight: 400">
+    Filtrer <cds-icon shape="filter"></cds-icon>:
+  </span>
+  <div style="margin-top: -1.4em">
+    <clr-combobox-container>
+      <clr-combobox
+        [(ngModel)]="selectedFonds"
+        name="fondsName"
+        clrMulti="true"
+        (ngModelChange)="filterFonds($event)"
+      >
+        <ng-container *clrOptionSelected="let selected">
+          <cds-icon
+            shape="filter-grid"
+            role="img"
+            aria-label="fonds list"
+          ></cds-icon>
+          {{ selected?.denomination }}
+        </ng-container>
+
+        <clr-options>
+          <clr-option
+            *clrOptionItems="let f of fonds; field: 'denomination'"
+            [clrValue]="f"
+          >
+            <cds-icon
+              shape="filter-grid"
+              role="img"
+              aria-label="fonds list of choice"
+            ></cds-icon>
+            {{ f.denomination }}
+          </clr-option>
+        </clr-options>
+      </clr-combobox>
+      <clr-control-helper>
+        Veuillez sélectionner un ou plusieurs fonds
+      </clr-control-helper>
+    </clr-combobox-container>
+  </div>
+  <!-- Right: Export button -->
+  <div cds-layout="horizontal align:right">
+    <cds-button action="outline" status="primary" solid="true">
+      <cds-icon shape="xls-file" size="md"></cds-icon> Export sur excel
+    </cds-button>
+  </div>
+</div>
+
+<!-- Datagrid-->
+<clr-datagrid style="height: calc(100vh - 240px)" [clrDgLoading]="loading">
+  <clr-dg-column [clrDgField]="'p.nom'">Nom du projet</clr-dg-column>
+  <clr-dg-column [clrDgField]="'p.promoteur.nom'">Promoteur</clr-dg-column>
+  <clr-dg-column [clrDgField]="'p.activite'">Activité</clr-dg-column>
+  <clr-dg-column>Secteur</clr-dg-column
+  ><clr-dg-column>Capital social</clr-dg-column>
+
+  <!-- Datagrid rows-->
+  <clr-dg-row *clrDgItems="let p of projets" [clrDgItem]="p">
+    <clr-dg-cell
+      class="text-left"
+      [style.textTransform]="'uppercase'"
+      [style.fontWeight]="'500'"
+    >
+      <a [routerLink]="['/dashboard/projects/', p.p.id]">
+        {{ p.p.nom }}
+        <cds-icon shape="link" class="link" status="info"></cds-icon>
+      </a>
+    </clr-dg-cell>
+    <clr-dg-cell class="text-left"> {{ p.p.promoteur?.nom }} </clr-dg-cell>
+    <clr-dg-cell class="text-left"> {{ p.p.activite }} </clr-dg-cell>
+    <clr-dg-cell class="text-left">
+      @for (s of p.p.secteurs; track $index) {
+      {{ s.libelle }}
+      }
+    </clr-dg-cell>
+    <clr-dg-cell class="text-right digit" [style.witeSpace]="'nowrap'">
+      {{
+        p.p.actualCapital
+          ? (p.p.actualCapital | number : "1.0-0")
+          : (p.p.capitalSocial | number : "1.0-0")
+      }}
+      <sup>tnd</sup></clr-dg-cell
+    >
+
+    <clr-dg-row-detail *clrIfExpanded>
+      <project-timeline
+        *clrIfExpanded
+        [pfa]="p.pfa"
+        (fondsChanged)="filterFonds($event)"
+        ngProjectAs="clr-dg-row-detail"
+      >
+      </project-timeline>
+    </clr-dg-row-detail>
+  </clr-dg-row>
+
+  <!-- Datagrid footer-->
+  <clr-dg-footer>{{ projets.length }} projets </clr-dg-footer>
+</clr-datagrid>
+
+<!-- Footer-->
+<small [style.color]="'var(--clr-color-neutral-600)'"
+  ><strong>NB:</strong> Tous les montants affichés au niveau des différentes
+  participations des fonds sont approuvés par les comités
+  d'investissement.</small
+>

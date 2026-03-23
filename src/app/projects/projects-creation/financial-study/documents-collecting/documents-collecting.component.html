@@ -1,0 +1,170 @@
+<table class="table table-vertical">
+  <tbody>
+    @for(item of filteredCheckList; track $index) {
+    <tr>
+      <!-- Colonne 1 -->
+      <td style="width: fit-content; white-space: nowrap">
+        <div cds-layout="horizontal align:center gap:none">
+          <clr-toggle-container style="--clr-forms-baseline: 0; margin-top: 0">
+            <clr-toggle-wrapper>
+              <input
+                type="checkbox"
+                [checked]="item.checked"
+                [disabled]="isToggleDisabled(item)"
+                (change)="onToggleChange(item, $event)"
+                clrToggle
+                name="item-{{ item.id }}"
+              />
+              <label></label>
+            </clr-toggle-wrapper>
+          </clr-toggle-container>
+
+          <clr-tooltip>
+            <cds-icon
+              clrTooltipTrigger
+              shape="info-circle"
+              size="24"
+            ></cds-icon>
+            <clr-tooltip-content [clrPosition]="'top-right'" [clrSize]="'lg'">
+              On décoche dans le cas où le promoteur a déjà fourni le document
+              correspondant.
+              <br />
+              Dans le cas échéant, vous serez mené à le télécharger.
+            </clr-tooltip-content>
+          </clr-tooltip>
+        </div>
+      </td>
+      <!-- Colonne 2 -->
+      <td style="width: fit-content">
+        <cds-icon
+          shape="ellipsis-vertical"
+          style="cursor: pointer"
+          (click)="openModal(item)"
+        ></cds-icon>
+      </td>
+
+      <!-- Colonne 3 -->
+      <td>
+        <cds-icon
+          shape="pdf-file"
+          size="md"
+          [status]="item.hasDocument ? 'success' : 'info'"
+          style="cursor: pointer"
+        ></cds-icon>
+        {{ item.documentType?.libelle }}
+      </td>
+    </tr>
+    }
+  </tbody>
+</table>
+
+<!-- Boutons -->
+<div cds-layout="horizontal m-y:lg">
+  <div class="btn-group">
+    <cds-button action="outline" (click)="showEmailModalNda()">
+      Envoyer un email de NDA
+    </cds-button>
+  </div>
+  <div class="btn-group">
+    <cds-button action="outline" (click)="showEmailModalCheckList()">
+      Envoyer un email de checklist
+    </cds-button>
+  </div>
+</div>
+
+<!-- Modal Upload -->
+<clr-modal [clrModalSize]="'md'" [(clrModalOpen)]="showModal">
+  <h3 class="modal-title">
+    <cds-icon shape="pdf-file" size="md" status="info"></cds-icon>
+    {{ selectedItem?.documentType?.libelle }}
+  </h3>
+  <div class="modal-body">
+    <div class="alert alert-warning" role="alert" cds-layout="m-y:md">
+      <div class="alert-items">
+        <div class="alert-item static">
+          <div class="alert-icon-wrapper">
+            <cds-icon class="alert-icon" size="md" shape="exclamation-triangle">
+            </cds-icon>
+          </div>
+          <span class="alert-text">
+            Vous devez télécharger le document correspondant à ce contrôle.
+            Autrement, l'email à envoyer au promoteur doit inclure une
+            réclamation du document correspondant!
+          </span>
+        </div>
+      </div>
+    </div>
+    <app-document-upload-form
+      [mode]="'flat'"
+      [compliance]="{
+        document: undefined,
+        conformite: selectedItem
+      }"
+      [data]="prospection()"
+      [task_row]="selectedItem?.tache?.rang"
+      [phase_row]="selectedItem?.phase?.id"
+      [with_description]="true"
+      (documentUploadedEvent)="documentUploaded($event)"
+      (hasDocumentsEvent)="onHasDocuments($event)"
+    >
+    </app-document-upload-form>
+  </div>
+</clr-modal>
+
+<!-- Modal checklist -->
+<clr-modal [clrModalSize]="'xl'" [(clrModalOpen)]="showEmailChecklist">
+  <h3 class="modal-title">
+    <cds-icon shape="envelope" size="lg"></cds-icon> Nouveau Courrier Check List
+  </h3>
+  <div class="modal-body">
+    @if(showEmailChecklist) {
+    <emailing-form
+      #checklist
+      [(textModel)]="textFormHTML"
+      [prospection]="prospection()"
+      (hideModalEvent)="showHideModal()"
+    >
+    </emailing-form>
+    }
+  </div>
+</clr-modal>
+
+<!-- Modal NDA -->
+<clr-modal [clrModalSize]="'lg'" [(clrModalOpen)]="showEmailNda">
+  <h3 class="modal-title">
+    <cds-icon shape="envelope" size="lg" status="info"></cds-icon> Nouveau
+    Courrier NDA
+  </h3>
+  <div class="modal-body">
+    <emailing-form
+      #nda
+      (hideModalEvent)="showHideModal()"
+      [prospection]="prospection()"
+      [textModel]="textFormHTMLNDA"
+      [with_attachments]="true"
+    >
+    </emailing-form>
+  </div>
+</clr-modal>
+
+<!-- Modal Upload général (si encore utilisé) -->
+<clr-modal
+  [clrModalSize]="'lg'"
+  (clrModalOpenChange)="successUpload(false)"
+  [(clrModalOpen)]="showUploadDocument"
+>
+  <h3 class="modal-title">
+    <cds-icon shape="file" size="lg" status="info"></cds-icon> Documents du
+    checklist
+  </h3>
+  <div class="modal-body">
+    <document-upload
+      [with_description]="true"
+      (successUploadEvent)="successUpload($event)"
+      [phase_row]="2"
+      [task_row]="6"
+      [data]="prospection()"
+    >
+    </document-upload>
+  </div>
+</clr-modal>

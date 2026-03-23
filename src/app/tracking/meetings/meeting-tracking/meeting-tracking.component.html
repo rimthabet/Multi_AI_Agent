@@ -1,0 +1,243 @@
+<!-- Header -->
+<span cds-text="title">
+  <cds-icon shape="eye" status="info" solid="" size="lg"></cds-icon>
+  Suivi des réunions</span
+>
+
+<!-- Search fonds -->
+<div cds-layout="horizontal align:left gap:md m-t:xl">
+  <clr-dropdown>
+    <cds-button size="md" action="outline" clrDropdownTrigger>
+      {{ selectedProjet?.nom || "Sélectionner un projet" }}
+      <cds-icon shape="angle" status="info" direction="down"></cds-icon>
+    </cds-button>
+
+    <clr-dropdown-menu *clrIfOpen>
+      @for(p of projets; track p.id) {
+      <div
+        clrDropdownItem
+        (click)="setProjet(p)"
+        onkeypress=""
+      >
+        {{ p.nom | uppercase }}
+      </div>
+    }
+    </clr-dropdown-menu>
+  </clr-dropdown>
+
+  <!-- Project name -->
+  <div
+    class="project-name {{ selectedProjet ? 'active' : '' }}"
+    style="margin-top: 0px !important"
+  >
+    {{ selectedProjet ? selectedProjet.nom : "Nom du projet ..." }}
+    <cds-icon
+      onkeypress=""
+      shape="dashboard"
+      size="lg"
+      title="Cliquer pour consulter la fiche projet"
+      style="cursor: pointer"
+      (click)="goToFiche()"
+    ></cds-icon>
+  </div>
+</div>
+
+<div class="separator"></div>
+<ul class="clr-timeline clr-timeline-vertical">
+  <li *ngFor="let year of years; let last = last" class="clr-timeline-step">
+    <div class="clr-timeline-step-header">
+      <strong class="digit" [style.fontSize]="'large !important'">{{
+        year
+      }}</strong>
+    </div>
+    @if(year < thisYear) {
+    <cds-icon shape="success-standard" aria-label="Completed"></cds-icon>
+    } @if(year == thisYear) {
+    <cds-icon
+      clrMedium
+      role="img"
+      shape="dot-circle"
+      aria-label="Current"
+    ></cds-icon>
+    } @if(year > thisYear) {
+    <cds-icon shape="circle" aria-label="Not started"></cds-icon>
+    }
+
+    <div class="clr-timeline-step-body">
+      <div style="width: 100%">
+        <table class="table table-vetical" style="margin-top: 0px; width: 100%">
+          <caption style="text-align: right"></caption>
+          <thead>
+            <tr>
+              <th scope="col">Date</th>
+              <th scope="col">Organe</th>
+              <th scope="col" colspan="3">Procès Verbal</th>
+              <th scope="col"></th>
+            </tr>
+            <tr>
+              <th scope="col"></th>
+              <th scope="col"></th>
+              <th scope="col">Communiqué</th>
+              <th scope="col">Signé</th>
+              <th scope="col">Enregistré</th>
+              <th scope="col">Remarques</th>
+            </tr>
+          </thead>
+          @for (reunion of meetingsByYear[year]; track reunion.id) {
+          <tr
+            [style.backgroundColor]="
+              $odd
+                ? 'var(--cds-alias-viz-sequential-blue-50) !important'
+                : 'var(--cds-alias-viz-severity-free-space-fill) !important'
+            "
+          >
+            <td rowspan="2">{{ reunion.dateReunion | date : "dd/MM/yyyy" }}</td>
+            <td rowspan="2" class="left">{{ reunion.typeReunion.libelle }}</td>
+            <td class="centre">
+              @if(getDocumentsByType(reunion, 'PV Communiqué').length > 0) {
+              <ng-container>
+                <a
+                  *ngFor="
+                    let document of getDocumentsByType(reunion, 'PV Communiqué')
+                  "
+                  [href]="trimPath(document.chemin)"
+                  target="_blank"
+                >
+                  <cds-icon
+                    shape="success-standard"
+                    size="sm"
+                    class="success"
+                  ></cds-icon>
+                  {{ document.titre }}
+                </a>
+              </ng-container>
+              } @if(getDocumentsByType(reunion, 'PV Communiqué').length == 0) {
+              <ng-container>
+                <div
+                  class="failure"
+                  style="font-size: 12px !important; white-space: nowrap"
+                >
+                  <cds-icon shape="no-access" solid="" size="18"></cds-icon>
+                  Document manquant!
+                </div>
+              </ng-container>
+              }
+            </td>
+
+            <td class="centre">
+              @if(getDocumentsByType(reunion, 'PV signé').length > 0) {
+              <ng-container>
+                @for (document of getDocumentsByType(reunion, 'PV signé'); track
+                document.id) {
+                <a [href]="trimPath(document.chemin)" target="_blank">
+                  <cds-icon
+                    shape="success-standard"
+                    size="sm"
+                    class="success"
+                  ></cds-icon>
+                  {{ document.titre }}
+                </a>
+                }
+              </ng-container>
+              } @if(getDocumentsByType(reunion, 'PV signé').length == 0) {
+              <ng-container>
+                <div
+                  class="failure"
+                  style="font-size: 12px !important; white-space: nowrap"
+                >
+                  <cds-icon shape="no-access" solid="" size="18"></cds-icon>
+                  Document manquant!
+                </div>
+              </ng-container>
+              }
+            </td>
+
+            <td class="centre">
+              @if(getDocumentsByType(reunion, 'PV enregistré').length > 0) {
+              <ng-container>
+                @for (document of getDocumentsByType(reunion, 'PV enregistré');
+                track document.id) {
+                <a [href]="trimPath(document.chemin)" target="_blank">
+                  <cds-icon
+                    shape="success-standard"
+                    size="sm"
+                    class="success"
+                  ></cds-icon>
+                  {{ document.titre }}
+                </a>
+                }
+              </ng-container>
+              } @if(getDocumentsByType(reunion, 'PV enregistré').length == 0) {
+              <ng-container>
+                <div
+                  class="failure"
+                  style="font-size: 12px !important; white-space: nowrap"
+                >
+                  <cds-icon shape="no-access" solid="" size="18"></cds-icon>
+                  Document manquant!
+                </div>
+              </ng-container>
+              }
+            </td>
+            <td class="left">{{ reunion.remarques }}</td>
+          </tr>
+
+          <tr
+            [style.backgroundColor]="
+              $odd
+                ? 'var(--cds-alias-viz-sequential-blue-50) !important'
+                : 'var(--cds-alias-viz-severity-free-space-fill) !important'
+            "
+          >
+            <td class="left" colspan="4">
+              @for (decision of decisions[reunion.id]; track decision.id) {
+
+              <!-- decision content -->
+              <!-- decision content header -->
+              <cds-divider
+                cds-layout="m-y:md"
+                title="Décision / Résolution"
+                class="htitled-divider"
+              ></cds-divider>
+              <section
+                cds-text="body justify"
+                cds-layout="p-b:lg p-t:none p-x:lg"
+                class="panel"
+                [innerHTML]="formatMD2HTML(decision.libelle)"
+              ></section>
+
+              <!-- decision type vote -->
+              <div cds-layout="horizontal align:left gap:xs m-b:xxl m-t:md">
+                <cds-icon
+                  shape="cursor-hand"
+                  size="md"
+                  solid=""
+                  [status]="
+                    decision.typeVote?.libelle == 'avec réserve'
+                      ? 'info'
+                      : 'success'
+                  "
+                ></cds-icon>
+                Votée
+                <span
+                  [style]="{ letterSpacing: '2px', borderRadius: '3px' }"
+                  [class]="
+                    decision.typeVote?.libelle == 'avec réserve'
+                      ? 'badge badge-info reserve'
+                      : ' badge badge-success reserve'
+                  "
+                  >{{ decision.typeVote?.libelle }}</span
+                >
+              </div>
+
+              }
+            </td>
+          </tr>
+          }
+        </table>
+
+        <div class="separator"></div>
+      </div>
+    </div>
+  </li>
+</ul>

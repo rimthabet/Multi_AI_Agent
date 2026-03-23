@@ -1,0 +1,202 @@
+<span cds-text="title">
+  <cds-icon shape="bullseye" status="info" size="lg" solid></cds-icon> Suivi des
+  Business Plans</span
+>
+
+<!-- Search fonds -->
+<div cds-layout="horizontal align:left gap:md m-y:xl">
+  <clr-dropdown>
+    <cds-button size="md" action="outline" clrDropdownTrigger>
+      {{ selectedProjet?.nom || "Sélectionner un projet" }}
+      <cds-icon shape="angle" status="info" direction="down"></cds-icon>
+    </cds-button>
+
+    <clr-dropdown-menu *clrIfOpen>
+      <div
+        clrDropdownItem
+        *ngFor="let p of projets"
+        (click)="setProjet(p)"
+        onkeypress=""
+      >
+        {{ p.nom | uppercase }}
+      </div>
+    </clr-dropdown-menu>
+  </clr-dropdown>
+
+  <!-- Project name -->
+  <div
+    class="project-name {{ selectedProjet ? 'active' : '' }}"
+    style="margin-top: 0px !important"
+  >
+    {{ selectedProjet ? selectedProjet.nom : "Nom du projet ..." }}
+    <cds-icon
+      onkeypress=""
+      shape="dashboard"
+      status="info"
+      size="lg"
+      title="Cliquer pour consulter la fiche projet"
+      style="cursor: pointer"
+      (click)="goToFiche()"
+    ></cds-icon>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div style="padding-top: 1.5em">
+  <clr-tabs>
+    <clr-tab *ngFor="let bp of bps; let i = index">
+      <button
+        clrTabLink
+        [clrTabLinkInOverflow]="i > 2"
+        (click)="selectTab(bp)"
+        [title]="bp.label"
+      >
+        {{ bp.label }}
+        <span
+          class="badge badge-info"
+          style="padding: 0.7em; margin-bottom: 0.5em; font-size: 14px"
+        >
+          {{ bp.elaboration_date | date : "dd-MM-yyyy" }}
+        </span>
+      </button>
+
+      <clr-tab-content *clrIfActive="i == selectedTab">
+        <div>
+          <div cds-layout="horizontal align:right gap:md m-t:lg">
+            <!-- Title -->
+            <div
+              cds-layout="horizontal align:stretch"
+              style="margin-bottom: -2em"
+            >
+              <h1 cds-layout="horizontal align:left" style="margin-top: 0px">
+                {{ bp.label }}
+                <cds-icon
+                  shape="pencil"
+                  class="edit"
+                  size="md"
+                  status="info"
+                  style="margin-left: 0.5em; margin-top: 0.8em"
+                  (click)="modalRenameBP(bp)"
+                  onKeyPress=""
+                ></cds-icon>
+              </h1>
+            </div>
+            <!-- Add button -->
+            <cds-button
+              action="outline"
+              status="primary"
+              (click)="modalAddBp()"
+              onKeyPress=""
+            >
+              <cds-icon shape="plus-circle" size="md"></cds-icon>
+              Ajouter un BP
+            </cds-button>
+            <cds-divider orientation="vertical"></cds-divider>
+            <!-- delete button -->
+            <cds-button
+              action="outline"
+              status="danger"
+              (click)="deleteBP(bp)"
+              onKeyPress=""
+            >
+              <cds-icon shape="trash"></cds-icon> Supprimer ce BP ?
+            </cds-button>
+          </div>
+
+          <!-- Financial statement -->
+          <financial-statement
+            #businessPlan
+            [prospection]="selectedProjet"
+            [ref2]="bp?.id"
+            [ref3]="-1"
+            [ref4]="-1"
+            [ref5]="-1"
+            [data]="items"
+            [year]="bp?.year"
+            [item]="item"
+          >
+          </financial-statement>
+
+          <!-- Separator -->
+          <div class="separator"></div>
+        </div>
+      </clr-tab-content>
+    </clr-tab>
+  </clr-tabs>
+</div>
+
+<!-- Add modal -->
+<clr-modal [(clrModalOpen)]="opened" [clrModalSize]="'md'">
+  <h3 class="modal-title">
+    <cds-icon shape="bullseye" size="md" solid="" status="info"></cds-icon>
+    Ajouter un Business Plan
+  </h3>
+  <div class="modal-body">
+    <form clrForm [formGroup]="bpForm!" clrLayout="horizontal" clrLabelSize="5">
+      <clr-input-container>
+        <label>Libellé du business plan:</label>
+        <input clrInput type="text" formControlName="label" name="label" />
+      </clr-input-container>
+
+      <clr-date-container>
+        <label> Date d'élaboration: </label>
+        <input
+          clrDate
+          type="date"
+          formControlName="elaboration_date"
+          name="elaboration_date"
+        />
+      </clr-date-container>
+      <clr-input-container>
+        <label style="padding-top: 7px">Année: </label>
+        <input clrInput type="number" formControlName="year" name="year" />
+        <clr-control-helper
+          >Cinquième année du business plan !</clr-control-helper
+        >
+      </clr-input-container>
+    </form>
+  </div>
+
+  <div class="modal-footer" cds-layout="gap:md">
+    <button
+      type="button"
+      class="btn btn-primary"
+      [disabled]="bpForm!.invalid"
+      (click)="saveBP()"
+    >
+      <cds-icon shape="floppy"></cds-icon> Sauvegarder
+    </button>
+    <button type="button" class="btn btn-outline" (click)="opened = false">
+      Annuler
+    </button>
+  </div>
+</clr-modal>
+
+<!-- Rename modal -->
+<clr-modal [(clrModalOpen)]="bp_name_edit_mode" [clrModalSize]="'md'">
+  <h3 class="modal-title">Renommer ce Business Plan</h3>
+  <div class="modal-body" style="height: 65px !important">
+    <form clrLayout="horizontal" clrLabelSize="4" class="clr-form-compact">
+      <clr-input-container>
+        <label>Nouveau Libellé: </label>
+        <input clrInput type="text" name="new-label" [(ngModel)]="bp_name" />
+      </clr-input-container>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button
+      type="button"
+      class="btn btn-outline"
+      (click)="bp_name_edit_mode = false"
+    >
+      Annuler
+    </button>
+    <button
+      type="button"
+      class="btn btn-primary"
+      (click)="saveBP(editingBP); bp_name_edit_mode = false"
+    >
+      <cds-icon shape="floppy"></cds-icon> Sauvegarder
+    </button>
+  </div>
+</clr-modal>

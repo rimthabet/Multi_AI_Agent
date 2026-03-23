@@ -1,0 +1,106 @@
+<div class="card">
+  <div class="card-header">
+    <cds-icon shape="calendar" size="lg"></cds-icon>
+    Financement du
+    {{ financingPlan()?.dateDemandeFinancement | date : "dd/MM/yyyy" }}
+  </div>
+  <!-- Body -->
+  <div class="card-block">
+    <div class="card-text">
+      <app-kpi-badge-01
+        [value]="total_actif"
+        [type]="'currency'"
+        [title]="'Montant sollicité'"
+        [style.minWidth]="'150px'"
+      ></app-kpi-badge-01>
+
+      <cds-divider
+        class="htitled-divider"
+        title="Financements"
+        cds-layout="m-y:lg"
+      ></cds-divider>
+
+      <div
+        cds-layout="horizontal align:horizontal-stretch m-t:lg m-b:lg gap:lg"
+      >
+        <div class="label" cds-layout="horizontal">
+          <span
+            class="digit"
+            cds-layout="align:center"
+            [style.textDecoration]="
+              total_investi_actions == 0 ? 'line-through' : 'none'
+            "
+            [style.color]="
+              total_investi_actions == 0
+                ? 'var(--cds-alias-status-danger)'
+                : 'none'
+            "
+          >
+            {{ total_investi_actions | currency : "symbol" : "tnd" : "1.0-0" }}
+          </span>
+          <div class="badge badge-blue" cds-layout="align:right">ACTIONS</div>
+        </div>
+        <div class="label" cds-layout="horizontal">
+          <span
+            class="digit"
+            cds-layout="align:center"
+            [style.textDecoration]="
+              total_investi_oca == 0 ? 'line-through' : 'none'
+            "
+            [style.color]="
+              total_investi_oca == 0 ? 'var(--cds-alias-status-danger)' : 'none'
+            "
+          >
+            {{ total_investi_oca | currency : "symbol" : "tnd" : "1.0-0" }}
+          </span>
+          <div class="badge badge-light-blue" cds-layout="align:right">OCA</div>
+        </div>
+        <div class="label" cds-layout="horizontal">
+          <span
+            class="digit"
+            cds-layout="align:center"
+            [style.textDecoration]="
+              total_investi_cca == 0 ? 'line-through' : 'none'
+            "
+            [style.color]="
+              total_investi_cca == 0 ? 'var(--cds-alias-status-danger)' : 'none'
+            "
+          >
+            {{ total_investi_cca | currency : "symbol" : "tnd" : "1.0-0" }}
+          </span>
+          <div class="badge badge-purple" cds-layout="align:right">CCA</div>
+        </div>
+      </div>
+
+      <cds-divider
+        class="htitled-divider"
+        title="Fonds Investisseurs"
+        cds-layout="m-y:lg"
+      ></cds-divider>
+      <div cds-layout="horizontal gap:xs">
+        @for(fund of financingPlan()?.fonds; track $index) {
+        <div class="label" cds-layout="m:none" style="border-radius: 5px">
+          {{ fund?.denomination }}
+        </div>
+        @if(!$last) {
+        <cds-divider orientation="vertical"></cds-divider>
+        } }
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="card-footer" cds-layout="horizontal gap:md">
+    <cds-button
+      action="outline"
+      status="danger"
+      (click)="deleteFinancement()"
+      [disabled]="financingPlan()?.active"
+    >
+      <cds-icon shape="trash"></cds-icon> Supprimer
+    </cds-button>
+    <cds-button action="outline" status="primary" (click)="editFinancement()">
+      <cds-icon shape="pencil"></cds-icon> Modifier
+    </cds-button>
+  </div>
+</div>

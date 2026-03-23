@@ -1,0 +1,183 @@
+<!-- Header -->
+<span cds-text="title">
+  <cds-icon shape="users" size="lg" status="info"></cds-icon>
+  Gestion des contacts
+</span>
+
+<!-- Divider -->
+<cds-divider
+  cds-layout="m-t:xl "
+  class="htitled-divider"
+  title="Liste des contacts"
+></cds-divider>
+
+<!-- Data grid -->
+<clr-datagrid
+  style="height: calc(100vh - 165px)"
+  [(clrDgSingleSelected)]="selectedItem"
+  [clrDgLoading]="loading"
+>
+  <!-- Action bar -->
+  <clr-dg-action-bar>
+    <div class="btn-group">
+      <cds-button
+        action="outline"
+        status="primary"
+        (click)="showContactModal(true)"
+      >
+        <cds-icon shape="plus" size="md"></cds-icon> Ajouter
+      </cds-button>
+    </div>
+
+    <div class="btn-group">
+      <cds-button
+        action="outline"
+        status="warning"
+        [disabled]="!selectedItem?.id"
+        (click)="showContactModal(false)"
+      >
+        <cds-icon shape="note" size="md"></cds-icon> Modifier
+      </cds-button>
+    </div>
+
+    <div class="btn-group">
+      <cds-button
+        action="outline"
+        status="danger"
+        [disabled]="!selectedItem?.id"
+        (click)="deleteContact()"
+      >
+        <cds-icon shape="trash" size="md"></cds-icon> Supprimer
+      </cds-button>
+    </div>
+  </clr-dg-action-bar>
+
+  <!-- Columns -->
+  <clr-dg-column [clrDgField]="'nom'"
+    ><cds-icon shape="assign-user"></cds-icon> &nbsp; Nom du
+    Contact</clr-dg-column
+  >
+
+  <clr-dg-column>
+    <cds-icon shape="envelope"></cds-icon>
+    &nbsp; Adresse eMail</clr-dg-column
+  >
+  <clr-dg-column
+    ><cds-icon shape="phone-handset"></cds-icon> &nbsp; Téléphone</clr-dg-column
+  >
+  <clr-dg-column
+    ><cds-icon shape="employee"></cds-icon> &nbsp; Activité du
+    contact</clr-dg-column
+  >
+
+  <!-- Rows -->
+  <clr-dg-row *clrDgItems="let contact of contacts" [clrDgItem]="contact">
+    <clr-dg-cell>{{ contact.nom }}</clr-dg-cell>
+    <clr-dg-cell>{{ contact.email }}</clr-dg-cell>
+    <clr-dg-cell>{{ contact.telephone }}</clr-dg-cell>
+    <clr-dg-cell>{{ contact.activite }}</clr-dg-cell>
+
+    <clr-dg-row-detail *clrIfExpanded>
+      <div style="padding: 0">
+        <cds-divider
+          cds-layout="m-y:lg "
+          class="htitled-divider"
+          title="Observations"
+        ></cds-divider>
+
+        <div class="panel" cds-layout="p:lg m-b:md">
+          {{ contact.observation }}
+        </div>
+      </div>
+    </clr-dg-row-detail>
+  </clr-dg-row>
+
+  <!-- Footer -->
+  <clr-dg-footer>{{ contacts.length }} Contacts</clr-dg-footer>
+</clr-datagrid>
+
+<!-- Modal Contact  CRUD-->
+<clr-modal
+  [(clrModalOpen)]="openModal"
+  [clrModalSize]="'md'"
+  [clrModalStaticBackdrop]="false"
+>
+  <!-- Header -->
+  <h3 class="modal-title">
+    <cds-icon shape="user" size="lg" status="info"></cds-icon>
+    Contact
+  </h3>
+
+  <!-- Body -->
+  <div class="modal-body" cds-layout="p-t:xxs">
+    <!-- Form -->
+    <form clrForm [formGroup]="contactForm" clrLabelSize="4">
+      <clr-input-container>
+        <label>Nom:</label>
+        <input
+          clrInput
+          type="text"
+          formControlName="nom"
+          name="nom"
+          size="35"
+        />
+      </clr-input-container>
+      <clr-input-container>
+        <label>Adresse Mail:</label>
+        <input
+          clrInput
+          type="email"
+          formControlName="email"
+          name="email"
+          size="35"
+          required
+        />
+      </clr-input-container>
+      <clr-input-container>
+        <label>Numéro de tél:</label>
+        <input
+          clrInput
+          type="tel"
+          formControlName="telephone"
+          name="telephone"
+          size="35"
+          pattern="[0-9+\-\s()]*"
+        />
+        <clr-control-helper>Format: +XX XXX XXX XXX</clr-control-helper>
+      </clr-input-container>
+      <clr-input-container>
+        <label>Activité du contact:</label>
+        <input
+          clrInput
+          type="text"
+          formControlName="activite"
+          name="activite"
+          size="35"
+        />
+      </clr-input-container>
+      <clr-textarea-container>
+        <label>Observations:</label>
+        <textarea
+          clrTextarea
+          formControlName="observation"
+          name="observation"
+          rows="2"
+          cols="35"
+        ></textarea>
+      </clr-textarea-container>
+    </form>
+  </div>
+
+  <!-- Footer -->
+  <div class="modal-footer">
+    <!-- Buttons -->
+    <cds-button action="outline" (click)="openModal = false">Annuler</cds-button
+    ><cds-button
+      status="primary"
+      [disabled]="this.contactForm!.invalid"
+      (click)="saveContact()"
+    >
+      <cds-icon shape="floppy"></cds-icon>Sauvegarder
+    </cds-button>
+  </div>
+</clr-modal>

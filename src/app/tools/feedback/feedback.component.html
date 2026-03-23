@@ -1,0 +1,52 @@
+<!-- FEEDBACK MODAL -->
+<clr-modal #modal [(clrModalOpen)]="openfeedbackModal" [clrModalSize]="'md'" [clrModalStaticBackdrop]="false">
+    <div class="modal-title">
+        Connaître votre avis
+    </div>
+
+    <!-- Modal Body -->
+    <div class="modal-body">
+        <div cds-text="body" cds-layout="vertical p-t:xs">
+            <span>Votre satisfaction concernant notre produit?</span>
+            <!-- Form -->
+            <form [formGroup]="feedbackForm" cds-layout="vertical p-t:xs">
+                <div cds-layout="horizontal gap:md align:left m-t:sm">
+                    <cds-icon shape="sad-face" size="xxl" status="neutral"
+                        [class.selected]="(feedbackForm.get('emoji')?.value ?? null) === -1" [attr.solid]="
+                (feedbackForm.get('emoji')?.value ?? null) === -1 ? true : null
+              " (click)="setEmoji(-1)">
+                    </cds-icon>
+
+                    <cds-icon shape="neutral-face" size="xxl" status="info"
+                        [class.selected]="(feedbackForm.get('emoji')?.value ?? null) === 0" [attr.solid]="
+                (feedbackForm.get('emoji')?.value ?? null) === 0 ? true : null
+              " (click)="setEmoji(0)">
+                    </cds-icon>
+
+                    <cds-icon shape="happy-face" size="xxl" status="success"
+                        [class.selected]="(feedbackForm.get('emoji')?.value ?? null) === 1" [attr.solid]="
+                (feedbackForm.get('emoji')?.value ?? null) === 1 ? true : null
+              " (click)="setEmoji(1)">
+                    </cds-icon>
+                </div>
+
+                <!-- Comment -->
+                <div cds-layout="vertical m-t:sm" cds-text="body">
+                    <span>Qu'aimez-vous ou n'aimez-vous pas à propos de PAMS?</span>
+                    <cds-form-group layout="vertical">
+                        <cds-textarea>
+                            <label></label>
+                            <textarea name="comment" formControlName="comment"></textarea>
+                        </cds-textarea>
+                    </cds-form-group>
+                </div>
+
+                <!-- Submit -->
+                <div cds-layout="horizontal align:right m-t:sm" (click)="submitFeedback()">
+                    <cds-button>Soumettre</cds-button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</clr-modal>

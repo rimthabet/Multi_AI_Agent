@@ -1,0 +1,30 @@
+<!-- List of funds -->
+<div cds-layout="vertical gap:sm align:stretch">
+  @for(f of fonds(); track f) {
+  <a
+    class="show-hide-icon"
+    cds-layout="horizontal align:left"
+    [routerLink]="['/dashboard/funds/', f.id]"
+  >
+    <cds-icon
+      shape="coin-bag"
+      size="16"
+      [style.color]="getEtatColor(f)"
+      solid
+    ></cds-icon>
+    <span>{{ f?.denomination }}</span>
+    <cds-icon shape="link" size="sm"></cds-icon>
+
+    @if (f?.etat?.libelle === 'En liquidation' || f?.etat?.libelle === 'En
+    pré-liquidation') {
+    <div
+      cds-layout="align:right"
+      class="badge badge-warning"
+      cds-text="caption"
+    >
+      {{ f.etat.libelle }}
+    </div>
+    }
+  </a>
+  }
+</div>

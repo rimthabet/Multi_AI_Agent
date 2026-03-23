@@ -1,0 +1,51 @@
+<!-- Modal -->
+<clr-modal
+  [clrModalSize]="'md'"
+  [(clrModalOpen)]="opened"
+  class="custom-modal-height"
+>
+  <h3 class="modal-title">
+    <cds-icon shape="employee" status="info" size="lg" solid=""></cds-icon>
+    Ajouter un commissaire aux comptes
+  </h3>
+  <div class="modal-body">
+    <form
+      [formGroup]="commissaireSaveForm"
+      clrForm
+      clrLabelSize="5"
+      cds-layout="p-b:lg p-t:lg"
+    >
+      <clr-input-container>
+        <label class="clr-required-mark">Nom & prénom</label>
+        <input
+          clrInput
+          type="text"
+          formControlName="libelle"
+          name="libelle"
+          size="29"
+        />
+      </clr-input-container>
+
+      <clr-input-container>
+        <label class="clr-required-mark">Cabinet</label>
+        <input
+          clrInput
+          type="text"
+          formControlName="cabinet"
+          name="cabinet"
+          size="29"
+        />
+      </clr-input-container>
+    </form>
+  </div>
+  <div class="modal-footer" cds-layout="horizontal gap:sm">
+    <button class="btn btn-outline" (click)="opened.set(false)">Annuler</button>
+    <button
+      class="btn btn-primary"
+      [disabled]="commissaireSaveForm.invalid"
+      (click)="saveCommisaire()"
+    >
+      <cds-icon shape="floppy"></cds-icon> Sauvegarder
+    </button>
+  </div>
+</clr-modal>

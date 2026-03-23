@@ -1,0 +1,173 @@
+<!-- Loading Spinner -->
+<div
+  class="modal-backdrop"
+  aria-hidden="true"
+  [style.display]="loadingFunds || loadingLiberations ? 'block' : 'none'"
+  (click)="loadingFunds = false; loadingLiberations = false"
+>
+  <span
+    class="spinner"
+    style="
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    "
+    >Loading...</span
+  >
+</div>
+
+<!-- Header -->
+<span cds-text="title">
+  <cds-icon shape="gavel" size="lg" solid status="info"></cds-icon>
+  {{ getLabelForRatioType(ratioType) }}</span
+>
+
+<!-- Divider -->
+<cds-divider
+  cds-layout="m-t:xl"
+  class="htitled-divider"
+  title="Ratios des souscripteurs"
+></cds-divider>
+
+<!-- Search fonds -->
+<div cds-layout="horizontal align:left gap:md m-t:xl">
+  <clr-dropdown>
+    <cds-button size="md" action="outline" clrDropdownTrigger>
+      {{ selectedFonds?.fonds?.denomination }}
+      <cds-icon shape="angle" status="info" direction="down"></cds-icon>
+    </cds-button>
+
+    <clr-dropdown-menu *clrIfOpen>
+      @for (f of fonds; track $index) {
+      <div clrDropdownItem (click)="selectFonds(f)" onkeypress="">
+        {{ f.fonds?.denomination }}
+      </div>
+      }
+    </clr-dropdown-menu>
+  </clr-dropdown>
+
+  <span class="fund-name active" [style.marginBottom]="'0.2em'">
+    {{ selectedFonds?.fonds?.denomination }}
+    <cds-icon
+      onkeypress=""
+      shape="dashboard"
+      size="lg"
+      title="Cliquer pour consulter la fiche funds"
+      style="cursor: pointer"
+      (click)="goToFiche()"
+    ></cds-icon>
+  </span>
+</div>
+
+<!-- Fund state -->
+@if (selectedFonds?.fonds.etat.libelle == 'En liquidation' ||
+selectedFonds?.fonds.etat.libelle == 'En pré-liquidation') {
+<div class="badge badge-warning" cds-text="caption" cds-layout="p:sm">
+  Fonds {{ selectedFonds?.fonds.etat.libelle }}
+</div>
+}
+
+<!-- Timeline -->
+<ul class="clr-timeline clr-timeline-vertical" cds-layout="m-t:md">
+  @for (year of sortedYears(); track $index; let last = $last) {
+  <li class="clr-timeline-step">
+    <div class="clr-timeline-step-header">
+      <strong class="digit" [style.fontSize]="'large !important'">{{
+        year
+      }}</strong>
+    </div>
+    @if (year < thisYear) {
+    <cds-icon shape="success-standard" aria-label="Completed"></cds-icon>
+    } @if (year == thisYear) {
+    <clr-spinner clrMedium aria-label="In progress"></clr-spinner>
+    } @if (year > thisYear) {
+    <cds-icon shape="circle" aria-label="Not started"></cds-icon>
+    }
+    <div class="clr-timeline-step-body">
+      <div class="clr-timeline-step-description">
+        <div class="styled-badges">
+          <!-- Tabs -->
+          <clr-tabs>
+            <!-- Tab 1 -->
+            <clr-tab>
+              <button clrTabLink>
+                <span class="badge">31/12/{{ year }}</span
+                ><cds-icon shape="connect" size="24" solid=""></cds-icon
+                ><span class="badge" style="margin-left: -3px"
+                  >31/03/{{ year }}</span
+                >&nbsp;
+              </button>
+              <clr-tab-content *clrIfActive="true">
+                <ratios-widget
+                  [fonds]="selectedFonds"
+                  [type]="'souscripteur'"
+                  [endDate]="'3103' + year"
+                  [title]="
+                    'Historique Ratios règlementaires des souscripteurs dans les projets pour le ' +
+                    selectedFonds?.fonds?.denomination
+                  "
+                ></ratios-widget>
+              </clr-tab-content>
+            </clr-tab>
+
+            <!-- Tab 2 -->
+            <clr-tab>
+              <button clrTabLink>
+                <span class="badge">01/04/{{ year }}</span>
+                <cds-icon shape="connect" size="24" solid=""></cds-icon>
+                <span class="badge" style="margin-left: -3px"
+                  >30/06/{{ year }}</span
+                >&nbsp;
+              </button>
+              <clr-tab-content *clrIfActive>
+                <ratios-widget
+                  [fonds]="selectedFonds"
+                  [type]="'souscripteur'"
+                  [endDate]="'3006' + year"
+                ></ratios-widget
+              ></clr-tab-content>
+            </clr-tab>
+
+            <!-- Tab 3 -->
+            <clr-tab>
+              <button clrTabLink>
+                <span class="badge">01/07/{{ year }}</span>
+                <cds-icon shape="connect" size="24" solid=""></cds-icon>
+                <span class="badge" style="margin-left: -3px"
+                  >30/09/{{ year }}</span
+                >&nbsp;
+              </button>
+              <clr-tab-content *clrIfActive>
+                <ratios-widget
+                  [fonds]="selectedFonds"
+                  [type]="'souscripteur'"
+                  [endDate]="'3009' + year"
+                ></ratios-widget
+              ></clr-tab-content>
+            </clr-tab>
+
+            <!-- Tab 4 -->
+            <clr-tab>
+              <button clrTabLink>
+                <span class="badge">01/10/{{ year }}</span>
+                <cds-icon shape="connect" size="24" solid=""></cds-icon>
+                <span class="badge" style="margin-left: -3px"
+                  >31/12/{{ year }}</span
+                >&nbsp;
+              </button>
+              <clr-tab-content *clrIfActive>
+                <ratios-widget
+                  [fonds]="selectedFonds"
+                  [type]="'souscripteur'"
+                  [endDate]="'3112' + year"
+                ></ratios-widget
+              ></clr-tab-content>
+            </clr-tab>
+          </clr-tabs>
+        </div>
+      </div>
+    </div>
+  </li>
+  }
+</ul>

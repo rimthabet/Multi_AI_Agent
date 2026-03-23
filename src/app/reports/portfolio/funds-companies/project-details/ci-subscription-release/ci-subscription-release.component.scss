@@ -1,0 +1,74 @@
+h2 {
+    color: var(--cds-alias-status-info);
+    font-variant: small-caps;
+}
+
+cds-card {
+
+    &:hover {
+        cursor: grab;
+        --box-shadow: var(--cds-global-color-blue-900) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+    }
+
+    --box-shadow: none !important;
+}
+
+span.lib-date {
+    text-align: right;
+    font-variant: small-caps;
+    font-weight: 500;
+    color: var(--cds-alias-status-neutral)
+}
+
+h3 {
+    padding: 0.5em;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+
+    background-color: var(--clr-thead-bgcolor);
+    letter-spacing: 2px;
+    font-variant: small-caps;
+    font-weight: 500;
+    font-size: 90% !important;
+}
+
+
+.tooltip.ineligible {
+    --clr-tooltip-background-color: var(--cds-global-color-red-800)
+}
+
+.tooltip.non_assuree {
+    --clr-tooltip-background-color: var(--cds-alias-status-neutral)
+}
+
+.tooltip.assuree {
+    --clr-tooltip-background-color: var(--cds-global-color-green-700)
+}
+
+.tooltip.refusee {
+    --clr-tooltip-background-color: var(--cds-global-color-red-700)
+}
+
+
+::ng-deep .headless {
+    .signpost-content-header {
+        display: none !important;
+    }
+
+    width: 280px;
+
+    table {
+        margin-top: 0.5em !important;
+        width: 260px;
+    }
+}
+
+.item {
+    border-bottom: 1px dashed lightgrey;
+    padding: 0 0.5em 0.5em 0.5em;
+
+    &:last-of-type {
+        border-bottom: none
+    }
+
+}

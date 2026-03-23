@@ -1,0 +1,64 @@
+<!-- Modal -->
+<clr-modal [clrModalSize]="'md'" [clrModalOpen]="opened() ?? false">
+  <!-- Modal header -->
+  <h3 class="modal-title">
+    <cds-icon shape="bank" size="lg" solid status="info"> </cds-icon> Ajouter un
+    financement
+  </h3>
+
+  <!-- Modal body -->
+  <div class="modal-body">
+    <form clrForm [formGroup]="finacementSaveForm!" clrLabelSize="4">
+      <clr-input-container>
+        <label for="libelle" class="clr-required-mark">Libellé:</label>
+        <input clrInput type="text" formControlName="libelle" name="libelle" />
+      </clr-input-container>
+      <clr-number-input-container>
+        <label for="montant" class="clr-required-mark">Montant:</label>
+        <input
+          clrNumberInput
+          type="number"
+          formControlName="montant"
+          name="montant"
+        />
+
+        <clr-control-helper>
+          Exprimez en tnd :
+          <span style="font-size: 110%; font-weight: 500">
+            {{ finacementSaveForm.get("montant")?.value | number : "1.2-2" }}
+            <sup>tnd</sup>
+          </span>
+        </clr-control-helper>
+      </clr-number-input-container>
+      <clr-select-container>
+        <label for="natureBailleurFonds" class="clr-required-mark"
+          >Nature d'apport:</label
+        >
+        <select
+          clrSelect
+          name="natureBailleurFonds"
+          formControlName="natureBailleurFonds"
+        >
+          <option [ngValue]="undefined">Choisir une nature d'apport ...</option>
+          @for(natureBailleurFonds of naturesBailleurFonds; track
+          natureBailleurFonds) {
+          <option [ngValue]="natureBailleurFonds.id">
+            {{ natureBailleurFonds?.libelle }}
+          </option>
+          }
+        </select>
+      </clr-select-container>
+    </form>
+  </div>
+
+  <!-- Modal footer -->
+  <div class="modal-footer">
+    <cds-button action="outline" (click)="hideModal()"> Annuler </cds-button>
+    <cds-button
+      (click)="saveFinancement()"
+      [disabled]="finacementSaveForm.invalid"
+    >
+      <cds-icon shape="floppy" size="md"></cds-icon> Sauvegarder
+    </cds-button>
+  </div>
+</clr-modal>

@@ -1,0 +1,11 @@
+@use "https://fonts.googleapis.com/css2?family=Stardos+Stencil:wght@400&display=swap" as *;
+@use "https://fonts.googleapis.com/css2?family=Stardos+Stencil:wght@700&display=swap" as *;
+@use "./scrollbar-styles" as *;
+
+:root {
+  --ACTIONS: var(--cds-alias-viz-sequential-blue-900);
+  --OCA: var(--cds-alias-utility-light-blue);
+  --CCA: var(--cds-alias-viz-sequential-violet-700);
+  --TOTAL: var(--cds-alias-viz-sequential-blue-500);
+  --clr-forms-baseline: 4px;
+}

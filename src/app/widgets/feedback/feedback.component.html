@@ -1,0 +1,68 @@
+<div cds-layout="vertical align:horizontal-center p-t:xs">
+  <span cds-text="subsection"
+    >Qu'aimez-vous ou n'aimez-vous pas à propos de PAMS?</span
+  >
+
+  <form [formGroup]="feedbackForm" cds-layout="vertical p-t:md">
+    <div cds-layout="horizontal gap:md align:center m-t:sm">
+      <span
+        class="emoji"
+        [class.selected]="(feedbackForm.get('emoji')?.value ?? null) === 1"
+        (click)="setEmoji(1)"
+      >
+        😞
+      </span>
+
+      <span
+        class="emoji"
+        [class.selected]="(feedbackForm.get('emoji')?.value ?? null) === 2"
+        (click)="setEmoji(2)"
+      >
+        🙁
+      </span>
+
+      <span
+        class="emoji"
+        [class.selected]="(feedbackForm.get('emoji')?.value ?? null) === 3"
+        (click)="setEmoji(3)"
+      >
+        😐
+      </span>
+
+      <span
+        class="emoji"
+        [class.selected]="(feedbackForm.get('emoji')?.value ?? null) === 4"
+        (click)="setEmoji(4)"
+      >
+        🙂
+      </span>
+
+      <span
+        class="emoji"
+        [class.selected]="(feedbackForm.get('emoji')?.value ?? null) === 5"
+        (click)="setEmoji(5)"
+      >
+        😄
+      </span>
+    </div>
+
+    <div cds-layout="vertical m-t:lg" cds-text="body">
+      <cds-form-group layout="vertical">
+        <cds-textarea>
+          <label></label>
+          <textarea
+            name="comment"
+            formControlName="comment"
+            [placeholder]="commentPlaceholder"
+          ></textarea>
+        </cds-textarea>
+      </cds-form-group>
+    </div>
+
+    <div cds-layout="horizontal align:right m-t:sm">
+      <cds-button [disabled]="isSubmitDisabled()" (click)="submitFeedback()"
+        >Soumettre</cds-button
+      >
+    </div>
+  </form>
+</div>

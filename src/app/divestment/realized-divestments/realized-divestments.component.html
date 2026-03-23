@@ -1,0 +1,341 @@
+<!-- Header -->
+<span cds-text="title">
+  <cds-icon shape="logout" status="info" size="lg"></cds-icon>
+  Désinvestissements réalisés par fonds</span
+>
+<!-- Search fonds -->
+<div cds-layout="horizontal align:left gap:md m-t:xl">
+  <clr-dropdown>
+    <cds-button size="md" action="outline" clrDropdownTrigger>
+      {{ selectedFonds?.denomination || "Sélectionner un fonds" }}
+      <cds-icon shape="angle" status="info" direction="down"></cds-icon>
+    </cds-button>
+
+    <clr-dropdown-menu *clrIfOpen>
+      @for (f of fonds; track $index) {
+      <div clrDropdownItem (click)="selectFonds(f)" onkeypress="">
+        {{ f.denomination }}
+      </div>
+      }
+    </clr-dropdown-menu>
+  </clr-dropdown>
+  <!-- Fund name -->
+  <span class="fund-name active" [style.marginBottom]="'0.2em'">
+    {{
+      selectedFonds ? selectedFonds.denomination : "Dénomination du fonds ..."
+    }}
+    <cds-icon
+      onkeypress=""
+      shape="dashboard"
+      size="lg"
+      status="info"
+      title="Cliquer pour consulter la fiche funds"
+      style="cursor: pointer"
+      (click)="goToFiche()"
+    ></cds-icon>
+  </span>
+</div>
+
+<!-- Fund state -->
+@if (selectedFonds?.etat.libelle == 'En liquidation' ||
+selectedFonds?.etat.libelle == 'En pré-liquidation') {
+<div class="badge badge-warning" cds-text="caption" cds-layout="p:sm">
+  Fonds {{ selectedFonds?.etat.libelle }}
+</div>
+}
+
+<!-- Data grid -->
+<clr-datagrid style="max-height: calc(100vh - 240px)" [clrDgLoading]="loading">
+  <clr-dg-action-bar>
+    <div cds-layout="horizontal gap:md">
+      <div cds-layout="align:stretch">
+        <cds-divider
+          cds-layout="m-t:lg m-b:sm"
+          class="htitled-divider"
+          title="Sorties réalisées par souscription"
+        ></cds-divider>
+      </div>
+      <div cds-layout="align:right">
+        <cds-button
+          action="outline"
+          status="primary"
+          (click)="exportDesinvestissementRealises()"
+          onKeyPress=""
+        >
+          <cds-icon shape="xls-file" status="info" size="md"></cds-icon> Générer
+          un rapport
+        </cds-button>
+      </div>
+    </div>
+  </clr-dg-action-bar>
+
+  <clr-dg-column
+    style="min-width: 195px"
+    [clrDgField]="'sa.financement.projet.nom'"
+    >Projet</clr-dg-column
+  >
+  <clr-dg-column>Nombre d'actions souscrites</clr-dg-column>
+  <clr-dg-column>Prix de l’action à l’achat</clr-dg-column>
+  <clr-dg-column>Date du comité autorisant la sortie</clr-dg-column>
+  <clr-dg-column>Nombre d’actions cédées </clr-dg-column>
+  <clr-dg-column>Prix de vente de l’action</clr-dg-column>
+  <clr-dg-column>Date de la signature du protocole de cession</clr-dg-column>
+  <clr-dg-column>Montant total de la vente</clr-dg-column>
+  <clr-dg-column>TRI réalisé</clr-dg-column>
+  <clr-dg-column>Type de sortie réalisé </clr-dg-column>
+
+  <clr-dg-row
+    *clrDgItems="let d of desinvestissementsRealise; let i = index"
+    [clrDgItem]="d"
+    (click)="setSelectedDesinvestissement(d)"
+  >
+    <clr-dg-action-overflow>
+      <div cds-layout="vertical gap:xxs">
+        <div class="button-group">
+          <cds-button
+            action="flat-inline"
+            (click)="displayParticipationModal(d)"
+          >
+            <cds-icon shape="target" status="info"></cds-icon> Spécifier une
+            sortie réalisée
+          </cds-button>
+        </div>
+
+        <div class="button-group">
+          <cds-button
+            action="flat-inline"
+            status="danger"
+            (click)="setSelectedDesinvestissement(d); deleteDesinvestissement()"
+          >
+            <cds-icon shape="trash" status="danger"></cds-icon> Annuler la
+            sortie réalisée
+          </cds-button>
+        </div>
+      </div>
+    </clr-dg-action-overflow>
+
+    <clr-dg-cell style="min-width: 195px"
+      ><a
+        class="show-hide-icon"
+        [routerLink]="['/dashboard/project', d?.sa?.financement?.projet.id]"
+        [title]="d?.sa?.financement?.projet.nom"
+        >{{ d?.sa?.financement?.projet.nom }}
+        <cds-icon shape="link" status="info"></cds-icon> </a
+    ></clr-dg-cell>
+    <clr-dg-cell class="digit text-right">{{
+      d?.sa?.actions | number : "1.0-0"
+    }}</clr-dg-cell>
+    <clr-dg-cell class="digit text-right">{{
+      d?.sa?.nominal + d?.sa?.primeEmission
+        | currency : "tnd" : "symbol" : "1.0-0"
+    }}</clr-dg-cell>
+    <clr-dg-cell class="text-center">{{
+      d.sa.dateComiteAutorisantSortie | date : "dd/MM/yyyy"
+    }}</clr-dg-cell>
+
+    <clr-dg-cell class="digit text-right">{{
+      d?.sa?.actionsCedees | number : "1.0-0"
+    }}</clr-dg-cell>
+    <clr-dg-cell class="digit text-right">{{
+      d?.sa?.prixVenteAction | number : "1.2-2"
+    }}</clr-dg-cell>
+    <clr-dg-cell class="text-center">{{
+      d.sa.dateSignatureProtocoleCession | date : "dd/MM/yyyy"
+    }}</clr-dg-cell>
+    <clr-dg-cell class="digit text-right">{{
+      d?.sa?.prixTotalVente | number : "1.0-0"
+    }}</clr-dg-cell>
+    <clr-dg-cell class="digit text-right">{{
+      d?.sa?.triRealise | percent : "1.0-0"
+    }}</clr-dg-cell>
+    <clr-dg-cell>{{ d?.sa?.typeSortieRealisee?.libelle }}</clr-dg-cell>
+  </clr-dg-row>
+  <clr-dg-detail *clrIfDetail="let detail">
+    <clr-dg-detail-header>
+      <cds-icon shape="building" status="info" size="md"></cds-icon>
+      {{ detail?.sa?.financement?.projet.nom }}
+    </clr-dg-detail-header>
+    <clr-dg-detail-body>
+      <cds-divider
+        cds-layout="m-b:lg"
+        class="htitled-divider"
+        title="Collect de documents"
+      ></cds-divider>
+
+      @for (conformite of conformite_documentaires; track conformite) {
+      <document-upload
+        #docUpload
+        [compliance]="{ conformite: conformite }"
+        [data]="detail?.sa"
+        [task_row]="1"
+        [phase_row]="7"
+      ></document-upload>
+      }
+    </clr-dg-detail-body>
+  </clr-dg-detail>
+
+  <clr-dg-footer
+    >{{ desinvestissementsRealise.length }} désinvestissements
+    réalisés</clr-dg-footer
+  >
+</clr-datagrid>
+
+<!-- Modal -->
+<clr-modal
+  [clrModalSize]="'md'"
+  [(clrModalOpen)]="desinvestisssmentModalOpened"
+  class="custom-modal-height"
+>
+  <h3 class="modal-title">
+    <cds-icon shape="logout" status="info" size="lg" solid></cds-icon>
+    Spécification de la sortie réalisée
+  </h3>
+
+  <div class="modal-body">
+    <div
+      cds-text="title uppercase"
+      style="color: var(--cds-alias-status-info)"
+      cds-layout="m-t:xl"
+    >
+      {{ selectedDesinvestisssment?.sa?.financement?.projet.nom }}
+    </div>
+
+    <cds-divider
+      cds-layout="m-t:lg m-b:sm"
+      class="htitled-divider"
+      [title]="
+        'Souscription du ' +
+        (selectedDesinvestisssment?.sa.dateBulletin | date : 'dd/MM/yyyy')
+      "
+    ></cds-divider>
+
+    <form [formGroup]="desinvestissementForm" clrForm clrLabelSize="6">
+      <clr-date-container>
+        <label class="clr-required-mark"
+          >Date du comité autorisant la sortie</label
+        >
+        <input
+          clrDate
+          type="date"
+          formControlName="dateComiteAutorisantSortie"
+          name="dateComiteAutorisantSortie"
+          required
+          style="width: 250px"
+        />
+      </clr-date-container>
+
+      <clr-date-container>
+        <label class="clr-required-mark"
+          >Date de la signature du protocole de cession</label
+        >
+        <input
+          clrDate
+          type="date"
+          formControlName="dateSignatureProtocoleCession"
+          name="dateSignatureProtocoleCession"
+          required
+          style="width: 250px"
+        />
+      </clr-date-container>
+
+      <clr-input-container>
+        <label class="clr-required-mark">Nombre d’actions cédées</label>
+        <input
+          clrInput
+          type="number"
+          formControlName="actionsCedees"
+          name="actionsCedees"
+          required
+          style="width: 250px"
+        />
+      </clr-input-container>
+
+      <clr-input-container>
+        <label class="clr-required-mark">Prix de vente de l’action</label>
+        <input
+          clrInput
+          type="number"
+          formControlName="prixVenteAction"
+          name="prixVenteAction"
+          style="width: 250px"
+          required
+        />
+        <clr-control-helper>
+          <span style="font-size: 110%; font-weight: 500; white-space: nowrap"
+            >{{
+              desinvestissementForm.controls["prixVenteAction"].value
+                | number : "1.2-2"
+            }}
+            tnd</span
+          >
+        </clr-control-helper>
+      </clr-input-container>
+
+      <clr-input-container>
+        <label class="clr-required-mark">Montant total de la vente</label>
+        <input
+          clrInput
+          type="number"
+          formControlName="prixTotalVente"
+          name="prixTotalVente"
+          style="width: 250px"
+          required
+        />
+
+        <clr-control-helper>
+          <span style="font-size: 110%; font-weight: 500; white-space: nowrap"
+            >{{
+              desinvestissementForm.controls["prixTotalVente"].value
+                | number : "1.0-0"
+            }}
+            tnd</span
+          >
+        </clr-control-helper>
+      </clr-input-container>
+
+      <clr-input-container>
+        <label class="clr-required-mark">TRI réalisé (%)</label>
+        <input
+          clrInput
+          type="number"
+          formControlName="triRealise"
+          name="triRealise"
+          style="width: 250px"
+          required
+        />%
+      </clr-input-container>
+
+      <clr-select-container>
+        <label class="clr-required-mark">Type de sortie réalisé</label>
+        <select
+          clrSelect
+          name="typeSortieRealisee"
+          formControlName="typeSortieRealisee"
+          [compareWith]="equals"
+          style="width: 245px"
+          required
+        >
+          <option *ngFor="let t of types" [ngValue]="t" [attr.data-value]="t">
+            {{ t.libelle }}
+          </option>
+        </select>
+      </clr-select-container>
+    </form>
+  </div>
+
+  <div class="modal-footer" cds-layout="horizontal gap:sm">
+    <button
+      class="btn btn-outline"
+      (click)="desinvestisssmentModalOpened = false"
+    >
+      Annuler
+    </button>
+    <button
+      class="btn btn-primary"
+      [disabled]="desinvestissementForm.invalid"
+      (click)="updateDesinvestissementRealise()"
+    >
+      <cds-icon shape="floppy"></cds-icon> Sauvegarder
+    </button>
+  </div>
+</clr-modal>

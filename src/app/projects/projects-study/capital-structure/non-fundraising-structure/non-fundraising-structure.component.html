@@ -1,0 +1,447 @@
+@if(valeurAction() != valorisationAction){
+<div class="alert alert-warning" role="alert">
+  <div class="alert-items">
+    <div class="alert-item static">
+      <div class="alert-icon-wrapper">
+        <cds-icon class="alert-icon" shape="exclamation-circle"></cds-icon>
+      </div>
+      <span class="alert-text"
+        >La valeur nominale du projet a été modifiée. Le nominal actuel est :
+        <span class="digit" style="font-size: 120%"
+          >{{ valeurAction() | number : "1.2-2" }}<small>tnd</small></span
+        >
+      </span>
+    </div>
+  </div>
+</div>
+}
+<!-- Datagrid -->
+<clr-datagrid
+  style="margin-top: -1em"
+  [clrDgLoading]="loading()"
+  [style.width]="'100%'"
+>
+  <clr-dg-action-bar>
+    <div class="btn-group">
+      <cds-button (click)="showTransactionModalAdd()">
+        <cds-icon shape="plus" sise="md" solid></cds-icon> Ajouter un
+        actionnaire hors participation
+      </cds-button>
+    </div>
+    <div class="btn-group">
+      <cds-button action="outline" (click)="showNominalModalModify()">
+        <cds-icon shape="dollar" sise="md" solid></cds-icon> Mettre à jour la
+        valeur nominale
+      </cds-button>
+    </div>
+  </clr-dg-action-bar>
+
+  <clr-dg-column [clrDgField]="'libelle'">Actionnaire</clr-dg-column>
+  <clr-dg-column [clrDgField]="'nombre'">Nombre total d'actions </clr-dg-column>
+  <clr-dg-column [clrDgField]="'montant'">Montant (tnd)</clr-dg-column>
+  <clr-dg-column [clrDgField]="'pourcentage'">%</clr-dg-column>
+
+  <!-- Datagrid rows -->
+  <clr-dg-row
+    [class]="
+      actionnaire.isFund
+        ? 'fund-row'
+        : actionnaire.offFundRaiser &&
+          actionnaire.financement?.id == financement()?.id
+        ? 'fund-off-raiser'
+        : ''
+    "
+    *clrDgItems="let actionnaire of actionnaires()"
+    [clrDgItem]="actionnaire"
+    [clrDgSelectable]="actionnaire.financement?.id == financement()?.id"
+  >
+    <clr-dg-action-overflow [class]="{ disabled: actionnaire.isFund }">
+      <button
+        class="action-item"
+        (click)="showTransactionModalModify(actionnaire)"
+      >
+        <cds-icon shape="note" sise="md" solid class="info"></cds-icon>
+        Modifier l'actionnariat
+      </button>
+
+      @if(actionnaire.financement?.id == financement()?.id &&
+      actionnaire.offFundRaiser == 1){
+      <button (click)="supprimerActionnaire(actionnaire)" class="action-item">
+        <cds-icon shape="trash" class="failure" solid></cds-icon>
+        Supprimer l'actionnaire
+      </button>
+      }
+    </clr-dg-action-overflow>
+
+    <clr-dg-cell class="secret">
+      <!-- Share holder -->
+      {{ actionnaire.libelle }}
+
+      <!-- Tag -->
+      @if(actionnaire.isFund){ ({{ actionnaire.fundRaisings }})
+      }@if(actionnaire.transactions && actionnaire.transactions.length > 0){
+      (<cds-icon
+        shape="asterisk"
+        size="sm"
+        style="color: var(--clr-color-danger-600)"
+      ></cds-icon
+      >) }
+    </clr-dg-cell>
+
+    <clr-dg-cell class="text-right">
+      {{ actionnaire.nbrActionsApAugmentation | number : "1.0-0" }}
+        </clr-dg-cell
+    >
+
+    <clr-dg-cell class="text-right">
+      {{
+        actionnaire.nbrActionsApAugmentation * valeurAction() | number : "1.0-0"
+      }}
+    </clr-dg-cell>
+
+    <clr-dg-cell class="text-right">{{
+      actionnaire.nbrActionsApAugmentation / total_nombre_action
+        | percent : "1.3-3"
+    }}</clr-dg-cell>
+
+    <ng-container ngProjectAs="clr-dg-row-detail">
+      <clr-dg-row-detail *clrIfExpanded>
+        <div>
+          <span class="title"
+            ><cds-icon shape="history" size="md" solid=""></cds-icon>
+            Historiques de l’actionnariat de
+            <span
+              style="
+                font-size: 16px;
+                color: var(--clr-color-action-600);
+                font-weight: 600;
+              "
+              >{{ actionnaire.libelle }}</span
+            >
+            suite au plan de financement du
+          </span>
+          <strong
+            style="
+              font-size: 16px;
+              color: var(--clr-color-action-600);
+              font-weight: 600;
+            "
+            >{{
+              financement()?.dateDemandeFinancement | date : "dd/MM/yyyy"
+            }}</strong
+          >
+
+          <!-- Tableau des transactions -->
+          <table class="table table-compact" style="width: 100%">
+            <caption></caption>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Nombre d'actions</th>
+                <th>Montant (tnd)</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for(transaction of actionnaire.transactions; track $index){
+              <tr>
+                <td style="vertical-align: middle">
+                  {{ transaction.dateChangement | date : "dd/MM/yyyy" }}
+                </td>
+
+                <td style="vertical-align: middle">
+                  {{ transaction.nbrActions | number : "1.0-0" }}
+                </td>
+
+                <td style="vertical-align: middle">
+                  {{
+                    transaction.nbrActions * valeurAction() | number : "1.0-0"
+                  }}
+                </td>
+                <td style="vertical-align: middle">
+                  <cds-button
+                    action="flat-inline"
+                    status="danger"
+                    (click)="supprimerTransaction(transaction)"
+                  >
+                    <cds-icon shape="trash" status="danger"></cds-icon>
+                    Supprimer
+                  </cds-button>
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </clr-dg-row-detail>
+    </ng-container>
+  </clr-dg-row>
+
+  <!-- Footer -->
+  <clr-dg-footer
+    >Total actions :
+    <span class="digit">{{ total_nombre_action | number : "1.0-0" }}</span>
+    Total montant :
+    <span class="digit">{{
+      total_nombre_action * valeurAction() | number : "1.0-0"
+    }}</span>
+    <sup>tnd</sup></clr-dg-footer
+  >
+  >
+</clr-datagrid>
+
+<!-- Info messages -->
+<div cds-layout="m-y:md">
+  <div cds-layout="align:left">
+    (<cds-icon
+      shape="asterisk"
+      size="sm"
+      style="color: var(--clr-color-danger-600)"
+    ></cds-icon
+    >) : La participation de l'actionnaire a vu des changements
+  </div>
+  <div cds-layout="align:left">
+    (<cds-icon shape="asterisk" size="sm"></cds-icon>) : Nombre de financements
+    réalisés par ce fonds dans le capital.
+  </div>
+  <div cds-layout="align:left">
+    (<cds-icon
+      shape="circle"
+      size="sm"
+      solid
+      style="color: var(--clr-color-success-600)"
+    ></cds-icon
+    >) : Actionnaire hors participation de vos fonds
+  </div>
+</div>
+
+<!--Model ajouter un actionnaire-->
+<clr-modal [clrModalSize]="'md'" [(clrModalOpen)]="openedAdd">
+  <h3 class="modal-title">
+    <cds-icon shape="employee" status="info" size="lg" solid></cds-icon> Ajouter
+    un actionnaire hors participation
+  </h3>
+  <div class="modal-body">
+    <form
+      clrForm
+      [formGroup]="actionniareSaveForm!"
+      clrLabelSize="4"
+      class="clr-form-compact"
+      cds-layout="m-t:md"
+    >
+      <clr-input-container>
+        <label class="clr-required-mark">Libellé:</label>
+        <input
+          clrInput
+          type="text"
+          formControlName="libelle"
+          name="libelle"
+          style="width: 330px"
+        />
+      </clr-input-container>
+
+      <clr-date-container>
+        <label class="clr-required-mark">Date:</label>
+        <input
+          clrDate
+          type="Date"
+          formControlName="dateParticipation"
+          name="dateParticipation"
+          style="width: 175px"
+        />
+      </clr-date-container>
+
+      <clr-input-container>
+        <label class="clr-required-mark">Nombre d'actions:</label>
+        <input
+          clrInput
+          type="number"
+          formControlName="nbrActionsAvAugmentation"
+          name="nbrActionsAvAugmentation"
+          style="width: 200px"
+        />
+        <clr-control-helper>
+          <span style="font-size: 110%; font-weight: 500">{{
+            actionniareSaveForm.controls["nbrActionsAvAugmentation"].value
+              | number : "1.0-0"
+          }}</span>
+        </clr-control-helper>
+      </clr-input-container>
+
+      <clr-control-container>
+        <label class="clr-required-mark">Montant</label>
+        <span style="font-size: 110%; font-weight: 500">{{
+          actionniareSaveForm.controls["montantAvAugmentation"].value
+            | currency : "symbol" : "tnd" : "1.0-0"
+        }}</span>
+      </clr-control-container>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <div class="btn-group">
+      <cds-button action="outline" (click)="openedAdd = false"
+        >Annuler</cds-button
+      >
+    </div>
+    <div class="btn-group">
+      <cds-button
+        [disabled]="actionniareSaveForm.invalid"
+        (click)="saveActionnaire()"
+      >
+        <cds-icon shape="floppy"></cds-icon> Sauvegarder
+      </cds-button>
+    </div>
+  </div>
+</clr-modal>
+
+<!--Model modifier l'actionnariat-->
+<clr-modal [clrModalSize]="'md'" [(clrModalOpen)]="openedModify">
+  <h3 class="modal-title">
+    <cds-icon shape="employee" status="info" size="lg"></cds-icon> Modifier
+    l'actionnariat
+  </h3>
+  <div class="modal-body" style="overflow: hidden; padding-top: 1em">
+    <form
+      clrForm
+      [formGroup]="transactionSaveForm!"
+      clrLabelSize="4"
+      class="clr-form-compact"
+      cds-layout="m-t:md"
+    >
+      <clr-control-container>
+        <label class="clr-required-mark">Libellé</label>
+        <span style="font-size: 700 !important">{{
+          transactionSaveForm.controls["libelle"].value
+        }}</span>
+      </clr-control-container>
+
+      <clr-date-container>
+        <label class="clr-required-mark">Date:</label>
+        <input
+          clrDate
+          type="date"
+          formControlName="dateChangement"
+          name="dateChangement"
+          style="width: 175px"
+        />
+      </clr-date-container>
+
+      <clr-input-container>
+        <label class="clr-required-mark"># Nombre d'actions</label>
+        <input
+          clrInput
+          type="number"
+          formControlName="nbrActionsAvAugmentation"
+          name="nbrActionsAvAugmentation"
+          style="width: 200px"
+        />
+        <clr-control-helper>
+          <span style="font-size: 110%; font-weight: 500; white-space: nowrap"
+            >{{
+              transactionSaveForm.controls["nbrActionsAvAugmentation"].value
+                | number : "1.0-0"
+            }}
+          </span>
+        </clr-control-helper>
+      </clr-input-container>
+
+      <clr-control-container>
+        <label class="clr-required-mark">Montant (TND)</label>
+        <span style="font-size: 500">
+          {{
+            transactionSaveForm.controls["montantAvAugmentation"].value
+              | currency : "symbol" : "TND" : "1.0-0"
+          }}
+        </span>
+      </clr-control-container>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <div class="btn-group">
+      <cds-button action="outline" (click)="openedModify = false">
+        Annuler
+      </cds-button>
+    </div>
+    <div class="btn-group">
+      <cds-button
+        [disabled]="transactionSaveForm.invalid"
+        (click)="saveTransaction()"
+      >
+        <cds-icon shape="floppy"></cds-icon> Sauvegarder
+      </cds-button>
+    </div>
+  </div>
+</clr-modal>
+
+<!--Model modifier la valeur nominale-->
+<clr-modal [clrModalSize]="'md'" [(clrModalOpen)]="openedNominalModify">
+  <h3 class="modal-title">
+    <cds-icon shape="dollar" status="info" solid="" size="lg"></cds-icon>
+    Modifier la valeur nominale
+  </h3>
+  <div class="modal-body">
+    <form clrForm [formGroup]="nominalSaveForm!" clrLabelSize="2">
+      <clr-control-container>
+        <label class="clr-required-mark">Nominal:</label>
+        <input
+          clrInput
+          type="number"
+          formControlName="nominal"
+          name="nominal"
+          size="30"
+        />
+      </clr-control-container>
+
+      <clr-date-container>
+        <label class="clr-required-mark">Date:</label>
+        <input
+          clrDate
+          type="date"
+          formControlName="dateChangement"
+          name="dateChangement"
+        />
+      </clr-date-container>
+    </form>
+    <h4 cds-text="subsection" cds-layout="m-t:lg m-b:sm">Anciennes valeurs</h4>
+
+    <clr-datagrid [clrDgLoading]="loading()" [style.width]="'100%'">
+      <clr-dg-column>Date</clr-dg-column>
+      <clr-dg-column>Nominal </clr-dg-column>
+      <clr-dg-column [style.maxWidth]="'50px'" [style.minWidth]="'50px'"
+        ><cds-icon shape="trash"></cds-icon>
+      </clr-dg-column>
+
+      <clr-dg-row *clrDgItems="let nominal of nominals" [clrDgItem]="nominal">
+        <clr-dg-cell class="text-center">
+          {{ nominal.dateChangement | date : "dd/MM/yyyy" }}
+        </clr-dg-cell>
+        <clr-dg-cell class="text-center">
+          {{ nominal.nominal | number }}
+        </clr-dg-cell>
+        <clr-dg-cell
+          class="text-center"
+          [style.maxWidth]="'50px'"
+          [style.minWidth]="'50px'"
+        >
+          <cds-icon
+            shape="trash"
+            class="danger"
+            (click)="deleteNominal(nominal)"
+          ></cds-icon>
+        </clr-dg-cell>
+      </clr-dg-row>
+    </clr-datagrid>
+  </div>
+  <div class="modal-footer">
+    <div class="btn-group">
+      <cds-button action="outline" (click)="openedNominalModify = false">
+        Annuler
+      </cds-button>
+    </div>
+    <div class="btn-group">
+      <cds-button [disabled]="nominalSaveForm.invalid" (click)="addNominal()">
+        <cds-icon shape="floppy"></cds-icon> Sauvegarder
+      </cds-button>
+    </div>
+  </div>
+</clr-modal>

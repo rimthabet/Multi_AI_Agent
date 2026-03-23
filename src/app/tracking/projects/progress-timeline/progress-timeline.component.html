@@ -1,0 +1,45 @@
+<!--timeline-->
+<div [clrLoading]="loading">
+  <ul class="clr-timeline clr-timeline-horizontal">
+    @for (s of souscriptions; track s.d) {
+    <li class="clr-timeline-step">
+      <div class="clr-timeline-step-header">
+        {{ s.d | date : "dd MMMM yyyy" }}
+      </div>
+      <cds-icon shape="success-standard" aria-label="Completed"></cds-icon>
+      <div class="clr-timeline-step-body">
+        @for (_pfa of s.p; track _pfa.fonds?.id) {
+        <div cds-layout="vertical gap:xxs horizontal-stretch">
+          <span class="clr-timeline-step-title" cds-layout="m-t:sm">
+            {{ _pfa.fonds?.denomination }}</span
+          >
+
+          <div
+            cds-layout="vertical align:stretch gap:xxs p:none"
+            class="clr-timeline-step-description"
+          >
+            <span style="font-weight: 600"
+              >Souscription en @if (_pfa.type == 'Actions') {
+              <span class="badge badge-blue">{{ _pfa.type }}</span>
+              } @if (_pfa.type == 'OCA') {
+              <span class="badge badge-light-blue">{{ _pfa.type }}</span>
+              } @if (_pfa.type == 'CCA') {
+              <span class="badge badge-purple">{{ _pfa.type }}</span>
+              }
+            </span>
+            <span>
+              Montant :
+              <span class="digit">
+                {{ _pfa.montant | number : "1.0-0" }} &nbsp;<small
+                  >tnd</small
+                ></span
+              >
+            </span>
+          </div>
+        </div>
+        }
+      </div>
+    </li>
+    }
+  </ul>
+</div>

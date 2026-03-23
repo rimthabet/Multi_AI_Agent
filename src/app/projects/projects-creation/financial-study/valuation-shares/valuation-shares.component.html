@@ -1,0 +1,207 @@
+<!-- Financing Switch -->
+<financing-switch
+  (financementChanged)="financementChanged($event)"
+  [prospection]="prospection()"
+  [message]="'Veuillez spécifier le plan de financement en premier!'"
+></financing-switch>
+
+<!-- Title -->
+<div cds-layout="m-y:xl">
+  <h2 cds-text="title" style="font-variant: small-caps">
+    Évaluer l'action avant et après participation(s) du(es) fonds
+  </h2>
+</div>
+
+<!-- Form Valorisation -->
+<form
+  clrForm
+  clrLayout="horizontal"
+  clrLabelSize="2"
+  [formGroup]="valorisationForm"
+  class="clr-form-compact"
+  style="
+    margin-top: 4em !important;
+    padding-left: 1em;
+    border-left: 2px dotted var(--clr-color-action-300);
+  "
+>
+  <fieldset>
+    <legend cds-text="title">Avant participation</legend>
+    <clr-number-input-container>
+      <label for="val_action_av" class="clr-required-mark"
+        ><cds-icon shape="plugin" size="sm" status="info"></cds-icon> Valeur de
+        l'action:</label
+      >
+      <input
+        clrNumberInput
+        type="number"
+        name="val_action_av"
+        formControlName="val_action_av"
+      />
+      @if(!val_action_av){
+      <clr-control-helper> Exprimez la valeur en tnd </clr-control-helper>
+      } @if(val_action_av){
+      <clr-control-helper>
+        {{ val_action_av | number : "1.0-0" }} tnd
+      </clr-control-helper>
+      }
+    </clr-number-input-container>
+  </fieldset>
+
+  <fieldset>
+    <legend cds-text="title">Après participation</legend>
+    <clr-number-input-container>
+      <label
+        ><cds-icon shape="dollar" solid status="info"></cds-icon> Nominal par
+        action:
+      </label>
+      <input
+        clrNumberInput
+        type="number"
+        name="nominal_ap"
+        formControlName="nominal_ap"
+      />
+      @if(!nominal_ap){
+      <clr-control-helper> Exprimez la valeur en tnd </clr-control-helper>
+      } @if(nominal_ap){
+      <clr-control-helper>
+        {{ nominal_ap | number : "1.0-0" }} tnd
+      </clr-control-helper>
+      }
+    </clr-number-input-container>
+
+    <clr-number-input-container>
+      <label
+        ><cds-icon shape="dollar-bill" solid status="info"></cds-icon> Prime
+        d'émission par action
+        <cds-button
+          style="margin-top: 1.5em"
+          action="outline"
+          size="sm"
+          role="tooltip"
+          aria-haspopup="true"
+          class="tooltip tooltip-lg tooltip-top-right"
+          (click)="prime_emission_calculator_opened = true"
+          ><cds-icon shape="calculator"></cds-icon> Calculer à partir de la
+          prime d'émission globale
+
+          <span
+            class="tooltip-content"
+            style="text-transform: none; text-align: justify"
+            >Je ne dispose pas de la prime d'émission par action, mais je
+            dispose de la prime d'émission globale et je veux calculer la
+            première!</span
+          ></cds-button
+        >
+      </label>
+      <input
+        clrNumberInput
+        type="number"
+        name="prime_emission_ap"
+        formControlName="prime_emission_ap"
+      />
+      @if(!prime_emission_ap){
+      <clr-control-helper> Exprimez la valeur en tnd </clr-control-helper>
+      } @if(prime_emission_ap){
+      <clr-control-helper>
+        {{ prime_emission_ap | number : "1.2-2" }} tnd
+      </clr-control-helper>
+      }
+    </clr-number-input-container>
+
+    <clr-number-input-container>
+      <label
+        ><cds-icon shape="plugin" size="sm" solid status="info"></cds-icon>
+        Valeur de l'action:</label
+      >
+      <input
+        clrNumberInput
+        type="number"
+        name="val_action_ap"
+        readonly
+        formControlName="val_action_ap"
+      />
+      @if(!val_action_ap){
+      <clr-control-helper> Exprimez la valeur en tnd </clr-control-helper>
+      } @if(val_action_ap){
+      <clr-control-helper>
+        {{ val_action_ap | number : "1.2-2" }} tnd
+      </clr-control-helper>
+      }
+    </clr-number-input-container>
+  </fieldset>
+</form>
+
+<!-- Buttons -->
+<div cds-layout="horizontal p-y:lg">
+  <div class="btn-group">
+    <cds-button
+      [disabled]="valorisationForm.invalid || !selectedFinancement"
+      (click)="saveValorisationAction()"
+    >
+      <cds-icon shape="floppy" status="info"></cds-icon> Sauvegarder
+    </cds-button>
+  </div>
+  <div class="btn-group">
+    <cds-button
+      [disabled]="valorisation?.id <= 0"
+      (click)="deleteValorisation()"
+      status="danger"
+    >
+      <cds-icon shape="trash"></cds-icon> Supprimer
+    </cds-button>
+  </div>
+</div>
+
+<!-- Modal PEMA Calculator -->
+<clr-modal [(clrModalOpen)]="prime_emission_calculator_opened">
+  <h3 class="modal-title">
+    <cds-icon shape="calculator" size="lg" solid="" status="info"></cds-icon>
+    Calculateur de la prime d'émission par action
+  </h3>
+  <div class="modal-body" cds-layout="p-x:xl p-y:lg">
+    <form
+      clrForm
+      clrLayout="horizontal"
+      clrLabelSize="6"
+      [formGroup]="pemaCalculatorForm"
+      cds-layout="m-y:lg"
+    >
+      <clr-number-input-container>
+        <label
+          ><cds-icon shape="nodes" size="md" solid status="info"></cds-icon>
+          Prime d'émission globale:
+        </label>
+        <input
+          clrNumberInput
+          type="number"
+          name="prime_emission_ap_globale"
+          formControlName="prime_emission_ap_globale"
+          style="width: 180px"
+        />
+        @if(!prime_emission_ap_globale){
+        <clr-control-helper> Exprimez la valeur en tnd </clr-control-helper>
+        } @if(prime_emission_ap_globale){
+        <clr-control-helper>
+          {{
+            prime_emission_ap_globale | currency : "symbol" : "tnd" : "1.2-2"
+          }}
+        </clr-control-helper>
+        }
+      </clr-number-input-container>
+    </form>
+
+    <div cds-text="subsection" style="margin-top: 1.5em">
+      <cds-icon shape="node" size="md" class="info"></cds-icon> Prime d'émission
+      par action:
+      <span class="digit info" style="font-size: 130%; padding-right: 0.2em">{{
+        prime_emission_ap | currency : "symbol" : "tnd" : "1.2-2"
+      }}</span>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <cds-button (click)="setPemA()" [disabled]="pemaCalculatorForm.invalid">
+      <cds-icon shape="floppy"></cds-icon> Sauvegarder
+    </cds-button>
+  </div>
+</clr-modal>

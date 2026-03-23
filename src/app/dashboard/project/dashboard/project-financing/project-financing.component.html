@@ -1,0 +1,46 @@
+<!-- Total -->
+<div cds-layout="m-t:sm grid gap:lg align:stretch">
+  <div cds-layout="col@lg:9 col@md:9 col@sm:12">
+    <app-kpi-badge-01
+      [value]="totalMontant"
+      [color]="'var(--TOTAL)'"
+      [type]="'currency'"
+      [title]="'Total des montants sollicités dans le projet ' + projet?.nom"
+    ></app-kpi-badge-01>
+  </div>
+
+  <div cds-layout="col@lg:3 col@md:3 col@sm:12">
+    <app-kpi-badge-01
+      [value]="nbrTotalFonds || 0"
+      [color]="'var(--TOTAL)'"
+      [type]="'text'"
+      [title]="'# Fonds souscrit(s)'"
+    ></app-kpi-badge-01>
+  </div>
+</div>
+
+<!-- Stats -->
+<div cds-layout="m-t:lg p:none">
+  <div cds-layout="grid gap:lg align:stretch cols@lg:4 cols@md:4 cols@sm:12">
+    <app-kpi-badge-01
+      [value]="totalAction || 0"
+      [color]="'var(--ACTIONS)'"
+      [type]="'currency'"
+      [title]="'# Financement(s) en Actions (' + nbrAction + ')'"
+    ></app-kpi-badge-01>
+
+    <app-kpi-badge-01
+      [value]="totalOCA || 0"
+      [color]="'var(--OCA)'"
+      [type]="'currency'"
+      [title]="'# Financement(s) en OCA (' + nbrOCA + ')'"
+    ></app-kpi-badge-01>
+
+    <app-kpi-badge-01
+      [value]="totalCCA || 0"
+      [color]="'var(--CCA)'"
+      [type]="'currency'"
+      [title]="'# Financement(s) en CCA (' + nbrCCA + ')'"
+    ></app-kpi-badge-01>
+  </div>
+</div>

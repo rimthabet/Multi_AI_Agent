@@ -1,0 +1,255 @@
+<!--Dernier comité-->
+@if(lastComiteRecord != undefined) {
+<div cds-layout="m-y:md">
+    <clr-alert>
+        <clr-alert-item>
+            <span class="alert-text">
+                Le dernier comité a eu lieu le
+                <b> {{ lastComiteRecord?.dateComite | date }} </b>, la décision êtait d{{
+                lastComiteRecord?.decision == 0 ? "'" : "e "
+                }}
+                <b>{{ lastComiteRecord?.decisionEnum }}</b>.
+            </span>
+        </clr-alert-item>
+    </clr-alert>
+</div>
+}
+
+<!--Financement-->
+@if(financement == undefined) {
+<clr-alert [clrAlertType]="'danger'" cds-layout="m-y:md">
+    <clr-alert-item>
+        <span class="alert-text">
+            Aucun financement pour ce projet, n'a été spécifié au niveau de la
+            présélection. Veuillez en créer un et le choisir en haut!
+        </span>
+    </clr-alert-item>
+</clr-alert>
+}
+
+<!--Historique des comités-->
+<div cds-layout="m-y:lg">
+    <h4> <cds-icon shape="history" status="info" size="md"></cds-icon>Historique des comités</h4>
+    <clr-datagrid [(clrDgSingleSelected)]="selectedComite" style="margin-top: -1em">
+        <!--Actions-->
+        <clr-dg-action-bar>
+            <div cds-layout="horizontal gap:sm m-y:sm">
+                <cds-button action="outline" [disabled]="selectedComite == undefined" (click)="cancelSelection()">
+                    Désélectionner
+                </cds-button>
+
+                <cds-divider orientation="vertical" cds-layout="m-x:sm"></cds-divider>
+
+                <div class="btn-group">
+                    <cds-button [disabled]="selectedComite != undefined" (click)="addComiteInvestissement ()">
+                        <cds-icon shape="plus" size="md" solid></cds-icon>
+                        Ajouter un comité
+                    </cds-button>
+                </div>
+
+                <div class="btn-group">
+                    <cds-button status="danger" [disabled]="selectedComite == undefined"
+                        (click)="supprimerComiteInvestissement()">
+                        <cds-icon shape="trash" size="md" solid></cds-icon>
+                        Supprimer le comité
+                    </cds-button>
+                </div>
+            </div>
+        </clr-dg-action-bar>
+
+        <!--Colonnes-->
+        <clr-dg-column> Date du comité</clr-dg-column>
+        <clr-dg-column>Décision</clr-dg-column>
+        <clr-dg-column>Date du prochain comité</clr-dg-column>
+
+        <!--Lignes-->
+        <clr-dg-row *clrDgItems="let comite of comites; let i = index" [clrDgItem]="comite" [clrDgSelectable]="i == 0">
+            <clr-dg-cell>{{
+                comite.dateComite | date : "dd/MM/yyyy"
+                }}</clr-dg-cell>
+            <clr-dg-cell style="min-width: 180px" [style]="{
+                    letterSpacing: '2px',
+                    color:
+                      comite.decision == 0
+                        ? 'var(--clr-color-success-500)'
+                        : comite.decision == 1
+                        ? 'var(--clr-color-danger-500)'
+                        : 'var(--clr-color-action-500)'
+                  }">
+                @if(comite.decision == 0) {
+                <cds-icon shape="success-standard" size="md" status="success"></cds-icon>
+                }
+                @if(comite.decision == 1) {
+                <cds-icon shape="ban" size="md" status="danger"></cds-icon>
+                }
+                @if(comite.decision == 2) {
+                <cds-icon shape="eye" size="md" status="info" solid></cds-icon>
+                }
+
+                {{ comite.decisionEnum }}</clr-dg-cell>
+
+            <clr-dg-cell>{{ comite.nextDateComite | date }}</clr-dg-cell>
+            <clr-dg-row-detail [clrIfExpanded]="false">
+                <ng-container>
+                    @if(comite.decision == 2) {
+                    <div class="panel">
+                        <h5>Points à approfondir:</h5>
+                        {{ comite.points }}
+                    </div>
+                    }
+                    @if(comite.decision == 3) {
+                    <div class="panel">
+                        <h5>Réserves:</h5>
+                        {{ comite.reserve }}
+                    </div>
+                    }
+                </ng-container>
+            </clr-dg-row-detail>
+        </clr-dg-row>
+
+        <!--Footer-->
+        <clr-dg-footer>{{ comites.length }} comités</clr-dg-footer>
+    </clr-datagrid>
+
+
+    <!-- Modal Ajouter un comité -->
+    <clr-modal [(clrModalOpen)]="openModal" [clrModalSize]="'md'">
+        <h3 class="modal-title"> <cds-icon shape="plus" size="md" solid status="info"></cds-icon>Ajouter un comité</h3>
+        <!--Body-->
+        <div class="modal-body">
+            <!--Form-->
+            <form clrForm [formGroup]="comiteForm" class="clr-form-compact" clrLabelSize="4">
+                <clr-date-container>
+                    <label for="dateComite" class="clr-required-mark">Date:</label>
+                    <input clrDate type="date" formControlName="dateComite" name="dateComite" />
+                </clr-date-container>
+
+                <clr-radio-container clrInline>
+                    <label for="decision" class="clr-required-mark">Décision:</label>
+                    <clr-radio-wrapper>
+                        <input type="radio" clrRadio type="radio" name="decision" formControlName="decision"
+                            id="decision-1" value="0" />
+                        <label for="decision-1">Accepter</label>
+                    </clr-radio-wrapper>
+                    <clr-radio-wrapper>
+                        <input type="radio" clrRadio type="radio" name="decision" formControlName="decision"
+                            id="decision-2" value="1" />
+                        <label for="decision-2">Refuser</label>
+                    </clr-radio-wrapper>
+                    <clr-radio-wrapper>
+                        <input type="radio" clrRadio type="radio" name="decision" formControlName="decision"
+                            id="decision-3" value="2" />
+                        <label for="decision-3">Approfondir</label>
+                    </clr-radio-wrapper>
+                </clr-radio-container>
+            </form>
+        </div>
+        <!--Footer-->
+        <div class="modal-footer">
+            <cds-button action="outline" (click)="hideModalComite()">Annuler</cds-button>
+            @if(comiteForm.get('decision')?.value === '1') {
+            <cds-button [disabled]="comiteForm.get('decision')?.value !== '1'" (click)="saveComiteInvestissement()">
+                Sauvegarder
+            </cds-button>
+            }
+
+        </div>
+    </clr-modal>
+
+    <!-- Modal Approfondir -->
+    <clr-modal [(clrModalOpen)]="showApprofondirModal" [clrModalSize]="'lg'">
+        <h3 class="modal-title">Pour le prochain comité</h3>
+        <div class="modal-body">
+            <clr-alert>
+                <clr-alert-item>
+                    <span class="alert-text">
+                        Veuillez donner la date et les points à approfondir pour le
+                        prochain comité d'investissement et puis sauvegarder.
+                    </span>
+                </clr-alert-item>
+            </clr-alert>
+            <form clrForm [formGroup]="approfondirForm" clrLabelSize="4">
+                <clr-date-container>
+                    <label for="nextDateComite" class="clr-required-mark">Date du prochain comité: </label>
+                    <input clrDate type="date" formControlName="nextDateComite" name="nextDateComite" />
+                </clr-date-container>
+                <clr-textarea-container>
+                    <label for="points" class="clr-required-mark">Les points à approfondir:</label>
+                    <textarea clrTextarea name="points" formControlName="points" required cols="65" rows="7"></textarea>
+                </clr-textarea-container>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <cds-button action="outline" (click)="hideApprofondirModal()">Annuler</cds-button>
+            <cds-button [disabled]="approfondirForm.invalid" (click)="saveComiteInvestissement()">
+                <cds-icon shape="floppy" size="md"></cds-icon>
+                Sauvegarder
+            </cds-button>
+        </div>
+    </clr-modal>
+
+    <!-- Modal Reserve -->
+    <clr-modal [(clrModalOpen)]="showReserveModal" [clrModalSize]="'md'">
+        <h3 class="modal-title">Montants approuvés par le comité:</h3>
+        <div class="modal-body">
+            <clr-alert>
+                <clr-alert-item>
+                    <span class="alert-text">
+                        Les montants à saisir vont substituer les montants décidés dans la
+                        phase d'étude.
+                    </span>
+                </clr-alert-item>
+            </clr-alert>
+            <form clrForm [formGroup]="reserveForm" class="clr-form-compact" clrLabelSize="4">
+                <clr-number-input-container>
+                    <label for="montantActions" class="clr-required-mark">Montant en actions:</label>
+                    <input clrNumberInput type="number" formControlName="montantActions" name="montantActions" />
+                    <clr-control-helper>
+                        <span style="font-size: 110%; font-weight: 500">{{
+                            reserveForm.controls["montantActions"]!.value | number : "1.2-2"
+                            }} TND</span>
+                    </clr-control-helper>
+                </clr-number-input-container>
+
+                <clr-number-input-container>
+                    <label for="montantOCA" class="clr-required-mark">Montant en OCA:</label>
+                    <input clrNumberInput type="number" formControlName="montantOCA" name="montantOCA" />
+                    <clr-control-helper>
+                        <span style="font-size: 110%; font-weight: 500">{{
+                            reserveForm.controls["montantOCA"]!.value | number : "1.2-2"
+                            }} TND</span>
+                    </clr-control-helper>
+                </clr-number-input-container>
+
+                <clr-number-input-container>
+                    <label for="montantCCA" class="clr-required-mark">Montant en CCA:</label>
+                    <input clrNumberInput type="number" formControlName="montantCCA" name="montantCCA" />
+                    <clr-control-helper>
+                        <span style="font-size: 110%; font-weight: 500">{{
+                            reserveForm.controls["montantCCA"]!.value | number : "1.2-2"
+                            }} TND</span>
+                    </clr-control-helper>
+                </clr-number-input-container>
+
+                <div class="total_div">
+                    Montant total :
+                    <span style="font-size: 110%; font-weight: 500">{{ this.totalMontant | number : "1.2-2" }}
+                        TND</span>
+                </div>
+
+                @if(status == 3){
+                <clr-textarea-container>
+                    <label>Réserve(s):</label>
+                    <textarea clrTextarea required cols="39" rows="3" formControlName="reserve"
+                        name="reserve"></textarea>
+                </clr-textarea-container>
+                }
+            </form>
+        </div>
+        <div class="modal-footer">
+            <cds-button action="outline" (click)="hideReserveModal()">Annuler</cds-button>
+            <cds-button [disabled]="reserveForm.invalid" (click)="saveComiteInvestissement()">
+                <cds-icon shape="floppy"></cds-icon> Sauvegarder
+            </cds-button>
+        </div>
+    </clr-modal>

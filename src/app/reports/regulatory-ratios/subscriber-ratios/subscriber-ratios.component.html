@@ -1,0 +1,109 @@
+<!-- Loading Spinner -->
+<div
+  class="modal-backdrop"
+  aria-hidden="true"
+  [style.display]="loadingFunds || loadingRatios ? 'block' : 'none'"
+  (click)="loadingFunds = false; loadingRatios = false"
+>
+  <span
+    class="spinner"
+    style="
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    "
+    >Loading...</span
+  >
+</div>
+<!-- Header -->
+<span cds-text="title">
+  <cds-icon shape="gavel" size="lg" solid status="info"></cds-icon>
+  {{ getLabelForRatioType(ratioType) }}</span
+>
+
+<!-- Divider -->
+<cds-divider
+  cds-layout="m-t:xl "
+  class="htitled-divider"
+  title="Ratios des souscripteurs"
+></cds-divider>
+
+<!-- Search fonds -->
+<div cds-layout="horizontal align:left gap:md m-t:xl">
+  <clr-dropdown>
+    <cds-button size="md" action="outline" clrDropdownTrigger>
+      {{ selectedFonds?.fonds?.denomination }}
+      <cds-icon shape="angle" status="info" direction="down"></cds-icon>
+    </cds-button>
+
+    <clr-dropdown-menu *clrIfOpen>
+      @for (f of fonds; track $index) {
+      <div clrDropdownItem (click)="selectFonds(f)" onkeypress="">
+        {{ f.fonds?.denomination }}
+      </div>
+      }
+    </clr-dropdown-menu>
+  </clr-dropdown>
+
+  <span class="fund-name active" [style.marginBottom]="'0.2em'">
+    {{ selectedFonds?.fonds?.denomination }}
+    <cds-icon
+      onkeypress=""
+      shape="dashboard"
+      size="lg"
+      title="Cliquer pour consulter la fiche funds"
+      style="cursor: pointer"
+      (click)="goToFiche()"
+    ></cds-icon>
+  </span>
+</div>
+
+<!-- Fund state -->
+@if (selectedFonds?.fonds.etat.libelle == 'En liquidation' ||
+selectedFonds?.fonds.etat.libelle == 'En pré-liquidation') {
+<div class="badge badge-warning" cds-text="caption" cds-layout="p:sm">
+  Fonds {{ selectedFonds?.fonds.etat.libelle }}
+</div>
+}
+
+<!-- Divider -->
+<cds-divider
+  cds-layout="m-t:xl m-b:lg"
+  class="htitled-divider"
+  [title]="'Ratios atteints pour le ' + selectedFonds?.fonds?.denomination"
+></cds-divider>
+
+<!-- Ratios gauges -->
+<div cds-layout="m-t:lg">
+  <app-horizontal-scroller>
+    @for (i of investissements; track $index) {
+    <ng-template #itemTemplate>
+      <ngx-gauge
+        type="full"
+        cap="round"
+        [value]="i.progress >= 0 ? i.progress : 0"
+        [thick]="7"
+        [size]="130"
+        [min]="0"
+        [max]="100"
+        [append]="'%'"
+        [label]="i.annee + selectedFonds.fonds.nombreAnnees"
+        [foregroundColor]="parseForeColor(i.progress)"
+        [backgroundColor]="i.progress <= 0 ? '#ff000090' : '#ecf0f1'"
+      >
+        ></ngx-gauge
+      >
+    </ng-template>
+    }
+  </app-horizontal-scroller>
+</div>
+
+<!-- Ratios widget -->
+<ratios-widget
+  [fonds]="selectedFonds"
+  [type]="'souscripteur'"
+  [(investissements)]="investissements"
+  [title]="getWidgetTitle()"
+  [(loading)]="loadingRatios"
+></ratios-widget>

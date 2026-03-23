@@ -1,0 +1,53 @@
+.clr-form-horizontal .clr-form-control>.clr-control-label,
+.clr-form-horizontal .clr-form-control>.clr-form-control.clr-form-control-multi .clr-control-label {
+    margin-top: 0.48rem;
+}
+
+
+hr {
+    border: 0.3px dotted #dedede;
+    margin-top: 40px;
+}
+
+.calendar {
+    width: 250px;
+}
+
+.btn-upload {
+    width: 247px;
+    margin-left: 14px;
+    margin-top: 30px;
+}
+
+.label {
+    vertical-align: middle;
+    font-size: medium;
+    padding: 1em;
+}
+
+
+.statut-info {
+    font-size: 24px;
+    letter-spacing: 2px;
+    padding: 1em 0 0 0;
+
+    &.APPROUVE {
+        margin-top: .5em
+    }
+
+
+    span {
+
+        color: var(--clr-color-action-600);
+        font-weight: 900;
+
+        &.REFUSE {
+            color: var(--clr-color-danger-700) !important
+        }
+
+        &.APPROUVE {
+            color: var(--clr-color-success-700) !important
+        }
+    }
+
+}

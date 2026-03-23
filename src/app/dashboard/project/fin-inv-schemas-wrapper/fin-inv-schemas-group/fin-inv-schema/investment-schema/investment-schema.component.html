@@ -1,0 +1,36 @@
+<div
+  cds-layout="grid cols@sm:12 cols@md:12 cols@lg:6 cols@xl:6 cols@2xl:6 gap:xl"
+>
+  <clr-datagrid [clrDgLoading]="loading()" style="height: 410px">
+    <clr-dg-column [clrDgField]="'libelle'">Investissement</clr-dg-column>
+    <clr-dg-column>Montant (TND)</clr-dg-column>
+    <clr-dg-column>%</clr-dg-column>
+
+    <clr-dg-row
+      *clrDgItems="let investissement of investissements"
+      [clrDgItem]="investissement"
+    >
+      <clr-dg-cell>{{ investissement?.libelle }}</clr-dg-cell>
+      <clr-dg-cell class="text-right">{{
+        investissement?.montant | number : "1.0-0"
+      }}</clr-dg-cell>
+      <clr-dg-cell class="text-right">{{
+        investissement?.montant / (totalInvestissement() || 1)
+          | percent : "1.0-0"
+      }}</clr-dg-cell>
+    </clr-dg-row>
+    <clr-dg-footer>
+      Total Investissement :
+      <span class="digit"
+        >{{ totalInvestissement() | number : "1.0-0" }} <small>TND</small></span
+      >
+    </clr-dg-footer>
+  </clr-datagrid>
+
+  <div class="card" style="height: 399px; margin-top: 1em">
+    <app-pie-chart-04
+      [data]="investissements"
+      #pieChart04Component
+    ></app-pie-chart-04>
+  </div>
+</div>

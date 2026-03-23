@@ -1,0 +1,234 @@
+<!-- Header -->
+<span cds-text="title">
+  <cds-icon shape="bank" size="lg" status="info" cds-layout="m-b:sm"></cds-icon>
+  Inventaire des souscripteurs</span
+>
+
+<!-- Data grid -->
+<clr-datagrid
+  style="height: calc(100vh - 150px)"
+  [(clrDgSingleSelected)]="selectedItem"
+  [clrDgLoading]="loading"
+>
+  <!-- Actions -->
+  <clr-dg-action-bar>
+    <div class="btn-group">
+      <cds-button
+        action="outline"
+        status="primary"
+        (click)="showSouscripteurModal(true)"
+      >
+        <cds-icon shape="plus" size="md"></cds-icon> Ajouter
+      </cds-button>
+    </div>
+
+    <div class="btn-group">
+      <cds-button
+        action="outline"
+        status="warning"
+        [disabled]="!selectedItem?.id"
+        (click)="showSouscripteurModal(false)"
+      >
+        <cds-icon shape="note" size="md"></cds-icon> Modifier
+      </cds-button>
+    </div>
+
+    <div class="btn-group">
+      <cds-button
+        action="outline"
+        status="danger"
+        [disabled]="!selectedItem?.id"
+        (click)="deleteSouscripteur()"
+      >
+        <cds-icon shape="trash" size="md"></cds-icon> Supprimer
+      </cds-button>
+    </div>
+
+    <!-- Divider -->
+    <cds-divider
+      cds-layout="m-t:lg m-b:sm"
+      class="htitled-divider"
+      title="Inventaire des souscripteurs"
+    ></cds-divider>
+  </clr-dg-action-bar>
+
+  <!-- Columns definition -->
+  <clr-dg-column [clrDgField]="'libelle'"
+    ><cds-icon shape="bank"></cds-icon> &nbsp; Libellé</clr-dg-column
+  >
+  <clr-dg-column
+    ><cds-icon shape="world"></cds-icon> &nbsp; Nationalité</clr-dg-column
+  >
+  <clr-dg-column
+    ><cds-icon shape="plugin"></cds-icon> &nbsp; Catégorie de
+    Part</clr-dg-column
+  >
+  <clr-dg-column
+    ><cds-icon shape="building"></cds-icon> &nbsp; Établissement</clr-dg-column
+  >
+
+  <!-- Data Rows -->
+  <clr-dg-row
+    *clrDgItems="let souscripteur of souscripteurs"
+    [clrDgItem]="souscripteur"
+  >
+    <clr-dg-cell>{{ souscripteur.libelle }}</clr-dg-cell>
+    <clr-dg-cell>
+      @if (souscripteur.nationalite !== 'TUNISIENNE') {
+      <cds-icon
+        shape="world"
+        solid
+        size="md"
+        style="color: dodgerblue"
+      ></cds-icon>
+      } @else {
+      <span class="fi fi-tn" style="font-size: 16px"></span>
+      }
+
+      <span style="padding-left: 1em">
+        {{ souscripteur.nationalite }}
+      </span>
+    </clr-dg-cell>
+
+    <clr-dg-cell>{{ souscripteur.categoriePart }}</clr-dg-cell>
+    <clr-dg-cell>{{
+      souscripteur.etablissement != null
+        ? souscripteur.etablissement.libelle
+        : ""
+    }}</clr-dg-cell>
+  </clr-dg-row>
+
+  <!-- Footer -->
+  <clr-dg-footer>{{ souscripteurs.length }} Souscripteurs</clr-dg-footer>
+</clr-datagrid>
+
+<!-- Modal souscripteur CRUD -->
+<clr-modal
+  #modal
+  [(clrModalOpen)]="openModal"
+  [clrModalSize]="'md'"
+  [clrModalStaticBackdrop]="false"
+>
+  <!-- Header -->
+  <div class="modal-title">
+    <cds-icon
+      shape="bank"
+      size="lg"
+      status="info"
+      solid=""
+      cds-layout="m-b:xs"
+    ></cds-icon>
+    Souscripteur
+  </div>
+
+  <!-- Body -->
+  <div class="modal-body" cds-layout="p-t:xxs">
+    <!-- Form -->
+    <form clrForm [formGroup]="souscripteurForm" clrLabelSize="4">
+      <clr-input-container>
+        <label>Libellé:</label>
+        <input
+          clrInput
+          type="text"
+          formControlName="libelle"
+          name="libelle"
+          style="width: 340px"
+        />
+      </clr-input-container>
+
+      <clr-radio-container clrInline>
+        <label>Nationalité:</label>
+
+        <clr-radio-wrapper>
+          <input
+            type="radio"
+            clrRadio
+            name="nationalite"
+            formControlName="nationalite"
+            required
+            [value]="0"
+          />
+          <label>
+            <span class="fi fi-tn" style="font-size: 16px"></span>
+            TUNISIENNE
+          </label>
+        </clr-radio-wrapper>
+
+        <clr-radio-wrapper>
+          <input
+            type="radio"
+            clrRadio
+            name="nationalite"
+            formControlName="nationalite"
+            required
+            [value]="1"
+          />
+          <label>
+            <span class="fi fi-un" style="font-size: 16px"></span>
+            ÉTRANGÈRE
+          </label>
+        </clr-radio-wrapper>
+      </clr-radio-container>
+
+      <clr-radio-container clrInline>
+        <label>Catégorie de Part:</label>
+
+        <clr-radio-wrapper>
+          <input
+            type="radio"
+            clrRadio
+            name="categoriePart"
+            formControlName="categoriePart"
+            required
+            [value]="0"
+          />
+          <label>PartA</label>
+        </clr-radio-wrapper>
+
+        <clr-radio-wrapper>
+          <input
+            type="radio"
+            clrRadio
+            name="categoriePart"
+            formControlName="categoriePart"
+            required
+            [value]="1"
+          />
+          <label>PartB</label>
+        </clr-radio-wrapper>
+      </clr-radio-container>
+
+      <clr-select-container>
+        <label>Établissement:</label>
+        <select
+          clrSelect
+          name="options"
+          formControlName="etablissement"
+          class="calendar"
+          style="width: 340px"
+        >
+          <option>Choisir un établisement...</option>
+
+          @for (etablissement of etablissements; track $index) {
+          <option value="{{ etablissement?.id }}">
+            {{ etablissement?.libelle }}
+          </option>
+          }
+        </select>
+      </clr-select-container>
+    </form>
+  </div>
+
+  <!-- Footer -->
+  <div class="modal-footer">
+    <!-- Buttons -->
+    <cds-button action="outline" (click)="openModal = false">Annuler</cds-button
+    ><cds-button
+      status="primary"
+      [disabled]="this.souscripteurForm!.invalid"
+      (click)="saveSouscripteur()"
+    >
+      <cds-icon shape="floppy"></cds-icon>Sauvegarder
+    </cds-button>
+  </div>
+</clr-modal>

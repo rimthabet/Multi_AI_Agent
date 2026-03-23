@@ -1,0 +1,84 @@
+<!-- Divider -->
+<cds-divider cds-layout="m-t:xs" class="htitled-divider"
+  title="Veuillez remplir les informations du compte"></cds-divider>
+
+<!-- Form Bank Account stock -->
+<div cds-layout="m-t:xl m-l:md">
+  <form clrForm [formGroup]="bankAccountSaveForm!" clrLayout="horizontal" clrLabelSize="5">
+    <clr-number-input-container>
+      <label for="numeroCompte" class="clr-required-mark">N° du compte indisponible:</label>
+      <input clrNumberInput type="number" formControlName="numeroCompte" name="numeroCompte" />
+    </clr-number-input-container>
+
+    <clr-input-container>
+      <label for="banque" class="clr-required-mark">Nom de la banque:</label>
+      <input clrInput type="text" formControlName="banque" name="banque" />
+    </clr-input-container>
+
+    <clr-input-container>
+      <label for="agence" class="clr-required-mark">Agence:</label>
+      <input clrInput type="text" formControlName="agence" name="agence" />
+    </clr-input-container>
+
+    <clr-input-container>
+      <label for="greffeTribunal" class="clr-required-mark">Greffe du tribunal:</label>
+      <input clrInput type="text" formControlName="greffeTribunal" name="greffeTribunal" />
+    </clr-input-container>
+
+    <clr-date-container>
+      <label for="dateDepot" class="clr-required-mark">Date du déposition: </label>
+      <input clrDate type="date" formControlName="dateDepot" name="dateDepot" />
+    </clr-date-container>
+
+    <clr-date-container>
+      <label for="dateReunion" class="clr-required-mark">
+        >Date de la réunion de l'assemblée générale:
+      </label>
+      <input clrDate type="date" formControlName="dateReunion" name="dateReunion" />
+    </clr-date-container>
+
+    <clr-number-input-container>
+      <label for="capitalAvAugmentation" class="clr-required-mark">Capital avant augmentation:</label>
+      <input clrNumberInput type="number" formControlName="capitalAvAugmentation" name="capitalAvAugmentation" />
+      <clr-control-helper>{{
+        bankAccountSaveForm.controls["capitalAvAugmentation"].value
+        | currency : "tnd" : "symbol" : "1.2-2"
+        }}</clr-control-helper>
+    </clr-number-input-container>
+
+    <clr-number-input-container>
+      <label for="capitalApAugmentation" class="clr-required-mark">Capital aprés augmentation:</label>
+      <input clrNumberInput type="number" formControlName="capitalApAugmentation" name="capitalApAugmentation" />
+      <clr-control-helper>{{
+        bankAccountSaveForm.controls["capitalApAugmentation"].value
+        | currency : "tnd" : "symbol" : "1.2-2"
+        }}</clr-control-helper>
+    </clr-number-input-container>
+  </form>
+</div>
+
+<!-- Buttons -->
+<div cds-layout="horizontal m-t:xxl align:right">
+  <!-- Generate Bulletin -->
+  <div class="btn-group">
+    <cds-button status="primary" size="md" [disabled]="bankAccountSaveForm.invalid" (click)="generateBulletin()">
+      <cds-icon shape="floppy" size="md" solid></cds-icon> Générer le bulletin
+    </cds-button>
+  </div>
+
+  <!-- Save -->
+  <div class="btn-group">
+    <cds-button status="primary" size="md" [disabled]="bankAccountSaveForm.invalid" (click)="saveBankAccount()">
+      <cds-icon shape="floppy" size="md" solid></cds-icon>
+      Sauvegarder
+    </cds-button>
+  </div>
+
+  <!-- Cancel -->
+  <div class="btn-group">
+    <cds-button status="primary" size="md" [disabled]="bankAccountSaveForm.invalid" (click)="cancel()">
+      <cds-icon shape="floppy" size="md" solid></cds-icon>
+      Annuler
+    </cds-button>
+  </div>
+</div>

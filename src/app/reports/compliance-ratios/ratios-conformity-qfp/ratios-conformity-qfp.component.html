@@ -1,0 +1,169 @@
+<!-- Loading Spinner -->
+<div
+  class="modal-backdrop"
+  aria-hidden="true"
+  [style.display]="loadingFonds || loadingLiberations ? 'block' : 'none'"
+  (click)="loadingFonds = false; loadingLiberations = false"
+>
+  <span
+    class="spinner"
+    style="
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    "
+    >Loading...</span
+  >
+</div>
+
+<!-- Header -->
+<span cds-text="title">
+  <cds-icon shape="success-standard" size="lg" solid status="info"></cds-icon>
+  Ratios de conformité en quasi fonds propres</span
+>
+
+<!-- Divider -->
+<!-- <cds-divider cds-layout="m-t:lg m-b:sm" class="htitled-divider" title="Ratios de
+    conformité en quasi fonds propres"></cds-divider> -->
+
+<!-- Search fonds -->
+<div cds-layout="horizontal align:left gap:md m-t:xl">
+  <clr-dropdown>
+    <cds-button size="md" action="outline" clrDropdownTrigger>
+      {{ selectedFonds?.fonds?.denomination || "Nom du fonds ..." }}
+      <cds-icon shape="angle" status="info" direction="down"></cds-icon>
+    </cds-button>
+
+    <clr-dropdown-menu *clrIfOpen>
+      @for (f of fonds; track $index) {
+      <div clrDropdownItem (click)="selectFonds(f)" onkeypress="">
+        {{ f.fonds?.denomination }}
+      </div>
+      }
+    </clr-dropdown-menu>
+  </clr-dropdown>
+
+  <span class="fund-name active" [style.marginBottom]="'0.2em'">
+    {{ selectedFonds?.fonds?.denomination }}
+    <cds-icon
+      onkeypress=""
+      shape="dashboard"
+      size="lg"
+      title="Cliquer pour consulter la fiche funds"
+      style="cursor: pointer"
+      (click)="goToFiche()"
+    ></cds-icon>
+  </span>
+</div>
+
+<!-- Fund state -->
+@if (selectedFonds?.fonds.etat.libelle == 'En liquidation' ||
+selectedFonds?.fonds.etat.libelle == 'En pré-liquidation') {
+<div class="badge badge-warning" cds-text="caption" cds-layout="p:sm">
+  Fonds {{ selectedFonds?.fonds.etat.libelle }}
+</div>
+}
+
+<!-- Divider & Button -->
+<div cds-layout="horizontal gap:md">
+  <div cds-layout="align:stretch">
+    <cds-divider
+      cds-layout="m-t:lg m-b:sm"
+      class="htitled-divider"
+      title="
+        Pourcentage de participation du fonds au capital (>= 5%)"
+    ></cds-divider>
+  </div>
+  <div cds-layout="align:right">
+    <a
+      href="/fmsApi/ratio-conformite-en-quasi-fonds/{{
+        selectedFonds?.fonds?.id
+      }}"
+    >
+      <cds-button action="outline" status="primary" onKeyPress="">
+        <cds-icon shape="xls-file" status="info" size="md"></cds-icon> Générer
+        un rapport
+      </cds-button>
+    </a>
+  </div>
+</div>
+
+<!-- Ratios gauges -->
+@if (projets && projets.length > 0) {
+<div cds-layout="m-t:lg">
+  <app-horizontal-scroller>
+    @for (p of projets; track $index) {
+    <ng-template #itemTemplate>
+      <qfp-ratio-widget
+        [projet]="p"
+        [liberations]="liberations"
+        [selectedFonds]="selectedFonds"
+      ></qfp-ratio-widget>
+    </ng-template>
+    }
+  </app-horizontal-scroller>
+</div>
+}
+
+<!-- Ratios table -->
+<table class="table table-vertical">
+  <thead>
+    <th colspan="2" scope="row"></th>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Actif du fonds</th>
+      <td class="digit">{{ totalActif | number : "1.0-0" }} <sup>tnd</sup></td>
+    </tr>
+
+    <tr>
+      <th>Max à investir en quasi fonds propres</th>
+      <td class="digit">
+        {{
+          totalActif * selectedFonds?.fonds?.ratioQuasiFondPropre
+            | number : "1.0-0"
+        }}
+        <sup>tnd</sup>
+      </td>
+    </tr>
+    <tr>
+      <th>Actuellement investi en quasi fonds propres</th>
+      <td class="digit">
+        {{ totalInvesti | number : "1.0-0" }} <sup>tnd</sup>
+      </td>
+    </tr>
+    <tr>
+      <th>Ratio à respecter</th>
+      <td class="digit">
+        {{ selectedFonds?.fonds?.ratioQuasiFondPropre | percent : "1.0-0" }}
+      </td>
+    </tr>
+
+    <tr>
+      <th>Ratio quasi FP / actif du fonds</th>
+      <td
+        class="digit {{
+          ratioInvesti > selectedFonds?.fonds?.ratioQuasiFondPropre
+            ? 'failure'
+            : ''
+        }}"
+      >
+        {{ ratioInvesti | percent : "1.2-2" }}
+        @if (ratioInvesti > selectedFonds?.fonds?.ratioQuasiFondPropre) {
+        <cds-icon size="md" shape="error-standard" status="danger"></cds-icon>
+        }
+      </td>
+    </tr>
+    <tr>
+      <th>Restant à investir en quasi fonds propres</th>
+      <td class="digit">
+        {{
+          totalActif * selectedFonds?.fonds?.ratioQuasiFondPropre - totalInvesti
+            | number : "1.0-0"
+        }}
+        <sup>tnd</sup>
+      </td>
+    </tr>
+  </tbody>
+</table>

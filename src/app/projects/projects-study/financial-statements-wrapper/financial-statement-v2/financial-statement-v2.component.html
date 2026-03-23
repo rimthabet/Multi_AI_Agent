@@ -1,0 +1,219 @@
+<!-- Divider -->
+<cds-divider
+  cds-layout="m-t:lg m-b:xl"
+  class="htitled-divider"
+  title="Liste des itèmes financiers à saisir ou à calculer pour chaque année"
+></cds-divider>
+
+@if(loading) {
+<div class="progress-block" cds-layout="p:none m-y:xxs">
+  <label for="demoProgressBar">Traitement en cours...</label>
+  <clr-progress-bar clrValue="15" clrLoop></clr-progress-bar>
+</div>
+}
+<!-- Table -->
+<table class="table" cds-layout="m:none">
+  <thead>
+    <tr>
+      <th scope="col" colspan="4"></th>
+      @for (c of [].constructor(columns()); track $index) {
+      <th scope="col">
+        <div cds-layout="horizontal gap:sm align:center wrap:none">
+          <cds-icon
+            shape="refresh"
+            title="Recalculer les valeurs moyennant les dernières formules configurées"
+            class="icon-btn"
+            (click)="raiseRefreshEvent(getYearMinusColumnsPlus($index))"
+          ></cds-icon>
+          <cds-divider orientation="vertical"></cds-divider>
+          <span>{{ getYearMinusColumnsPlus($index) }}</span>
+          <cds-divider orientation="vertical"></cds-divider>
+          <cds-icon
+            shape="floppy"
+            title="Persister les valeurs"
+            class="icon-btn"
+            solid
+            (click)="raiseSaveEvent(getYearMinusColumnsPlus($index))"
+          ></cds-icon>
+        </div>
+      </th>
+      }
+    </tr>
+  </thead>
+
+  <tbody>
+    @for (item of financial_statement_items; track item.id) { @if (!item.leaf) {
+    <!-- LEVEL 1 - PARENT -->
+    <tr class="head {{ !item.input ? 'formula_row' : '' }}">
+      <th
+        scope="row"
+        class="left"
+        [attr.colspan]="item.input ? getColumnsPlus4() : 4"
+      >
+        {{ item.libelle }}
+      </th>
+      @if (!item.input) { @for (c of [].constructor(columns()); track $index) {
+      <th scope="row">
+        <financial-datum
+          [autonomous]="false"
+          [finDatum]="fetchFinDatum(item, year() - columns() + $index + 1)"
+          [finEntity]="item"
+          [years]="years()"
+          [row]="$index + 1"
+        >
+        </financial-datum>
+      </th>
+      } }
+    </tr>
+    } @if (item.leaf) {
+    <!-- LEVEL 1 - LEAF -->
+    <tr class="head {{ !item.input ? 'formula_row' : '' }}">
+      <th scope="row" class="left" colspan="4" style="min-width: 300px">
+        {{ item.libelle }}
+      </th>
+      @for (c of [].constructor(columns()); track $index) {
+      <th scope="row">
+        <financial-datum
+          [autonomous]="false"
+          [finDatum]="fetchFinDatum(item, year() - columns() + $index + 1)"
+          [finEntity]="item"
+          [years]="years()"
+          [row]="$index + 1"
+        >
+        </financial-datum>
+      </th>
+      }
+    </tr>
+    }
+
+    <!-- LEVEL 2 -->
+    @for (it of item.items; track it.id) {
+    <tr class="{{ !it.input ? 'formula_row' : '' }}">
+      @if (!it.leaf) {
+      <th scope="row"></th>
+      <th
+        scope="row"
+        class="left"
+        [attr.colspan]="it.input ? getColumnsPlus3() : 3"
+      >
+        {{ it.libelle }}
+      </th>
+      @if (!it.input) { @for (c of [].constructor(columns()); track $index) {
+      <th scope="row">
+        <financial-datum
+          [autonomous]="false"
+          [finDatum]="fetchFinDatum(it, year() - columns() + $index + 1)"
+          [finEntity]="it"
+          [years]="years()"
+          [row]="$index + 1"
+        >
+        </financial-datum>
+      </th>
+      } } } @if (it.leaf) {
+      <td></td>
+      <td class="left" [attr.colspan]="3">
+        {{ it.libelle }}
+      </td>
+      @for (c of [].constructor(columns()); track $index) {
+      <td>
+        <financial-datum
+          [autonomous]="false"
+          [finDatum]="fetchFinDatum(it, year() - columns() + $index + 1)"
+          [finEntity]="it"
+          [years]="years()"
+          [row]="$index + 1"
+        >
+        </financial-datum>
+      </td>
+      } }
+    </tr>
+
+    <!-- LEVEL 3 -->
+    @for (i of it.items; track i.id) {
+    <tr class="{{ !i.input ? 'formula_row' : '' }}">
+      @if (!i.leaf) {
+      <td></td>
+      <td></td>
+      <th
+        scope="row"
+        class="left"
+        [attr.colspan]="i.input ? getColumnsPlus2() : 2"
+      >
+        {{ i.libelle }}
+      </th>
+      @if (!i.input) { @for (c of [].constructor(columns()); track $index) {
+      <th scope="row">
+        <financial-datum
+          [autonomous]="false"
+          [finDatum]="fetchFinDatum(i, year() - columns() + $index + 1)"
+          [finEntity]="i"
+          [years]="years()"
+          [row]="$index + 1"
+        >
+        </financial-datum>
+      </th>
+      } } } @if (i.leaf) {
+      <td></td>
+      <td></td>
+      <td class="left" [attr.colspan]="2">
+        {{ i.libelle }}
+      </td>
+      @for (c of [].constructor(columns()); track $index) {
+      <td>
+        <financial-datum
+          [autonomous]="false"
+          [finDatum]="fetchFinDatum(i, year() - columns() + $index + 1)"
+          [finEntity]="i"
+          [years]="years()"
+          [row]="$index + 1"
+        >
+        </financial-datum>
+      </td>
+      } }
+    </tr>
+
+    <!-- LEVEL 4 -->
+    @for (k of i.items; track k.id) {
+    <tr class="{{ !k.input ? 'formula_row' : '' }}">
+      <td></td>
+      <td></td>
+      <td></td>
+      <td class="left">{{ k.libelle }}</td>
+      @for (c of [].constructor(columns()); track $index) {
+      <td>
+        <financial-datum
+          [autonomous]="false"
+          [finDatum]="fetchFinDatum(k, year() - columns() + $index + 1)"
+          [finEntity]="k"
+          [years]="years()"
+          [row]="$index + 1"
+        >
+        </financial-datum>
+      </td>
+      }
+    </tr>
+    } } } }
+  </tbody>
+</table>
+
+<!-- Legend -->
+<div cds-layout="m-y:xs">
+  <cds-icon
+    shape="stop"
+    style="
+      color: var(--cds-alias-object-interaction-color);
+      border: 1px solid gray;
+    "
+    solid
+  ></cds-icon>
+  : L'item financier est à saisir
+</div>
+<div>
+  <cds-icon
+    shape="stop"
+    style="color: var(--cds-alias-utility-dark-blue); border: 1px solid gray"
+    solid
+  ></cds-icon>
+  : L'item financier est calculé à base de la formule définie au niveau du
+  paramétrage
+</div>

@@ -1,0 +1,224 @@
+<!-- Project card -->
+<div
+  class="card"
+  title="{{ project()?.etatAvancement?.libelle }}"
+  [style.borderBottomColor]="project()?.projet.etatAvancement?.couleur"
+  [style.borderBottomWidth]="'3px'"
+  [style.borderBottomLeftRadius]="'10px'"
+  [style.borderBottomRightRadius]="'10px'"
+>
+  <!-- Header -->
+  <div
+    class="card-title"
+    cds-layout="horizontal align:stretch gap:lg"
+    [style.backgroundColor]="
+      themeColor().toLowerCase() == 'light'
+        ? project()?.projet.etatAvancement?.couleur
+        : 'transparent'
+    "
+  >
+    <!-- Project name -->
+    <h2
+      [title]="project()?.projet.nom"
+      [style.color]="
+        themeColor().toLowerCase() === 'light' ? 'white' : 'inherit'
+      "
+    >
+      {{ project()?.projet.nom }}
+    </h2>
+
+    <!-- Project Capital -->
+    <h2
+      cds-layout="align:right"
+      style="text-align: right"
+      title="Capital social"
+      [style.color]="
+        themeColor().toLowerCase() === 'light' ? 'white' : 'inherit'
+      "
+    >
+      <span cds-text="monospace">
+        {{
+          project()?.projet.actualCapital != null &&
+          project()?.projet.actualCapital != 0
+            ? (project()?.projet.actualCapital
+              | currency : "symbol" : "tnd" : "1.0-0")
+            : (project()?.projet.capitalSocial
+              | currency : "symbol" : "tnd" : "1.0-0")
+        }}
+      </span>
+    </h2>
+  </div>
+
+  <!-- Body -->
+  <div class="card-block" cds-layout="p-t:xxs">
+    <div class="card-text">
+      <!-- Informations / Specialisation -->
+      <div class="notice-01" cds-layout="m-b:xs m-t:none">
+        {{ project()?.projet.activite }}
+      </div>
+
+      <!-- Status -->
+      <section cds-layout="horizontal align:left gap:xs m-b:lg">
+        <cds-icon
+          shape="stop"
+          size="sm"
+          solid=""
+          [style.color]="project()?.projet.etatAvancement?.couleur"
+          [style.marginTop]="'2px'"
+        ></cds-icon>
+        Le projet est en état :
+        <span
+          [style.color]="project()?.projet.etatAvancement?.couleur"
+          [style.marginLeft]="'2px'"
+          >{{ project()?.projet.etatAvancement?.libelle }}</span
+        >
+        <cds-divider
+          orientation="vertical"
+          cds-layout="m-x:xs align:vertical-center"
+          style="height: 1.2em"
+        ></cds-divider>
+        <cds-icon
+          shape="flag"
+          size="md"
+          [status]="hasLitigationCase ? 'danger' : 'info'"
+          [solid]="hasLitigationCase"
+          (click)="showLitigationView = true"
+        >
+        </cds-icon>
+      </section>
+
+      <div cds-layout="horizontal align:stretch gap:lg m-b:lg m-t:xxl">
+        <!-- Adresse -->
+        <app-kpi-badge-01
+          [value]="project()?.projet.adresseSiege"
+          [type]="'text'"
+          [title]="'Adresse du siège social'"
+          [style.minWidth]="'150px'"
+          [size]="'small'"
+        ></app-kpi-badge-01>
+
+        <!-- Promoteur -->
+        <app-kpi-badge-01
+          [value]="project()?.projet.promoteur?.nom"
+          [type]="'text'"
+          [title]="'Promoteur'"
+          [style.minWidth]="'150px'"
+          [size]="'small'"
+        ></app-kpi-badge-01>
+
+        <!-- Secteur -->
+        <app-kpi-badge-01
+          [value]="project()?.projet.secteurs[0]?.libelle"
+          [type]="'text'"
+          [title]="'Secteur'"
+          [style.minWidth]="'150px'"
+          [size]="'small'"
+        ></app-kpi-badge-01>
+
+        <!-- Type d'investissement -->
+        <app-kpi-badge-01
+          [value]="project()?.projet.typeInvestissement?.libelle"
+          [type]="'text'"
+          [title]="'Type d\'investissement'"
+          [style.minWidth]="'150px'"
+          [size]="'small'"
+        ></app-kpi-badge-01>
+
+        <!-- Nature d'investissement -->
+        <app-kpi-badge-01
+          [value]="project()?.projet.natureInvestissement?.libelle"
+          [type]="'text'"
+          [title]="'Nature d\'investissement'"
+          [style.minWidth]="'150px'"
+          [size]="'small'"
+        ></app-kpi-badge-01>
+
+        <!--Criteres de selection -->
+        <app-kpi-badge-01
+          [value]="criteresPreselection()"
+          [type]="'text'"
+          [title]="'Criteres de sélection'"
+          [style.minWidth]="'150px'"
+          [size]="'small'"
+        ></app-kpi-badge-01>
+
+        <!--Criteres de selection -->
+        <app-kpi-badge-01
+          [value]="checkoutFunds()"
+          [type]="'text'"
+          [title]="'Fonds associés'"
+          [style.minWidth]="'150px'"
+          [size]="'small'"
+        ></app-kpi-badge-01>
+      </div>
+
+      <div class="card-footer" style="padding: 1.5em 0 0 0">
+        <div cds-layout="horizontal align:vertical-center wrap">
+          <div cds-layout="horizontal align:vertical-center wrap">
+            <cds-button
+              action="outline"
+              [routerLink]="['/projects/edition/', project()?.projet.id]"
+              style="margin-right: 8px"
+            >
+              <cds-icon shape="form" size="sm" solid=""></cds-icon> Éditer le
+              projet
+            </cds-button>
+
+            <cds-button
+              (click)="showEtatChangeMondel()"
+              action="outline"
+              status="neutral"
+              style="margin-right: 8px"
+            >
+              <cds-icon shape="note" solid="" size="sm"></cds-icon>État du
+              projet
+            </cds-button>
+
+            <cds-divider
+              orientation="vertical"
+              cds-layout="m-x:xs align:vertical-center"
+              style="height: 1.8em"
+            ></cds-divider>
+
+            <cds-button
+              action="outline"
+              status="warning"
+              (click)="showLitigationWizard = true"
+              style="margin-left: 8px; margin-right: 8px"
+            >
+              <cds-icon shape="gavel" solid="" size="20"></cds-icon>
+              Contentieux
+            </cds-button>
+          </div>
+
+          <div cds-layout="align:right">
+            <cds-button
+              action="outline"
+              status="success"
+              [routerLink]="['/dashboard/projects/', project()?.projet.id]"
+            >
+              Fiche du projet
+              <cds-icon shape="eye" size="sm" solid=""></cds-icon>
+            </cds-button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--  Dossier Contentieux -->
+@if(showLitigationWizard){
+<project-litigation-form
+  [(open)]="showLitigationWizard"
+  [project]="project()"
+></project-litigation-form>
+}
+
+<!-- Litigation View -->
+@if(showLitigationView){
+<litigation-view
+  [(open)]="showLitigationView"
+  [project]="project()"
+></litigation-view>
+}

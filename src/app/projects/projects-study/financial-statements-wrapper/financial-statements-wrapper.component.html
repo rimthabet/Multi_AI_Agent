@@ -1,0 +1,46 @@
+<!-- Form -->
+<div cds-layout="horizontal align:stretch">
+  <form clrForm [formGroup]="yearForm!" clrLabelSize="6">
+    <clr-number-input-container>
+      <label>Année des derniers états financiers à saisir:</label>
+      <input clrNumberInput type="number" formControlName="year" name="year" />
+    </clr-number-input-container>
+  </form>
+
+  <div cds-layout="horizontal align:right m-t:xs m-b:xs">
+    <button
+      class="btn btn-outline"
+      (click)="exportFinancialDataToExcel()"
+      [disabled]="isExporting"
+    >
+      <cds-icon shape="xls-file" size="md"></cds-icon>
+      {{ isExporting ? "Export en cours..." : "Export sur Excel" }}
+    </button>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div cds-layout="m-y:md">
+  <clr-tabs>
+    @for(item of fin_statements; track $index) {
+    <clr-tab>
+      <button (click)="selectedTab = $index" clrTabLink [title]="item.libelle">
+        {{ item.libelle }}
+      </button>
+
+      <clr-tab-content *clrIfActive="selectedTab == $index">
+        <financial-statement-v2
+          [prospection]="prospection()"
+          [ref2]="-1"
+          [ref3]="-1"
+          [ref4]="-1"
+          [ref5]="-1"
+          [item]="item"
+          [data]="items"
+          [year]="yearForm.controls['year'].value"
+        ></financial-statement-v2>
+      </clr-tab-content>
+    </clr-tab>
+    }
+  </clr-tabs>
+</div>

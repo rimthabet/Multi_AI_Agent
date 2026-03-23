@@ -1,0 +1,22 @@
+h4 {
+    margin-top: .1em;
+    color: var(--clr-color-neutron-200);
+}
+
+h1 {
+    color: var(--clr-color-action-700);
+
+    cds-icon {
+        visibility: hidden;
+    }
+
+    &:hover cds-icon {
+        visibility: visible;
+        cursor: pointer;
+    }
+}
+
+h2 {
+    font-weight: 500;
+    color: var(--clr-color-action-600);
+}

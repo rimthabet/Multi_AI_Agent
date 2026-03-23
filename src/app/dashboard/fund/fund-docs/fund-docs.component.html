@@ -1,0 +1,33 @@
+<cds-form-group [formGroup]="searchPatternForm" cds-layout="m-b:md">
+  <cds-search>
+    <label cds-layout="display:screen-reader-only">Recherche</label>
+    <input
+      type="search"
+      placeholder="Recherche"
+      formControlName="pattern"
+      name="pattern"
+    />
+  </cds-search>
+</cds-form-group>
+
+<div class="kpi" style="overflow-y: scroll; max-height: 215px">
+  @for(d of filteredDocs; track $index) {
+  <div
+    class="name"
+    style="
+      font-variant: normal !important ;
+      color: var(--cds-alias-object-interaction-color);
+    "
+    [title]="d.titre"
+  >
+    <cds-icon
+      shape="file"
+      status="info"
+      size="sm"
+      cds-layout="m-r:xxs"
+      solid=""
+    ></cds-icon>
+    <a [href]="d.chemin" target="_blank">{{ d.titre }}</a>
+  </div>
+  }
+</div>

@@ -1,0 +1,180 @@
+<!-- Header -->
+<span cds-text="title">
+  <cds-icon
+    shape="gavel"
+    size="lg"
+    status="info"
+    cds-layout="m-b:sm"
+  ></cds-icon>
+  Comités d'investissement des fonds</span
+>
+
+<!-- Divider -->
+<cds-divider
+  cds-layout="m-t:lg "
+  class="htitled-divider"
+  title="Inventaire des comités d'investissement par fonds"
+></cds-divider>
+
+<!-- Search fonds -->
+<div cds-layout="horizontal align:left gap:md m-t:xl">
+ <clr-combobox-container style="margin-top: 0.7em !important">
+  <clr-combobox
+    [(ngModel)]="selectedFonds"
+    name="fondsName"
+    (ngModelChange)="switchTheFund($event)"
+  >
+
+    <!-- Affichage du fonds sélectionné -->
+    <ng-container *clrOptionSelected="let selected">
+      <cds-icon
+        shape="filter-grid"
+        role="img"
+        aria-label="fonds list"
+      ></cds-icon>
+      {{ selected?.denomination }}
+    </ng-container>
+
+    <!-- Options -->
+    <clr-options>
+      <clr-option
+        *clrOptionItems="let f of fonds; field: 'denomination'"
+        [clrValue]="f"
+      >
+        <cds-icon
+          shape="filter-grid"
+          role="img"
+          aria-label="fonds list"
+        ></cds-icon>
+        {{ f.denomination }}
+      </clr-option>
+    </clr-options>
+
+  </clr-combobox>
+
+</clr-combobox-container>
+
+  <div
+    class="fund-name {{ selectedFonds ? 'active' : '' }}"
+    style="margin-top: 0px !important"
+  >
+    {{ selectedFonds ? selectedFonds.denomination : "Nom du projet ..." }}
+    <cds-icon
+      onkeypress=""
+      shape="dashboard"
+      size="lg"
+      title="Cliquer pour consulter la fiche projet"
+      style="cursor: pointer"
+      (click)="goToFiche()"
+    ></cds-icon>
+  </div>
+</div>
+
+<!-- Data grid -->
+<clr-datagrid
+  style="clear: both; height: calc(100vh - 220px)"
+  [clrDgLoading]="loading"
+>
+  <clr-dg-column
+    [clrDgField]="'ci.dateComite'"
+    [style.width]="'200px'"
+    class="datagrid-compact"
+    >Date du comité</clr-dg-column
+  >
+  <clr-dg-column
+    [clrDgField]="'ci.financement.projet.nom'"
+    [style.width]="'300px'"
+    >Nom du projet</clr-dg-column
+  >
+  <clr-dg-column [style.width]="'200px'">Décision</clr-dg-column>
+  <clr-dg-column>Montant approuvé</clr-dg-column>
+
+  <!-- Rows -->
+  <clr-dg-row
+    *clrDgItems="let comite of comites; let i = index"
+    [clrDgItem]="comite"
+    [clrDgSelectable]="i == 0"
+  >
+    <clr-dg-cell>{{ comite.ci.dateComite | date : "dd/MM/yyyy" }}</clr-dg-cell>
+    <clr-dg-cell class="text-left">
+      <a
+        class="show-hide-icon"
+        style="margin-top: auto; color: var(--cds-alias-status-info)"
+        [routerLink]="[
+          '/dashboard/projects/',
+          comite?.ci?.financement?.projet?.id
+        ]"
+      >
+        {{ comite.ci.financement.projet.nom }}
+        <cds-icon shape="link" size="sm"></cds-icon>
+      </a>
+    </clr-dg-cell>
+    <clr-dg-cell
+      [style]="{
+        letterSpacing: '2px',
+        fontSize: '14px',
+        color:
+          comite.ci.decision == 0
+            ? 'var(--clr-color-success-500)'
+            : comite.ci.decision == 1
+            ? 'var(--clr-color-danger-500)'
+            : 'var(--clr-color-action-500)'
+      }"
+    >
+      @if(comite.ci.decision == 0) {
+      <cds-icon shape="success-standard" size="md" status="success"></cds-icon>
+      } @else if(comite.ci.decision == 1) {
+      <cds-icon shape="ban" size="md" status="danger"></cds-icon>
+      } @else if(comite.ci.decision == 2) {
+      <cds-icon shape="eye" size="md" status="info" solid></cds-icon>
+      } @else if(comite.ci.decision == 3) {
+      <cds-icon shape="success-standard" size="md" status="info"></cds-icon>
+      }
+      {{ decisionText(comite.ci.decision) }}
+    </clr-dg-cell>
+
+    <clr-dg-cell>
+      <div class="cell-content">
+        <div class="calculate-total">
+          {{ calculateMontantTotal(comite) | number : "1.0-0" }} <sup>tnd</sup>
+        </div>
+        <div class="badges-container">
+          <span class="badge">Actions</span>
+          <span class="badge-value">{{
+            comite.pfa.montantActions | number : "1.0-0"
+          }}</span>
+          <span class="badge"> OCA</span
+          ><span class="badge-value">{{
+            comite.pfa.montantOCA | number : "1.0-0"
+          }}</span>
+          <span class="badge"> CCA</span
+          ><span class="badge-value">{{
+            comite.pfa.montantCCA | number : "1.0-0"
+          }}</span>
+        </div>
+      </div>
+    </clr-dg-cell>
+
+    <!-- Row details -->
+    @if(comite.ci.decision == 2 || comite.ci.decision == 3) {
+    <clr-dg-row-detail [clrIfExpanded]="false">
+      @if(comite.ci.decision == 2) {
+      <div cds-layout="vertical" style="padding-left: 3px">
+        <span cds-text="section">Points à approfondir:</span>
+        &nbsp;
+        <span cds-text="subsection">{{ comite.points }}</span>
+      </div>
+      } @if(comite.ci.decision == 3) {
+      <div cds-layout="vertical" style="padding-left: 3px">
+        <span cds-text="section">Réserves:</span>
+        &nbsp;
+        <span cds-text="subsection">{{ comite.ci.reserve }}</span>
+      </div>
+      }
+    </clr-dg-row-detail>
+    }
+  </clr-dg-row>
+
+  <!-- Footer -->
+  <clr-dg-footer>{{ comites.length }} comités</clr-dg-footer>
+</clr-datagrid>

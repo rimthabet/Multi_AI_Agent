@@ -1,0 +1,133 @@
+<!-- Header -->
+<span cds-text="title">
+    <cds-icon shape="cursor-hand" status="info" solid size="lg"></cds-icon> Faits Marquants
+</span>
+
+
+<!-- Search project -->
+<div cds-layout="horizontal align:left gap:md m-t:xl">
+    <clr-dropdown>
+        <cds-button size="md" action="outline" clrDropdownTrigger>
+            {{ selectedProjet?.nom }}
+            <cds-icon shape="angle" status="info" direction="down"></cds-icon>
+        </cds-button>
+
+        <clr-dropdown-menu *clrIfOpen>
+            @for (p of projets; track p.id) {
+            <div clrDropdownItem (click)="setProjet(p)" onkeypress="">
+                {{ p.nom | uppercase }}
+            </div>
+            }
+        </clr-dropdown-menu>
+    </clr-dropdown>
+
+    <!-- Project name -->
+    <div class="project-name {{ selectedProjet ? 'active' : '' }}" style="margin-top: 0px !important">
+        {{ selectedProjet ? selectedProjet.nom : "Nom du projet ..." }}
+        <cds-icon onkeypress="" shape="dashboard" size="lg" title="Cliquer pour consulter la fiche projet"
+            style="cursor: pointer" (click)="goToFiche()"></cds-icon>
+    </div>
+</div>
+
+<!-- Tabs -->
+<div cds-layout="m-y:sm">
+    <clr-tabs>
+        <clr-tab>
+            <button clrTabLink id="link1">
+                <cds-icon shape="add-text" size="md"></cds-icon>
+                Nouveau fait marquant
+            </button>
+            <clr-tab-content id="content1" *clrIfActive="true">
+                <landmark-event-create-form [projet]="selectedProjet"
+                    (refreshEvent)="loadFaitsMarquants()"></landmark-event-create-form>
+            </clr-tab-content>
+        </clr-tab>
+
+        <clr-tab>
+            <button clrTabLink>
+                <cds-icon shape="history" size="md"></cds-icon>
+                Historique des faits marquants
+            </button>
+            <clr-tab-content *clrIfActive>
+                <clr-datagrid style="clear: both; height: calc(100vh - 250px)" [clrDgLoading]="loading">
+                    <clr-dg-column [clrDgField]="'dateFM'" [style.maxWidth]="'250px'">Date du fait
+                        marquant</clr-dg-column>
+                    <clr-dg-column>Fait marquant</clr-dg-column>
+
+                    <!-- Rows -->
+                    <clr-dg-row *clrDgItems="let f of faitsMarquants!; let odd = odd" [style.backgroundColor]="
+                odd
+                  ? 'var(--cds-alias-viz-sequential-blue-50) !important'
+                  : 'var(--cds-alias-viz-severity-free-space-fill) !important'
+              ">
+                        <!-- Actions -->
+                        <clr-dg-action-overflow>
+                            <button class="action-item" (click)="openEditModal(f)">
+                                <cds-icon shape="note" sise="md" solid status="info"></cds-icon>
+                                Modifier le fait marquant
+                            </button>
+                            <button class="action-item" (click)="deleteFaitMarquant(f)">
+                                <cds-icon shape="trash" status="danger" [style.cursor]="'pointer'" solid
+                                    (click)="deleteFaitMarquant(f)"></cds-icon>
+                                Supprimer le fait marquant
+                            </button>
+                        </clr-dg-action-overflow>
+
+                        <!-- Cells -->
+                        <clr-dg-cell [style.maxWidth]="'250px'">{{
+                            f.dateFM | date : "dd/MM/yyyy"
+                            }}</clr-dg-cell>
+                        <clr-dg-cell>
+                            <cds-divider cds-layout="m-y:lg" class="htitled-divider"
+                                title="PV de la réunion"></cds-divider>
+
+                            <div cds-layout="horizontal align:left gap:md">
+                                @for(document of f.documents; track $index) {
+
+                                <a [href]="trimPath(document.chemin)" target="_blank" cds-layout="align:left"
+                                    class="label">
+                                    {{ document.nomFichier }}</a>
+
+                                } @if(f.documents?.length == 0) {
+                                <span><cds-icon shape="no-access" solid="" size="18" status="danger"></cds-icon>
+                                    Document manquant!
+                                </span>
+                                }
+                            </div>
+
+                            <cds-divider cds-layout="m-y:lg" class="htitled-divider"
+                                title="Télécharement"></cds-divider>
+
+                            <document-upload [mode]="'modal'" [compliance]="{
+                    conformite: fm_conformite_documentaire[0]
+                  }" [data]="f" [task_row]="5" [phase_row]="5"
+                                (documentUploadedEvent)="loadFaitsMarquants()"></document-upload>
+
+                            <cds-divider cds-layout="m-y:lg" class="htitled-divider"
+                                title="Fait marquant"></cds-divider>
+
+                            <section cds-text="body justify" cds-layout="p:lg m-b:lg" class="panel"
+                                [innerHTML]="formatMD2HTML(f.commentaires)"></section>
+                        </clr-dg-cell>
+                    </clr-dg-row>
+
+                    <!-- Footer -->
+                    <clr-dg-footer>{{ faitsMarquants!.length }} faits marquants</clr-dg-footer>
+                </clr-datagrid>
+            </clr-tab-content>
+        </clr-tab>
+    </clr-tabs>
+</div>
+
+
+
+<!-- Modal Fait Marquant -->
+<clr-modal [clrModalSize]="'lg'" [(clrModalOpen)]="opened">
+    <h3 class="modal-title">
+        <cds-icon shape="cursor-hand" size="md" solid status="info"></cds-icon> Faits Marquants
+    </h3>
+    <div class="modal-body">
+        <landmark-event-create-form [fm]="selectedFm" [projet]="selectedProjet" (closeModal)="opened = false"
+            (refreshEvent)="loadFaitsMarquants()"></landmark-event-create-form>
+    </div>
+</clr-modal>

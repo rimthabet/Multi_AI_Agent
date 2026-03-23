@@ -1,0 +1,130 @@
+<div class="card">
+  <div
+    class="card-block"
+    cds-layout="grid cols:4 cols@sm:12 cols@md:6 cols@lg:4 cols@xl:4 cols@2xl:4 align:stretch gap:md"
+  >
+    <!-- Bloc 1 : Total investi -->
+    <app-kpi-badge-01
+      [value]="totalActions + totalOCA + totalCCA"
+      [color]="'var(--TOTAL)'"
+      [type]="'currency'"
+      [title]="'Total investi'"
+      [primary]="false"
+    ></app-kpi-badge-01>
+
+    <!-- Bloc 2 : Nombre de fonds et nombre de souscriptions -->
+    <!-- Bloc : Nombre de fonds -->
+    <app-kpi-badge-01
+      [value]="(nombreFonds | number : '1.0-0') + ' Fonds souscrit(s)'"
+      [type]="'text'"
+      [primary]="false"
+      [title]="'# Souscription(s) (' + (data!.length || 0) + ')'"
+    ></app-kpi-badge-01>
+
+    <!-- Bloc : Nombre de souscriptions -->
+    <app-kpi-badge-01
+      [value]="totalActions + totalOCA + totalCCA + ''"
+      [type]="'currency'"
+      [primary]="false"
+      [title]="'# Souscription(s) (' + (data!.length || 0) + ')'"
+    ></app-kpi-badge-01>
+  </div>
+</div>
+
+<!-- Divider -->
+<cds-divider
+  class="htitled-divider centered"
+  cds-layout="m-y:xl"
+  title="{{ data?.length || 0 }} Souscriptions / Engagements"
+></cds-divider>
+
+<!-- Bloc 3 : Nombre de souscriptions ACTIONS, OCA et CCA -->
+
+<div class="card">
+  <div
+    class="card-block"
+    cds-layout="grid cols@sm:12 cols@md:12 cols@lg:4 cols@xl:4 cols@2xl:4 gap:lg align:stretch"
+  >
+    <!-- Bloc : Nombre de souscriptions ACTIONS -->
+
+    <app-kpi-badge-01
+      [value]="totalActions"
+      [color]="'var(--ACTIONS)'"
+      [type]="'currency'"
+      [primary]="false"
+      [title]="'# Souscription(s) Actions (' + (NbrActions || 0) + ')'"
+    ></app-kpi-badge-01>
+
+    <!-- Bloc : Nombre de souscriptions OCA -->
+
+    <app-kpi-badge-01
+      [value]="totalOCA"
+      [color]="'var(--OCA)'"
+      [type]="'currency'"
+      [primary]="false"
+      [title]="'# Souscription(s) OCA (' + (NbrOCA || 0) + ')'"
+    ></app-kpi-badge-01>
+
+    <!-- Bloc : Nombre de souscriptions CCA -->
+
+    <app-kpi-badge-01
+      [value]="totalCCA"
+      [color]="'var(--CCA)'"
+      [type]="'currency'"
+      [primary]="false"
+      [title]="'# Souscription(s) CCA (' + (NbrCCA || 0) + ')'"
+    ></app-kpi-badge-01>
+
+    <cds-divider
+      cds-layout="col@sm:12 col@md:12 col@lg:12 col@xl:12 col@2xl:12"
+    ></cds-divider>
+
+    <!-- Bloc : Nombre de souscriptions ACTIONS -->
+
+    <app-kpi-badge-01
+      [value]="souscriptionMin?.montant"
+      [type]="'currency'"
+      [color]="
+        souscriptionMin?.type == 'Actions'
+          ? 'var(--ACTIONS)'
+          : souscriptionMin?.type == 'OCA'
+          ? 'var(--OCA)'
+          : 'var(--CCA)'
+      "
+      [primary]="false"
+      [title]="
+        'Participation Engagée Minimale (' + (souscriptionMin?.type || '') + ')'
+      "
+      [description]="souscriptionMin?.fonds?.denomination"
+    ></app-kpi-badge-01>
+
+    <!-- Bloc : Nombre de souscriptions OCA -->
+
+    <app-kpi-badge-01
+      [value]="souscriptionMax?.montant"
+      [type]="'currency'"
+      [color]="
+        souscriptionMax?.type == 'Actions'
+          ? 'var(--ACTIONS)'
+          : souscriptionMax?.type == 'OCA'
+          ? 'var(--OCA)'
+          : 'var(--CCA)'
+      "
+      [primary]="false"
+      [title]="
+        'Participation Engagée Maximale (' + (souscriptionMax?.type || '') + ')'
+      "
+      [description]="souscriptionMax?.fonds?.denomination"
+    ></app-kpi-badge-01>
+
+    <!-- Bloc : Nombre de souscriptions CCA -->
+
+    <app-kpi-badge-01
+      [value]="(totalActions + totalOCA + totalCCA) / (data!.length || 0)"
+      [type]="'currency'"
+      [primary]="false"
+      [title]="'Participation Engagée Moyenne'"
+      [description]="'Participation Engagée Moyenne'"
+    ></app-kpi-badge-01>
+  </div>
+</div>

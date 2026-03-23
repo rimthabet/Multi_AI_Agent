@@ -1,0 +1,130 @@
+<!--STATS-->
+<div cds-layout="horizontal gap:md align:stretch m-y:md">
+  <app-kpi-badge-01
+    [title]="'# Nominal Action'"
+    [value]="valeurAction()"
+    [type]="'number'"
+    [size]="'large'"
+    [color]="'var(--cds-alias-viz-sequential-blue-600)'"
+  >
+  </app-kpi-badge-01>
+
+  <app-kpi-badge-01
+    [title]="'# Actionnaires'"
+    [value]="total_actionnaires"
+    [type]="'number'"
+    [size]="'large'"
+    [color]="'var(--cds-alias-status-info-shade)'"
+  >
+  </app-kpi-badge-01>
+
+  <app-kpi-badge-01
+    [title]="'# Actions'"
+    [value]="total_nombre_action"
+    [type]="'number'"
+    [size]="'large'"
+    [color]="'var(--cds-alias-viz-sequential-aqua-600)'"
+  >
+  </app-kpi-badge-01>
+
+  <app-kpi-badge-01
+    [title]="'# Capital social'"
+    [value]="total_nombre_action * valeurAction()"
+    [type]="'currency'"
+    [size]="'large'"
+    [color]="'var(--cds-alias-viz-sequential-aqua-800)'"
+  >
+  </app-kpi-badge-01>
+</div>
+
+<!--DATA GRID ACTIONNAIRES-->
+<clr-datagrid
+  [clrDgLoading]="loading()"
+  [(clrDgSingleSelected)]="selectedActionnaire"
+  [style.height]="height"
+  style="margin-top: -1.5em"
+>
+  <clr-dg-action-bar>
+    <div class="btn-group">
+      <cds-button (click)="addActionnaire()">
+        <cds-icon shape="plus" sise="md" solid></cds-icon> Ajouter un
+        actionnaire avant participation
+      </cds-button>
+    </div>
+    <div class="btn-group">
+      <cds-button
+        status="danger"
+        [disabled]="
+          !selectedActionnaire ||
+          selectedActionnaire.nbrActionsApAugmentation > 0
+        "
+        (click)="supprimerActionnaire()"
+      >
+        <cds-icon shape="trash" sise="md" solid></cds-icon> Supprimer
+        l'actionnaire
+      </cds-button>
+    </div>
+  </clr-dg-action-bar>
+
+  <clr-dg-column>Actionnaire</clr-dg-column>
+  <clr-dg-column>Nombre d'actions</clr-dg-column>
+  <clr-dg-column>Montant (tnd)</clr-dg-column>
+  <clr-dg-column></clr-dg-column>
+  <clr-dg-row
+    [class]="actionnaire.isFund ? 'fund-row' : ''"
+    *clrDgItems="let actionnaire of actionnaires_av"
+    [clrDgItem]="actionnaire"
+    [clrDgSelectable]="
+      actionnaire?.financement?.id == financement()?.id &&
+      (actionnaire?.nbrActionsApAugmentation == null ||
+        actionnaire?.nbrActionsApAugmentation == 0)
+    "
+  >
+    <clr-dg-cell class="secret"
+      >{{ actionnaire.libelle }}
+      @if(actionnaire.isFund){
+      <span>({{ actionnaire.fundRaisings }})</span>
+      }
+    </clr-dg-cell>
+
+    <clr-dg-cell class="text-right">{{
+      actionnaire.nbrActionsAvAugmentation | number : "1.0-0"
+    }}</clr-dg-cell>
+
+    <clr-dg-cell class="text-right">{{
+      actionnaire.nbrActionsAvAugmentation * valeurAction() | number : "1.0-0"
+    }}</clr-dg-cell>
+
+    <clr-dg-cell class="text-right">{{
+      actionnaire.nbrActionsAvAugmentation / total_nombre_action
+        | percent : "1.3-3"
+    }}</clr-dg-cell>
+  </clr-dg-row>
+
+  <clr-dg-footer
+    >Total actions :
+    <span class="digit">{{ total_nombre_action | number : "1.0-0" }}</span>
+    Total montant :
+    <span class="digit">{{
+      total_nombre_action * valeurAction() | number : "1.0-0"
+    }}</span>
+    <sup>tnd</sup></clr-dg-footer
+  >
+  >
+</clr-datagrid>
+
+<!-- FOOTER-->
+<div cds-layout="align:left m-y:xs">
+  (<cds-icon shape="asterisk" size="sm" solid status="info"></cds-icon>) :
+  Nombre de financements réalisés par ce fonds dans le capital.
+</div>
+
+<!-- add actionnaire dialog -->
+<shareholders-create-form
+  [avant_participation]="true"
+  [financement]="financement()"
+  [valeurAction]="valeurAction()"
+  (closed)="opened = false"
+  [opened]="opened"
+  (refreshEvent)="refreshEvent.emit({})"
+></shareholders-create-form>

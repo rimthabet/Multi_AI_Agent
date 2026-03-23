@@ -1,0 +1,116 @@
+<!-- HEADER -->
+<div cds-layout="grid gap:none align:stretch p-t:lg gap:md">
+  <div cds-layout="grid col@lg:8 col@md:12 col@sm:12 align:stretch gap:md">
+    <!-- Details -->
+    <div
+      class="card"
+      cds-layout="col:6 cols@sm:12 cols@md:12 cols@lg:12 cols@xl:12 cols@2xl:12 p:none m:none"
+    >
+      <div class="card-block">
+        <div class="card-text" cds-layout="p-t:none align:stretch">
+          <project-details [projet]="projet()"></project-details>
+        </div>
+      </div>
+    </div>
+
+    <!-- Promotors -->
+    <div
+      class="card"
+      cds-layout="col@sm:12 col@md:12 col@lg:6 col@xl:6 col@2xl:6 p:none m:none"
+    >
+      <div class="card-block">
+        <project-promotors [projet]="projet()"></project-promotors>
+      </div>
+    </div>
+
+    <!-- Financing -->
+    <div
+      class="card"
+      cds-layout="col@sm:12 col@md:12 col@lg:12 col@xl:12 col@2xl:12 p:none m:none"
+    >
+      <div class="card-block">
+        <project-financing [financements]="financements"></project-financing>
+      </div>
+    </div>
+
+    <!-- Financing Chart -->
+    <div
+      class="card"
+      cds-layout="col@sm:12 col@md:12 col@lg:12 col@xl:12 col@2xl:12 p:none m:none"
+    >
+      <div class="card-block">
+        <app-bar-chart-06 [financements]="financements"></app-bar-chart-06>
+      </div>
+    </div>
+  </div>
+
+  <!-- Map -->
+  <div
+    class="card"
+    cds-layout="col@sm:12 col@md:12 col@lg:4 col@xl:4 col@2xl:4"
+  >
+    <div class="card-block" cds-layout="horizontal align:stretch p:none">
+      <project-geolocation
+        [height]="'800px'"
+        [projet]="projet()"
+        [showTitles]="true"
+      ></project-geolocation>
+    </div>
+  </div>
+</div>
+
+<!-- Divider -->
+<cds-divider
+  class="htitled-divider centered"
+  cds-layout="m-y:xl"
+  title="Phase Investissement"
+></cds-divider>
+
+<!-- Investi -->
+<invested-project [souscriptions]="souscriptions()"></invested-project>
+
+<cds-divider
+  class="htitled-divider centered"
+  cds-layout="m-y:xl"
+  title="Phase Suivi"
+></cds-divider>
+
+<!-- Tracking -->
+<div cds-layout="grid gap:md">
+  <div
+    class="card"
+    cds-layout="col@sm:12 col@md:12 col@lg:7 col@xl:7 col@2xl:7"
+  >
+    <div class="card-block">
+      <!-- Tracking Chart -->
+      <app-bar-chart-04 [souscriptions]="souscriptions()"></app-bar-chart-04>
+    </div>
+  </div>
+
+  <div
+    class="card"
+    cds-layout="col@sm:12 col@md:12 col@lg:5 col@xl:5 col@2xl:5"
+  >
+    <div class="card-block">
+      <!-- Tracking Bar Chart -->
+      <app-bar-chart-05 [souscriptions]="souscriptions()"></app-bar-chart-05>
+    </div>
+  </div>
+</div>
+
+<!-- Tracking Milestones -->
+
+<cds-divider
+  class="htitled-divider centered"
+  cds-layout="m-y:xl"
+  title="Timeline des Financements"
+></cds-divider>
+
+<div class="card">
+  <div class="card-block" style="max-width: 100%; overflow-x: auto">
+    <project-tracking-milestones
+      [projet]="projet()"
+      (dataReady)="refreshData($event)"
+    ></project-tracking-milestones>
+  </div>
+</div>

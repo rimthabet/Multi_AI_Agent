@@ -1,0 +1,241 @@
+<!-- Button -->
+<cds-button
+  action="outline"
+  status="primary"
+  cds-layout="m-t:lg"
+  (click)="openNewFinancingModal()"
+>
+  <cds-icon shape="plus" size="md"></cds-icon> Ajouter un plan de financement
+</cds-button>
+
+<!-- Divider -->
+<cds-divider
+  cds-layout="m-t:lg"
+  class="htitled-divider"
+  title="Inventaire des Plans de Financement"
+></cds-divider>
+
+<!-- Grille des financements -->
+<div
+  cds-layout="grid cols@xs:12 cols@sm:12 cols@md:6 cols@lg:6 cols@xl:6 cols@2xl:4 gap:md stretch"
+  style="width: 100%"
+>
+  @for (plan of financements; track $index) {
+  <app-financing-plan
+    [financingPlan]="plan"
+    (editEvent)="editFinancement($event)"
+    (deleteEvent)="deleteFinancing($event)"
+  ></app-financing-plan>
+  }
+</div>
+
+<!-- Modal de financement -->
+<clr-modal [(clrModalOpen)]="financingFormModalOpened" [clrModalSize]="'lg'">
+  <h3 class="modal-title">
+    <cds-icon shape="plus" size="md" solid status="info"></cds-icon> Ajouter un
+    plan de financement
+  </h3>
+  <div class="modal-body">
+    <!-- Formulaire de financement -->
+    <form clrForm [formGroup]="financementSaveForm!" clrLabelSize="4">
+      <clr-date-container>
+        <label for="dateDemandeFinancement" class="clr-required-mark"
+          >Date demande de financement:</label
+        >
+        <input
+          clrDate
+          type="date"
+          formControlName="dateDemandeFinancement"
+          name="dateDemandeFinancement"
+          style="width: 450px"
+        />
+      </clr-date-container>
+      <clr-number-input-container>
+        <label for="financementActions" class="clr-required-mark"
+          >Financement en actions:</label
+        >
+        <input
+          clrNumberInput
+          type="number"
+          (change)="calculMontant()"
+          formControlName="financementActions"
+          name="financementActions"
+          style="width: 450px"
+          min="0"
+          step="1"
+        />
+        <clr-control-helper>
+          <span style="font-size: 110%; font-weight: 500"
+            >{{
+              financementSaveForm!.value["financementActions"]
+                | currency : "symbol" : "tnd" : "1.2-2"
+            }}
+          </span>
+        </clr-control-helper>
+      </clr-number-input-container>
+
+      <clr-number-input-container>
+        <label for="financementOCA" class="clr-required-mark"
+          >Financement en OCA
+          <sup role="tooltip" aria-haspopup="true" class="tooltip tooltip-lg">
+            <cds-icon shape="info-circle" size="18"></cds-icon>
+            <span class="tooltip-content"
+              >L'Obligation Convertible en Actions (OCA) est un titre de créance
+              qui peut être converti en actions</span
+            >
+          </sup>
+          :</label
+        >
+        <input
+          clrNumberInput
+          type="number"
+          (change)="calculMontant()"
+          formControlName="financementOCA"
+          name="financementOCA"
+          style="width: 450px"
+          min="0"
+          step="1"
+        />
+        <clr-control-helper>
+          <span style="font-size: 110%; font-weight: 500"
+            >{{
+              financementSaveForm!.value["financementOCA"]
+                | currency : "symbol" : "tnd" : "1.2-2"
+            }}
+          </span>
+        </clr-control-helper>
+      </clr-number-input-container>
+
+      <clr-number-input-container>
+        <label for="financementCCA" class="clr-required-mark"
+          >Financement en CCA
+          <sup role="tooltip" aria-haspopup="true" class="tooltip tooltip-lg">
+            <cds-icon shape="info-circle" size="18"></cds-icon>
+            <span class="tooltip-content"
+              >Les apports en Compte Courant d’Associé (CCA) correspondent à des
+              avances de fonds réalisées par les investisseurs.</span
+            >
+          </sup>
+          :</label
+        >
+        <input
+          clrNumberInput
+          type="number"
+          formControlName="financementCCA"
+          name="financementCCA"
+          style="width: 450px"
+          min="0"
+          step="1"
+          (change)="calculMontant()"
+        />
+        <clr-control-helper>
+          <span style="font-size: 110%; font-weight: 500"
+            >{{
+              financementSaveForm!.value["financementCCA"]
+                | currency : "symbol" : "tnd" : "1.2-2"
+            }}
+          </span>
+        </clr-control-helper>
+      </clr-number-input-container>
+
+      <clr-control-container>
+        <label for="montant" class="clr-required-mark"
+          >Montant total sollicité:</label
+        >
+        <span>
+          {{
+            financementSaveForm!.value["montant"] != 0
+              ? (financementSaveForm!.value["montant"]
+                | currency : "symbol" : "tnd" : "1.2-2")
+              : ""
+          }}</span
+        >
+      </clr-control-container>
+
+      <clr-combobox-container>
+        <label for="funds" class="clr-required-mark">Fonds:</label>
+        <clr-combobox formControlName="funds" name="funds" clrMulti="true">
+          <ng-container *clrOptionSelected="let selected">
+            <cds-icon
+              shape="filter-grid"
+              role="funds"
+              aria-label="Funds list"
+            ></cds-icon>
+            {{ selected?.denomination }}
+          </ng-container>
+          <clr-options>
+            <clr-option *clrOptionItems="let fund of funds" [clrValue]="fund">
+              <cds-icon
+                shape="filter-grid"
+                role="funds"
+                aria-label="Funds list of choice"
+              ></cds-icon>
+              {{ fund.denomination }}
+            </clr-option>
+          </clr-options>
+        </clr-combobox>
+      </clr-combobox-container>
+
+      <clr-combobox-container>
+        <label for="natureInvestissements" class="clr-required-mark"
+          >Nature(s) d'investissement:</label
+        >
+        <clr-combobox
+          formControlName="natureInvestissements"
+          name="natureInvestissements"
+          clrMulti="true"
+        >
+          <ng-container *clrOptionSelected="let selected">
+            <cds-icon
+              shape="filter-grid"
+              role="natureInvestissements"
+              aria-label="natureInvestissements list"
+            ></cds-icon>
+            {{ selected?.libelle }}
+          </ng-container>
+          <clr-options>
+            <clr-option
+              *clrOptionItems="let nature of naturesInvestissement"
+              [clrValue]="nature"
+            >
+              <cds-icon
+                shape="filter-grid"
+                role="naturesInvestissement"
+                aria-label="natureInvestissements list of choice"
+              ></cds-icon>
+              {{ nature.libelle }}
+            </clr-option>
+          </clr-options>
+        </clr-combobox>
+      </clr-combobox-container>
+    </form>
+  </div>
+  <!-- Footer du modal -->
+  <div class="modal-footer">
+    <cds-button
+      action="outline"
+      status="primary"
+      (click)="financingFormModalOpened = false"
+    >
+      Annuler
+    </cds-button>
+    <cds-button
+      action="outline"
+      status="primary"
+      [disabled]="financementSaveForm!.invalid"
+      (click)="saveFinancement()"
+    >
+      @if(financementModifForm.controls['financement'].value == undefined) {
+      <span>
+        <cds-icon shape="plus" size="md"></cds-icon> Ajouter le
+        financement</span
+      >
+      } @else {
+      <span>
+        <cds-icon shape="note" size="md"></cds-icon> Modifier ce
+        financement</span
+      >
+      }
+    </cds-button>
+  </div>
+</clr-modal>

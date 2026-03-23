@@ -1,0 +1,148 @@
+<clr-modal #modal [(clrModalOpen)]="open" [clrModalSize]="'md'">
+  <div class="modal-title">Création d'un dossier contentieux</div>
+
+  <div class="modal-body">
+    <div
+      class="progress loop"
+      [style]="{ height: '3px', visibility: !loading ? 'hidden' : 'visible' }"
+    >
+      <progress></progress>
+    </div>
+
+    <cds-divider
+      class="htitled-divider centered"
+      title="Informations sur le projet"
+      cds-layout="m-y:lg"
+    ></cds-divider>
+
+    <table class="table table-vertical">
+      <tbody>
+        <tr>
+          <th>Projet:</th>
+          <td>{{ project()?.projet.nom }}</td>
+        </tr>
+        <tr>
+          <th>Promoteur:</th>
+          <td>{{ project()?.projet?.promoteur?.nom }}</td>
+        </tr>
+        <tr>
+          <th>Forme Juridique:</th>
+          <td>{{ project()?.projet.formeJuridique }}</td>
+        </tr>
+        <tr>
+          <th>Lieu (usine):</th>
+          <td>{{ project()?.projet.adresseUsine }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <cds-divider
+      class="htitled-divider centered"
+      title="Formulaire du dossier contentieux"
+      cds-layout="m-y:lg"
+    ></cds-divider>
+
+    <form
+      clrForm
+      [formGroup]="caseSaveForm!"
+      clrLabelSize="4"
+      class="clr-form-compact panel"
+      cds-layout="p-b:lg p-x:md"
+    >
+      <!-- inputs -->
+      <clr-input-container>
+        <label for="numeroDossier" class="clr-required-mark"
+          >Numéro Dossier</label
+        >
+        <input
+          clrInput
+          type="text"
+          formControlName="numeroDossier"
+          name="numeroDossier"
+          style="width: 315px"
+          maxlength="255"
+          required=""
+        />
+      </clr-input-container>
+
+      <clr-date-container>
+        <label for="dateCreation" class="clr-required-mark"
+          >Date de création</label
+        >
+        <input
+          clrDate
+          type="date"
+          formControlName="dateCreation"
+          name="dateCreation"
+          style="width: 277px"
+          required=""
+        />
+      </clr-date-container>
+
+      <clr-input-container>
+        <label for="titre" class="clr-required-mark">Titre</label>
+        <input
+          clrInput
+          formControlName="titre"
+          name="titre"
+          style="width: 315px"
+          maxlength="255"
+          required=""
+        />
+      </clr-input-container>
+
+      <clr-select-container>
+        <label for="typeEntite" class="clr-required-mark">Type Projet</label>
+        <select
+          clrSelect
+          name="typeEntite"
+          formControlName="typeEntite"
+          style="width: 275px"
+        >
+          @for(type of entitiesTypes ; track $index){
+          <option [value]="type" [attr.data-value]="type">
+            {{ type }}
+          </option>
+          }
+        </select>
+      </clr-select-container>
+
+      <clr-select-container>
+        <label for="typeContentieux" class="clr-required-mark"
+          >Type contentieux</label
+        >
+        <select
+          clrSelect
+          formControlName="typeContentieux"
+          name="typeContentieux"
+          required=""
+        >
+          @for (typeContentieux of typeContentieuxOptions; track $index) {
+          <option [value]="typeContentieux">
+            {{ typeContentieux }}
+          </option>
+          }
+        </select>
+      </clr-select-container>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline" (click)="open.set(false)">
+      Annuler
+    </button>
+    @if(dossier?.id){
+    <button type="button" class="btn btn-primary" (click)="open.set(false)">
+      OK
+    </button>
+    } @else{
+    <button
+      type="button"
+      class="btn btn-primary"
+      (click)="saveLitigationCase()"
+      [disabled]="caseSaveForm!.invalid"
+    >
+      Créer
+    </button>
+    }
+  </div>
+</clr-modal>

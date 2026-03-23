@@ -1,0 +1,114 @@
+<!-- Stats  -->
+<div class="card" cds-layout="col@sm:12 col@md:12 col@lg:12">
+  <div class="card-block">
+    <div class="card-text">
+      <div
+        cds-layout="grid  gap:md align:stretch  cols@lg:3 cols@md:4 cols@sm:6"
+      >
+        <app-kpi-badge-01
+          [value]="nbrProjets || 0"
+          [color]="'var(--cds-alias-viz-sequential-blue-600)'"
+          [type]="'number'"
+          [title]="'Projets'"
+        ></app-kpi-badge-01>
+
+        <app-kpi-badge-01
+          [value]="this.secteurs()?.length || 0"
+          [color]="'var(--cds-alias-viz-sequential-green-700)'"
+          [type]="'number'"
+          [title]="'Secteurs d\'activité'"
+          [primary]="false"
+        ></app-kpi-badge-01>
+
+        <app-kpi-badge-01
+          [value]="this.totalActif"
+          [color]="'var(--cds-alias-viz-sequential-violet-700)'"
+          [type]="'currency'"
+          [title]="'Total investi'"
+          [primary]="false"
+        ></app-kpi-badge-01>
+
+        <app-kpi-badge-01
+          [value]="minActif"
+          [color]="'var(--cds-alias-viz-sequential-aqua-700)'"
+          [type]="'currency'"
+          [title]="'Ticket minimal'"
+          [primary]="false"
+          [description]="projetMinActif"
+        ></app-kpi-badge-01>
+
+        <app-kpi-badge-01
+          [value]="maxActif"
+          [color]="'var(--cds-alias-viz-sequential-aqua-800)'"
+          [type]="'currency'"
+          [title]="'Ticket maximal'"
+          [description]="projetMaxActif"
+          [primary]="false"
+        ></app-kpi-badge-01>
+
+        <app-kpi-badge-01
+          [value]="moyenneActif"
+          [color]="'var(--cds-alias-status-disabled-shade)'"
+          [type]="'currency'"
+          [title]="'Ticket moyen'"
+          [primary]="false"
+        ></app-kpi-badge-01>
+
+        <app-kpi-badge-01
+          [value]="averagePart"
+          [color]="'var(--cds-alias-status-info-shade)'"
+          [type]="'currency'"
+          [title]="'% moyen de participation'"
+          [primary]="false"
+        ></app-kpi-badge-01>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Data grid -->
+<div cds-layout="col:12 col@sm:12 col@md:12 col@lg:12">
+  <clr-datagrid style="max-height: 452px; width: 100%">
+    <clr-dg-column [clrDgField]="'p.nom'"
+      ><cds-icon shape="bank"></cds-icon> &nbsp; Projet</clr-dg-column
+    >
+    <clr-dg-column [clrDgField]="'actif'" [style.width]="'250px'"
+      >Participation engagée</clr-dg-column
+    >
+    <clr-dg-column>
+      % <= 15%
+      <cds-icon shape="exclamation-triangle" solid="" class="warning"></cds-icon
+    ></clr-dg-column>
+
+    <clr-dg-row *clrDgItems="let p of projets" [clrDgItem]="p">
+      <clr-dg-cell>
+        <a
+          [routerLink]="['/dashboard/projects/', p.p.id]"
+          class="show-hide-icon"
+        >
+          <span style="font-size: 90%" class="info" class="">
+            {{ p.p.nom?.toUpperCase() }}
+            <cds-icon shape="link" size="sm"></cds-icon> </span></a
+      ></clr-dg-cell>
+
+      <clr-dg-cell
+        [style.textAlign]="'right'"
+        [style.maxWidth]="'400px'"
+        [style.whiteSpace]="'nowrap'"
+        [style.color]="'var(--cds-alias-status-info)'"
+      >
+        {{ p.actif | number : "1.0-0" }} <sup>tnd</sup>
+      </clr-dg-cell>
+
+      <clr-dg-cell>
+        <clr-progress-bar
+          [clrValue]="p.part * 100"
+          [clrMax]="30"
+          clrLabeled
+          [clrDisplayval]="formatPercent(p.part)"
+        >
+        </clr-progress-bar>
+      </clr-dg-cell>
+    </clr-dg-row>
+  </clr-datagrid>
+</div>

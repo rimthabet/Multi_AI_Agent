@@ -1,0 +1,73 @@
+<clr-modal [clrModalSize]="'md'" [clrModalOpen]="opened() ?? false">
+    <h3 class="modal-title">
+        <cds-icon shape="employee" size="lg"></cds-icon> Ajouter
+        {{ apres_participation() ? "après l'augmentation" : "avant l'augmentation" }}
+    </h3>
+    <div class="modal-body" [style]="{
+        height: apres_participation() || hlf_participation() ? '180px' : '180px'
+      }">
+        <form clrForm [formGroup]="actionnaireSaveForm!" clrLabelSize="6">
+            <clr-input-container>
+                <label for="libelle" class="clr-required-mark">Libellé:</label>
+                <input clrInput type="text" formControlName="libelle" name="libelle" />
+            </clr-input-container>
+
+            @if(avant_participation()){
+            <clr-number-input-container>
+                <label for="nbrActionsAvAugmentation" class="clr-required-mark"># Actions avant augmentation:</label>
+                <input clrNumberInput type="number" formControlName="nbrActionsAvAugmentation"
+                    name="nbrActionsAvAugmentation" [style.width]="'200px'" />
+            </clr-number-input-container>
+            }
+            @if(apres_participation() || hlf_participation()){
+            <clr-number-input-container>
+                <label for="nbrActionsApAugmentation" class="clr-required-mark"># Nouvelles actions émises:</label>
+                <input clrNumberInput type="number" formControlName="nbrActionsApAugmentation" [style.width]="'200px'"
+                    name="montantApAugmentation" />
+            </clr-number-input-container>
+            }
+            @if(avant_participation()){
+            <clr-number-input-container>
+                <label for="montantAvAugmentation" class="clr-required-mark">Montant:</label>
+                <input clrNumberInput type="number" readonly formControlName="montantAvAugmentation"
+                    name="montantAvAugmentation">
+
+                <span style="font-size: 110%; font-weight: 500">
+                    {{
+                    actionnaireSaveForm.controls["montantAvAugmentation"].value || 0
+                    | currency : 'tnd' : 'symbol' : '1.0-0'
+                    }}
+                </span>
+
+            </clr-number-input-container>
+            }
+
+            @if(apres_participation() || hlf_participation()){
+            <clr-number-input-container>
+                <label for="montantApAugmentation" class="clr-required-mark">Montant après augmentation:</label>
+                <input clrNumberInput readonly type="number" formControlName="montantApAugmentation"
+                    name="montantApAugmentation" />
+                <clr-control-helper>En dinar tnd :
+                    <span style="font-size: 110%; font-weight: 500">{{
+                        actionnaireSaveForm.controls["montantApAugmentation"].value
+                        | currency : "symbol" : "tnd" : "1.0-0"
+                        }}
+                    </span>
+                </clr-control-helper>
+            </clr-number-input-container>
+
+            }
+        </form>
+    </div>
+    <!-- Boutons -->
+    <div class="modal-footer">
+        <div class="btn-group">
+            <cds-button action="outline" (click)="hideModal()">Annuler</cds-button>
+        </div>
+        <div class="btn-group">
+            <cds-button (click)="saveActionnaire()" [disabled]="actionnaireSaveForm!.invalid">
+                <cds-icon shape="floppy"></cds-icon> Sauvegarder
+            </cds-button>
+        </div>
+    </div>
+</clr-modal>

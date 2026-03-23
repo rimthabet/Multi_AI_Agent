@@ -1,0 +1,65 @@
+<!-- Header -->
+<div cds-layout="horizontal m:none">
+  <div cds-layout="m-b:sm m-t:md">
+    <cds-icon
+      shape="ellipsis-vertical"
+      style="cursor: pointer"
+      (click)="show = true"
+    ></cds-icon>
+  </div>
+  <cds-divider orientation="vertical" style="padding: 0 7px"></cds-divider>
+
+  <div cds-layout="align:left">
+    <clr-toggle-container>
+      <clr-toggle-wrapper>
+        <input
+          type="checkbox"
+          [checked]="checked()"
+          (change)="stateChanged($event)"
+          clrToggle
+          name="item"
+          required
+          [disabled]="!checked()"
+        />
+        <label>{{ data()?.documentType?.libelle }} </label>
+      </clr-toggle-wrapper>
+    </clr-toggle-container>
+  </div>
+</div>
+
+<!-- Modal -->
+<clr-modal [clrModalSize]="'md'" [(clrModalOpen)]="show">
+  <h3 class="modal-title">
+    <cds-icon shape="pdf-file" size="md" status="info"></cds-icon>
+    {{ data()?.documentType?.libelle }}
+  </h3>
+  <div class="modal-body">
+    <div class="alert alert-warning" role="alert" cds-layout="m-y:md">
+      <div class="alert-items">
+        <div class="alert-item static">
+          <div class="alert-icon-wrapper">
+            <cds-icon
+              class="alert-icon"
+              size="md"
+              shape="exclamation-triangle"
+            ></cds-icon>
+          </div>
+          <span class="alert-text"
+            >Vous devez télécharger le document correspondant à ce contrôle.
+            Autrement, l'email à envoyer au promoteur doit inclure une
+            réclamation du document correspondant!</span
+          >
+        </div>
+      </div>
+    </div>
+    <app-document-upload-form
+      [mode]="'flat'"
+      [compliance]="{ document: undefined, conformite: data() }"
+      [data]="projet"
+      [task_row]="task_row"
+      [phase_row]="phase_row"
+      [with_description]="true"
+      (documentUploadedEvent)="documentUploaded($event)"
+    ></app-document-upload-form>
+  </div>
+</clr-modal>

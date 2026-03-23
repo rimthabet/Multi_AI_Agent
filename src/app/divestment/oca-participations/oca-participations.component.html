@@ -1,0 +1,149 @@
+<!-- Header -->
+<span cds-text="title">
+  <cds-icon shape="bullseye" status="info" size="lg"></cds-icon> Participations
+  en OCA par fonds</span>
+
+<!-- Search fonds -->
+<div cds-layout="horizontal align:left gap:md m-t:xl">
+  <clr-dropdown>
+    <cds-button size="md" action="outline" clrDropdownTrigger>
+      {{ selectedFonds?.denomination || "Sélectionner un fonds" }}
+      <cds-icon shape="angle" status="info" direction="down"></cds-icon>
+    </cds-button>
+
+    <clr-dropdown-menu *clrIfOpen>
+      @for (f of fonds; track $index) {
+      <div clrDropdownItem (click)="selectFund(f)" onkeypress="">
+        {{ f.denomination }}
+      </div>
+      }
+    </clr-dropdown-menu>
+  </clr-dropdown>
+  <!-- Fund name -->
+  <span class="fund-name active" [style.marginBottom]="'0.2em'">
+    {{
+    selectedFonds ? selectedFonds.denomination : "Dénomination du fonds ..."
+    }}
+    <cds-icon onkeypress="" shape="dashboard" size="lg" status="info" title="Cliquer pour consulter la fiche funds"
+      style="cursor: pointer" (click)="goToFiche()"></cds-icon>
+  </span>
+</div>
+
+<!-- Fund state -->
+@if (selectedFonds?.etat.libelle == 'En liquidation' ||
+selectedFonds?.etat.libelle == 'En pré-liquidation') {
+<div class="badge badge-warning" cds-text="caption" cds-layout="p:sm">
+  Fonds {{ selectedFonds?.etat.libelle }}
+</div>
+}
+
+<!-- Data grid -->
+<clr-datagrid style="height: calc(100vh - 245px)" [clrDgLoading]="loading">
+  <clr-dg-action-bar>
+    <!-- LIBERATIONS TABLE -->
+    <div cds-layout="horizontal gap:md">
+      <div cds-layout="align:stretch">
+        <cds-divider cds-layout="m-t:lg m-b:sm" class="htitled-divider"
+          title="OCA par fonds (Spécification des dates de sortie espérée par souscription)"></cds-divider>
+      </div>
+      <div cds-layout="align:right">
+        <cds-button action="outline" status="primary" (click)="exportParticipationOCA()" onKeyPress="">
+          <cds-icon shape="xls-file" status="info" size="md"></cds-icon> Générer
+          un rapport
+        </cds-button>
+      </div>
+    </div>
+  </clr-dg-action-bar>
+
+  <!-- Data grid -->
+  <clr-dg-column [clrDgField]="'so.financement.projet.nom'">Projet</clr-dg-column>
+  <clr-dg-column>Date du comité d’investissement</clr-dg-column>
+  <clr-dg-column>Date de la souscription </clr-dg-column>
+  <clr-dg-column>Nombre d'actions souscrites</clr-dg-column>
+  <clr-dg-column>Montant total des OCA </clr-dg-column>
+  <clr-dg-column>Taux d'intérêt </clr-dg-column>
+  <clr-dg-column>Indexation </clr-dg-column>
+  <clr-dg-column>Date de sortie espérée </clr-dg-column>
+
+  <clr-dg-row *clrDgItems="let p of participationsOCA; let i = index" [clrDgItem]="p" [clrDgSelectable]="i == 0">
+    <clr-dg-action-overflow>
+      <div cds-layout="vertical gap:xxs">
+        <div class="button-group">
+          <cds-button action="flat-inline" (click)="displayParticipationModal(p)">
+            <cds-icon shape="calendar" status="info"></cds-icon> Saisir la date de
+            sortie
+          </cds-button>
+        </div>
+        <div class="button-group">
+          <cds-button action="flat-inline" status="danger" (click)="setSelectedParticipation(p); deleteParticipation()">
+            <cds-icon shape="trash" status="danger"></cds-icon> Annuler la date de
+            sortie
+          </cds-button>
+        </div>
+      </div>
+    </clr-dg-action-overflow>
+    <clr-dg-cell><a class="show-hide-icon" [routerLink]="['/dashboard/project', p?.so?.financement?.projet.id]"
+        [title]="p?.so?.financement?.projet.nom">{{ p?.so?.financement?.projet.nom }}
+        <cds-icon shape="link"></cds-icon> </a></clr-dg-cell>
+
+    <clr-dg-cell class="text-center">{{
+      p?.ci?.dateComite | date : "dd/MM/yyyy"
+      }}</clr-dg-cell>
+    <clr-dg-cell class="text-center">{{
+      p?.so?.dateBulletin | date : "dd/MM/yyyy"
+      }}</clr-dg-cell>
+    <clr-dg-cell class="digit text-right">{{
+      p?.so?.nombreOCA | number : "1.0-0"
+      }}</clr-dg-cell>
+    <clr-dg-cell class="digit text-right">{{
+      p?.so?.montant | currency : "tnd" : "symbol" : "1.0-0"
+      }}</clr-dg-cell>
+    <clr-dg-cell class="digit text-right">{{
+      p?.so?.taux | percent : "1.0-0"
+      }}</clr-dg-cell>
+    <clr-dg-cell>{{ p?.so?.index }} </clr-dg-cell>
+    <clr-dg-cell class="text-center">{{
+      p?.so?.dateSortie | date : "dd/MM/yyyy"
+      }}</clr-dg-cell>
+  </clr-dg-row>
+  <clr-dg-footer>{{ participationsOCA.length }} participations ocas</clr-dg-footer>
+</clr-datagrid>
+
+<clr-modal [clrModalSize]="'md'" [(clrModalOpen)]="participationModalOpened" class="custom-modal-height">
+  <h3 class="modal-title">
+    <cds-icon shape="bullseye" status="info" size="lg" solid></cds-icon> Saisie
+    de la date de sortie
+  </h3>
+
+  <!-- Modal body -->
+  <div class="modal-body" cds-layout="p-b:xxl">
+    <div cds-text="title uppercase" style="color: var(--cds-alias-status-info)" cds-layout="m-t:xl">
+      {{ selectedParticipation?.so?.financement?.projet.nom }}
+    </div>
+
+    <cds-divider cds-layout="m-t:lg m-b:sm" class="htitled-divider" [title]="
+        'Souscription en actions du ' +
+        (selectedParticipation?.so?.dateBulletin | date : 'dd/MM/yyyy')
+      "></cds-divider>
+
+    <form [formGroup]="participationForm" clrForm clrLabelSize="5">
+      <clr-date-container>
+        <label><cds-icon shape="calendar" status="info" solid=""></cds-icon> Date de
+          sortie espérée:
+        </label>
+        <input clrDate type="date" formControlName="dateSortie" name="dateSortie" />
+      </clr-date-container>
+    </form>
+  </div>
+
+  <div class="modal-footer" cds-layout="horizontal gap:sm">
+    <button class="btn btn-outline" (click)="participationModalOpened = false">
+      Annuler
+    </button>
+    <button class="btn btn-primary" [disabled]="participationForm.invalid" (click)="updateParticipationsOca()">
+      <cds-icon shape="floppy"></cds-icon> Sauvegarder
+    </button>
+  </div>
+</clr-modal>
+
+<div class="separator"></div>

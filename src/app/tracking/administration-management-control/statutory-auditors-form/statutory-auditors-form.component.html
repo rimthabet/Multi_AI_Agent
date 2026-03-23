@@ -1,0 +1,215 @@
+<!-- Data grid -->
+<clr-datagrid [clrDgLoading]="loading" cds-layout="m-b:md">
+  <!-- Actions Bar -->
+  <clr-dg-action-bar>
+    <cds-button action="outline" status="primary" (click)="openFormModal()">
+      <cds-icon shape="plus" size="md"></cds-icon> Assigner le commissaire aux
+      comptes
+    </cds-button>
+  </clr-dg-action-bar>
+
+  <clr-dg-column>Nom du commissaire</clr-dg-column>
+  <clr-dg-column>Nom du cabinet</clr-dg-column>
+  <clr-dg-column [style.minWidth]="'270px'">Exercice</clr-dg-column>
+  <clr-dg-column>PV</clr-dg-column>
+  <clr-dg-column style="width: 70px"
+    ><cds-icon shape="folder-open"></cds-icon
+  ></clr-dg-column>
+  <clr-dg-column style="width: 70px"></clr-dg-column>
+
+  <clr-dg-row *clrDgItems="let pcac of pcacs" [clrDgItem]="pcac">
+    <clr-dg-cell>{{ pcac?.commissaire?.libelle }}</clr-dg-cell>
+    <clr-dg-cell>{{ pcac?.commissaire?.cabinet }}</clr-dg-cell>
+    <clr-dg-cell [style.minWidth]="'270px'" [style.textAlign]="'center'">
+      <span class="badge-date">{{ pcac.dateDebut | date : "dd/MM/yyyy" }}</span>
+      <cds-icon shape="connect" size="24"></cds-icon>
+      <span class="badge-date">
+        {{ pcac.dateFin | date : "dd/MM/yyyy" }}</span
+      ></clr-dg-cell
+    >
+
+    <clr-dg-cell>
+      @for(document of pcac.documents; track $index){
+      <a
+        [href]="trimPath(document.chemin)"
+        target="_blank"
+        [style.display]="'block'"
+      >
+        <cds-icon shape="pdf-file" size="md" solid=""></cds-icon>
+        {{ document.nomFichier }}</a
+      >
+      } @if(pcac.documents?.length == 0){
+      <cds-icon shape="no-access" solid="" size="18" status="danger"></cds-icon>
+      Document manquant! }
+    </clr-dg-cell>
+
+    <clr-dg-cell style="width: 70px">
+      <cds-icon
+        shape="upload"
+        size="sm"
+        status="info"
+        solid
+        (click)="showDocument(pcac)"
+      ></cds-icon>
+    </clr-dg-cell>
+    <clr-dg-cell style="width: 70px">
+      <div cds-layout="horizontal align:center">
+        <cds-icon
+          onkeypress=""
+          status="info"
+          shape="note"
+          solid=""
+          style="cursor: pointer"
+          (click)="edit(pcac)"
+        ></cds-icon>
+
+        <cds-divider
+          orientation="vertical"
+          style="padding: 0 7px"
+        ></cds-divider>
+
+        <cds-icon
+          onkeypress=""
+          status="danger"
+          shape="trash"
+          solid=""
+          style="cursor: pointer"
+          (click)="deletePcac(pcac)"
+        ></cds-icon>
+      </div>
+    </clr-dg-cell>
+  </clr-dg-row>
+
+  <clr-dg-footer>Commissaire(s)</clr-dg-footer>
+</clr-datagrid>
+
+<!-- Modal Commissaire aux comptes -->
+<clr-modal [(clrModalOpen)]="formOpened" [clrModalSize]="'md'">
+  <h3 class="modal-title">
+    <cds-icon shape="assign-user" size="md" solid status="info"></cds-icon>
+    {{ commissaireSaveForm.value["commissaire"] ? "Changer" : "Assigner" }}
+    le commissaire aux comptes
+  </h3>
+
+  <div class="modal-body" cds-layout="m-t:xl">
+    <!-- Form -->
+    <form
+      clrForm
+      [formGroup]="commissaireSaveForm!"
+      clrLabelSize="4"
+      class="clr-form-compact"
+    >
+      <clr-select-container>
+        <label for="commissaire" class="clr-required-mark">
+          <cds-icon shape="employee" size="sm" solid></cds-icon>
+          Commissaire</label
+        >
+        <select
+          clrSelect
+          name="commissaire"
+          formControlName="commissaire"
+          [compareWith]="equals"
+        >
+          <option [ngValue]="undefined" [attr.data-value]="undefined">
+            Choisir un commissaire au compte...
+          </option>
+          @for(c of commisaires_aux_comptes; track $index){
+          <option [ngValue]="c" [attr.data-value]="c">
+            {{ c?.libelle }}
+          </option>
+          }
+        </select>
+        <clr-control-helper>
+          <cds-icon
+            shape="plus-circle"
+            size="md"
+            status="info"
+            solid
+            (click)="statuary_form_opened = true"
+            style="cursor: pointer"
+          ></cds-icon>
+        </clr-control-helper>
+      </clr-select-container>
+
+      <clr-control-container>
+        <label for="nom_cabinet">
+          <cds-icon shape="bank" size="sm" solid></cds-icon> Cabinet:
+        </label>
+        <label>{{
+          commissaireSaveForm.value["commissaire"]?.cabinet ?? ""
+        }}</label>
+      </clr-control-container>
+
+      <clr-date-container>
+        <label for="date_d" class="clr-required-mark"
+          ><cds-icon
+            shape="calendar"
+            size="sm"
+            solid
+            badge="success"
+          ></cds-icon>
+          Date début</label
+        >
+        <input
+          clrDate
+          type="date"
+          formControlName="date_d"
+          name="date_d"
+          size="30"
+        />
+      </clr-date-container>
+
+      <clr-date-container>
+        <label for="date_fr" class="clr-required-mark"
+          ><cds-icon shape="calendar" size="sm" solid badge="danger"></cds-icon>
+          Date fin</label
+        >
+        <input
+          clrDate
+          type="date"
+          formControlName="date_f"
+          name="date_f"
+          size="30"
+        />
+      </clr-date-container>
+    </form>
+  </div>
+
+  <div class="modal-footer">
+    <cds-button action="outline" (click)="closeFormModal()">Annuler</cds-button>
+    <cds-button
+      status="primary"
+      (click)="addCommissaire()"
+      [disabled]="commissaireSaveForm!.invalid"
+      onKeyPress=""
+    >
+      <cds-icon shape="floppy" size="md"></cds-icon> Sauvegarder
+    </cds-button>
+  </div>
+</clr-modal>
+
+<!-- Commissaire aux comptes form -->
+<statutory-auditor-form
+  #commissaire_form
+  (refreshEvent)="loadCommissaires()"
+  [(opened)]="statuary_form_opened"
+></statutory-auditor-form>
+
+<!-- Document upload modal -->
+<clr-modal [clrModalSize]="'md'" [(clrModalOpen)]="opened">
+  <h3 class="modal-title">
+    <cds-icon shape="upload" size="lg" solid=""></cds-icon> Télécharger le PV du
+    commissaire aux comptes
+  </h3>
+  <div class="modal-body">
+    @for(conformite of conformite_documentaires; track $index){
+    <document-upload
+      [compliance]="{ conformite: conformite }"
+      [data]="selectedPcac"
+      [task_row]="4"
+      [phase_row]="5"
+      (documentUploadedEvent)="loadPcacByProject()"
+    ></document-upload>
+    }
+  </div>
+</clr-modal>

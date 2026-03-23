@@ -1,0 +1,177 @@
+<!-- Header -->
+<span cds-text="title">
+  <cds-icon shape="slider" solid="" size="lg" status="info"></cds-icon>
+  Comparaison entre les réalisations et les Business plans</span
+>
+
+<!-- Search fonds -->
+<div cds-layout="horizontal align:left gap:md m-y:xl">
+  <clr-dropdown>
+    <cds-button size="md" action="outline" clrDropdownTrigger>
+      {{ selectedProjet?.nom }}
+      <cds-icon shape="angle" status="info" direction="down"></cds-icon>
+    </cds-button>
+
+    <clr-dropdown-menu *clrIfOpen>
+      @for (p of projets; track $index) {
+      <div clrDropdownItem (click)="setProjet(p)" onkeypress="">
+        {{ p.nom | uppercase }}
+      </div>
+      }
+    </clr-dropdown-menu>
+  </clr-dropdown>
+
+  <!-- Project name -->
+  <div
+    class="project-name {{ selectedProjet ? 'active' : '' }}"
+    style="margin-top: 0px !important"
+  >
+    {{ selectedProjet ? selectedProjet.nom : "Nom du projet ..." }}
+    <cds-icon
+      onkeypress=""
+      shape="dashboard"
+      size="lg"
+      title="Cliquer pour consulter la fiche projet"
+      style="cursor: pointer"
+      (click)="goToFiche()"
+    ></cds-icon>
+  </div>
+</div>
+
+<!-- Tabs -->
+<clr-tabs>
+  @for (bp of bps; track $index) {
+  <clr-tab>
+    <button clrTabLink (click)="selectedBP($index)" [title]="bp.label">
+      {{ bp.label }}
+      <span
+        class="badge badge-info"
+        style="padding: 0.7em; margin-bottom: 0.5em; font-size: 14px"
+      >
+        {{ bp.elaboration_date | date : "dd-MM-YYYY" }}</span
+      >
+    </button>
+    <!-- Tab content -->
+    <clr-tab-content *clrIfActive="$index == selectedTab">
+      <div style="width: 100%; overflow-x: scroll">
+        <table class="table">
+          <caption>
+            @if (loading) {
+            <clr-progress-bar [clrLoop]="true"></clr-progress-bar>
+            }
+          </caption>
+          <thead>
+            <tr>
+              <th rowspan="2"></th>
+              @for (year of years; track $index) {
+              <th colspan="4" scope="col">
+                {{ year }}
+              </th>
+              }
+            </tr>
+
+            <tr>
+              @for (year of years; track $index) {
+              <th>Projeté</th>
+              <th>Réalisé</th>
+              <th>Ecart</th>
+              <th>Ecart %</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (i of items; track $index) {
+            <tr>
+              <td class="left">{{ i.libelle }}</td>
+              @for (year of years; track $index) {
+              <td
+                class="digit"
+                [style.backgroundColor]="$index % 2 == 0 ? bgColor1 : bgColor2"
+              >
+                @if(i.type == 'int') {
+                <ng-container>
+                  {{ valueOfBp(i.code, year) | number : "1.0-0" }}</ng-container
+                >
+                } @if(i.type == 'decimal') {
+                <ng-container>
+                  {{ valueOfBp(i.code, year) | number : "1.2-2" }}</ng-container
+                >
+                } @if(i.type == 'percent') {
+
+                <ng-container>
+                  {{
+                    valueOfBp(i.code, year) / 100.0 | percent : "1.2-2"
+                  }}</ng-container
+                >
+                }
+              </td>
+              <td
+                class="digit"
+                [style.backgroundColor]="$index % 2 == 0 ? bgColor1 : bgColor2"
+              >
+                @if(i.type == 'int') {
+                <ng-container>
+                  {{ valueOfEf(i.code, year) | number : "1.0-0" }}</ng-container
+                >
+                } @if(i.type == 'decimal') {
+                <ng-container>
+                  {{ valueOfEf(i.code, year) | number : "1.2-2" }}</ng-container
+                >
+                } @if(i.type == 'percent') {
+                <ng-container>
+                  {{
+                    valueOfEf(i.code, year) / 100.0 | percent : "1.2-2"
+                  }}</ng-container
+                >
+                }
+              </td>
+              <td
+                [style.backgroundColor]="$index % 2 == 0 ? bgColor1 : bgColor2"
+                [style.color]="
+                  valueOfEcart(i.code, year) >= 0
+                    ? 'var(--cds-alias-utility-gray-shade)'
+                    : 'var(--cds-alias-utility-gray)'
+                "
+              >
+                @if(i.type == 'int') {
+                <ng-container>
+                  {{
+                    valueOfEcart(i.code, year) | number : "1.0-0"
+                  }}</ng-container
+                >
+                } @if(i.type == 'decimal') {
+                <ng-container>
+                  {{
+                    valueOfEcart(i.code, year) | number : "1.2-2"
+                  }}</ng-container
+                >
+                } @if(i.type == 'percent') {
+                <ng-container>
+                  {{
+                    valueOfEcart(i.code, year) / 100.0 | percent : "1.2-2"
+                  }}</ng-container
+                >
+                }
+              </td>
+              <td
+                [style.backgroundColor]="$index % 2 == 0 ? bgColor1 : bgColor2"
+                [style.color]="
+                  valueOfPecart(i.code, year) >= 0
+                    ? 'var(--cds-alias-utility-gray-shade)'
+                    : 'var(--cds-alias-utility-gray)'
+                "
+              >
+                {{ valueOfPecart(i.code, year) | percent : "1.2-2" }}
+              </td>
+              }
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </clr-tab-content>
+  </clr-tab>
+  }
+</clr-tabs>
+
+<div class="separator"></div>

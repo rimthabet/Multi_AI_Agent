@@ -1,0 +1,177 @@
+@if(prospection()?.statut == 0 || prospection()?.statut == 1){
+<div
+  class="clr-row decision-area"
+  cds-layout="horinzontal gap:md m-y:xl p-x:xl"
+>
+  <cds-button
+    action="outline"
+    status="success"
+    (click)="acceptanceModalOpened = true"
+  >
+    <cds-icon shape="digital-signature" badge="success" size="30"></cds-icon>
+    Accepter la présélection
+  </cds-button>
+
+  <cds-divider orientation="vertical"></cds-divider>
+
+  <cds-button
+    action="outline"
+    status="danger"
+    (click)="refusalModalOpened = true"
+    ><cds-icon shape="ban" size="28"></cds-icon>
+    Refuser la présélection
+  </cds-button>
+</div>
+} @else {
+<ng-container>
+  <div
+    class="statut-info {{ prospection()?.statutActuel }}"
+    cds-text="section"
+    cds-layout="m-y:xl"
+  >
+    Le projet <span>{{ prospection()?.nom }}</span> est
+    <span
+      [class]="prospection()?.statutActuel"
+      class="label {{
+        prospection()?.statut == 3 ? 'label-danger' : 'label-success'
+      }}"
+      style="
+        font-size: 0.9em;
+        padding: 0.7em 0.5em;
+        margin-left: 1em;
+        letter-spacing: 2px;
+        border-radius: 5px;
+      "
+      >{{ prospection()?.statutActuel }}</span
+    >
+  </div>
+  @if (prospection()?.statut == 3){
+  <ng-container>
+    <h6 cds-text="caption" cds-layout="m-y:sm">Date de refus:</h6>
+    <div style="padding: 1em" class="panel">{{ refusalData()?.dateRefus }}</div>
+
+    <h6 cds-text="caption" cds-layout="m-y:sm">Date d'envoi de lettre:</h6>
+    <div style="padding: 1em" class="panel">
+      {{ refusalData()?.dateEnvoiLettre }}
+    </div>
+
+    <h6 cds-text="caption" cds-layout="m-y:sm">Motifs:</h6>
+    <div style="padding: 1em" class="panel">
+      {{ refusalData()?.motifRejet }}
+    </div>
+  </ng-container>
+  } @if (prospection()?.statut == 2 || prospection()?.statut == 3){
+
+  <cds-button action="outline" (click)="resetTheDecision()" cds-layout="m-t:xl">
+    <cds-icon shape="lock" size="md"></cds-icon> Annuler la décision de
+    présélection <cds-icon shape="note" size="md"></cds-icon>
+  </cds-button>
+  }
+</ng-container>
+}
+
+<cds-divider
+  cds-layout="m-t:xxl"
+  class="htitled-divider"
+  title="Approbation des plans de financement"
+></cds-divider>
+
+<financing-plans-acceptance
+  [(prospection)]="prospection"
+></financing-plans-acceptance>
+
+<!-- Modal for the refusal and acceptance -->
+<clr-modal [(clrModalOpen)]="refusalModalOpened">
+  <h3 class="modal-title">
+    <cds-icon shape="ban" size="md" status="danger"></cds-icon>Refus de la
+    présélection
+  </h3>
+
+  <!-- model pour le refus -->
+  <div class="modal-body">
+    <form clrForm [formGroup]="refuseSaveForm!" clrLabelSize="3">
+      <clr-date-container>
+        <label class="clr-required-mark">Date d'envoi </label>
+        <input
+          clrDate
+          type="date"
+          formControlName="date"
+          name="date"
+          style="width: 345px"
+        />
+      </clr-date-container>
+      <clr-textarea-container>
+        <label class="clr-required-mark">Motifs </label>
+        <textarea
+          clrTextarea
+          formControlName="motif"
+          name="motif"
+          cols="45"
+          rows="4"
+        ></textarea>
+        <clr-control-helper>
+          Vous pouvez utiliser la synthaxe
+          <a href="https://www.markdownguide.org/" target="_blank">Markdown</a>
+          pour formater vos motifs de refus</clr-control-helper
+        >
+      </clr-textarea-container>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button
+      (click)="emailModalOpened = true"
+      class="btn btn-outline"
+      [disabled]="refuseSaveForm.invalid"
+    >
+      <cds-icon shape="envelope" size="md" solid></cds-icon> Envoyer un e-mail
+    </button>
+    <button
+      class="btn btn-primary"
+      (click)="saveRefus()"
+      [disabled]="refuseSaveForm.invalid"
+    >
+      <cds-icon shape="thumbs-down" size="md" solid></cds-icon> Confirmer
+    </button>
+  </div>
+</clr-modal>
+
+<!-- Modal for the approval -->
+<clr-modal [(clrModalOpen)]="acceptanceModalOpened">
+  <h3 class="modal-title">Approbation de la présélection</h3>
+
+  <!-- model pour l'acceptation -->
+  <div class="modal-body">
+    <div class="panel" cds-layout="p:sm m-t:lg">
+      Veuillez confirmer l'approbation de la présélection.
+    </div>
+  </div>
+
+  <!-- Boutons -->
+  <div class="modal-footer">
+    <button
+      class="btn"
+      class="btn btn-outline"
+      (click)="acceptanceModalOpened = false"
+    >
+      Annuler
+    </button>
+    <button class="btn btn-primary" (click)="saveApproval()">
+      <cds-icon shape="thumbs-up" size="md" solid></cds-icon> confirmer
+    </button>
+  </div>
+</clr-modal>
+
+<!-- model pour l'email -->
+<clr-modal [clrModalSize]="'xl'" [(clrModalOpen)]="emailModalOpened">
+  <h3 class="modal-title">
+    <cds-icon shape="envelope" size="lg"></cds-icon> Nouveau Courrier
+  </h3>
+  <div class="modal-body">
+    <emailing-form
+      (hideModalEvent)="emailModalOpened = false"
+      [prospection]="prospection()"
+      [textModel]="textFormHTML"
+      [with_attachments]="false"
+    ></emailing-form>
+  </div>
+</clr-modal>

@@ -1,0 +1,463 @@
+<div cds-layout="m-t:md m-r:md m-b:md">
+  <!-- CONVERSION CCA -->
+  @if(conversion && !show_subsc){
+  <div cds-layout="vertical gap:lg p-x:none p-y:md align:stretch">
+    <span cds-text="title" cds-layout="align:left"
+      ><cds-icon size="lg" shape="recycle" class="info"></cds-icon> Le montant
+      du CCA a été converti en Actions
+    </span>
+
+    <!-- Buttons -->
+    <div cds-layout="horizontal align:stretch">
+      <span cds-text="section" cds-layout="horizontal align:left">
+        <cds-button (click)="show_subsc = true" action="flat">
+          <cds-icon shape="link" size="md"></cds-icon> Aperçu sur la
+          souscription CCA
+        </cds-button></span
+      ><span cds-text="section" cds-layout="horizontal align:right">
+        <cds-button
+          cds-layout="align:right"
+          style="margin-top: auto"
+          status="danger"
+          (click)="deleteConversion()"
+        >
+          <cds-icon shape="ban" size="md"></cds-icon>
+          <span> Annuler</span>
+        </cds-button>
+      </span>
+    </div>
+
+    <!-- Divider -->
+    <cds-divider orientation="horizontal"></cds-divider>
+
+    <!-- CONVERSION DATA -->
+    <div cds-layout="vertical gap:md p:sm horizontal-stretch">
+      <div cds-layout="horizontal align:stretch">
+        <span cds-text="section" cds-layout="horizontal align:left"
+          >Montant de souscription en CCA:</span
+        ><span
+          cds-text="section"
+          cds-layout="horizontal align:right"
+          class="digit"
+        >
+          {{ conversion?.montant | number : "1.0-0" }} &nbsp;<small>tnd</small>
+        </span>
+      </div>
+
+      <div cds-layout="horizontal align:stretch">
+        <span cds-text="section" cds-layout="horizontal align:left"
+          >Actions converties:</span
+        ><span
+          cds-text="section"
+          cds-layout="horizontal align:right"
+          class="digit"
+        >
+          {{ conversion?.nbrActions | number : "1.0-0" }}
+        </span>
+      </div>
+
+      <div cds-layout="horizontal align:stretch">
+        <span cds-text="section" cds-layout="horizontal align:left"
+          >Montant des intérêts à rembourser:</span
+        ><span
+          cds-text="section"
+          cds-layout="horizontal align:right"
+          class="digit"
+        >
+          {{ conversion?.montantInteretRembourse | number : "1.0-0" }}
+        </span>
+      </div>
+
+      <div cds-layout="horizontal align:stretch">
+        <span cds-text="section" cds-layout="horizontal align:left"
+          >Date de l'AGE:</span
+        ><span
+          cds-text="section"
+          cds-layout="horizontal align:right"
+          class="digit"
+        >
+          {{ conversion?.dateAge | date : "dd/MM/yyyy" }}</span
+        >
+      </div>
+    </div>
+
+    <cds-divider orientation="horizontal"></cds-divider>
+
+    <!-- CONFORMITE DOCUMENTS -->
+    @for(conformite of conformite_documentaires_conversion; track $index){
+    <document-upload
+      #doc_upload
+      [compliance]="{ document: undefined, conformite: conformite }"
+      [data]="conversion"
+      [task_row]="8"
+      [phase_row]="3"
+    ></document-upload>
+    }
+  </div>
+  }
+
+  <!-- REGLEMENT CCA -->
+  @else { @if(reglement && !show_subsc){
+  <div cds-layout="vertical gap:lg p-x:none p-y:md align:stretch">
+    <span cds-text="title" cds-layout="align:left"
+      ><cds-icon size="lg" shape="recycle" class="info"></cds-icon> Le montant
+      du CCA a été réglé
+    </span>
+
+    <!-- BUTTONS  -->
+    <div cds-layout="horizontal align:stretch">
+      <span cds-text="section" cds-layout="horizontal align:left">
+        <cds-button (click)="show_subsc = true" action="flat">
+          <cds-icon shape="link" size="md"></cds-icon> Aperçu sur la
+          souscription CCA
+        </cds-button></span
+      ><span cds-text="section" cds-layout="horizontal align:right">
+        <cds-button
+          cds-layout="align:right"
+          style="margin-top: auto"
+          status="danger"
+          (click)="deleteReglement()"
+        >
+          <cds-icon shape="ban" size="md"></cds-icon>
+          <span> Annuler</span>
+        </cds-button>
+      </span>
+    </div>
+
+    <!-- Divider -->
+    <cds-divider orientation="horizontal"></cds-divider>
+
+    <!-- REGLEMENT DATA -->
+    <div cds-layout="vertical gap:md p:sm horizontal-stretch">
+      <div cds-layout="horizontal align:stretch">
+        <span cds-text="section" cds-layout="horizontal align:left"
+          >Montant de souscription en CCA:</span
+        ><span
+          cds-text="section"
+          cds-layout="horizontal align:right"
+          class="digit"
+        >
+          {{ souscription?.montant | currency : "symbol" : "tnd" : "1.0-0" }}
+        </span>
+      </div>
+
+      <div cds-layout="horizontal align:stretch">
+        <span cds-text="section" cds-layout="horizontal align:left"
+          >Montant des intérêts remboursés:</span
+        ><span
+          cds-text="section"
+          cds-layout="horizontal align:right"
+          class="digit"
+        >
+          {{ reglement?.interet | currency : "symbol" : "tnd" : "1.0-0" }}
+        </span>
+      </div>
+
+      <div cds-layout="horizontal align:stretch">
+        <span cds-text="section" cds-layout="horizontal align:left"
+          >Date du PV:</span
+        ><span
+          cds-text="section"
+          cds-layout="horizontal align:right"
+          class="digit"
+        >
+          {{ reglement?.datePV | date : "dd/MM/yyyy" }}</span
+        >
+      </div>
+    </div>
+
+    <cds-divider orientation="horizontal"></cds-divider>
+
+    <!-- CONFORMITE DOCUMENTS -->
+    @for(conformite of conformite_documentaires_conversion; track $index){
+    <document-upload
+      #doc_upload
+      [compliance]="{ document: undefined, conformite: conformite }"
+      [data]="reglement"
+      [task_row]="9"
+      [phase_row]="3"
+    ></document-upload>
+    }
+  </div>
+  } }
+  <!-- CCA -->
+  @if(!conversion && !reglement || show_subsc){
+  <!-- HEADER -->
+  <span cds-text="title" class="title"> Souscription en CCA </span>
+
+  <!-- ALERT CONVERSION -->
+  @if (conversion != undefined) {
+  <div cds-layout="m-t:md">
+    <cds-alert-group status="warning">
+      <cds-alert>
+        <span [style.color]="'var(--cds-alias-typography-color-500)'"
+          >Le montant du CCA a été converti en actions &nbsp;</span
+        >
+        <span
+          (click)="show_subsc = false"
+          [style.cursor]="'pointer'"
+          [style.color]="'var(--cds-alias-typography-color-500)'"
+          >(Voir les détails)</span
+        >
+      </cds-alert>
+    </cds-alert-group>
+  </div>
+  }
+
+  <!-- ALERT REGLEMENT -->
+  @if (reglement != undefined) {
+  <div cds-layout="m-t:md">
+    <cds-alert-group status="warning">
+      <cds-alert>
+        Le règlement du CCA a été effectué &nbsp;
+        <span
+          (click)="show_subsc = false"
+          [style.cursor]="'pointer'"
+          [style.color]="'var(--cds-alias-typography-color-500)'"
+          >(Voir les détails)</span
+        >
+      </cds-alert>
+    </cds-alert-group>
+  </div>
+  }
+
+  <!-- PROGRESS BAR -->
+  @if (loading) {
+  <div cds-layout="m-t:md">
+    <label for="demoProgressBar">Téléchargement </label>
+    <clr-progress-bar id="progressBar" clrLoop></clr-progress-bar>
+  </div>
+  }
+
+  <!-- CCA FORM -->
+  <form
+    cds-layout="m-t:lg"
+    clrForm
+    [formGroup]="ccaSaveForm!"
+    clrLayout="horizontal compact"
+    clrLabelSize="3"
+    class="clr-form-compact"
+  >
+    <clr-date-container>
+      <label for="date_signature_contrat">
+        <cds-icon shape="calendar" solid></cds-icon> Date de signature du
+        contrat:
+      </label>
+      <input
+        clrDate
+        type="date"
+        formControlName="date_signature_contrat"
+        name="date_signature_contrat"
+      />
+    </clr-date-container>
+
+    <clr-number-input-container>
+      <label for="montant_cca"
+        ><cds-icon shape="dollar" solid></cds-icon> Montant en CCA (tnd):</label
+      >
+      <input
+        clrNumberInput
+        type="number"
+        formControlName="montant_cca"
+        name="montant_cca"
+        min="0"
+        step="0.01"
+      />
+      <clr-control-helper>{{
+        ccaSaveForm.controls["montant_cca"].value != 0
+          ? (ccaSaveForm.controls["montant_cca"].value
+            | currency : "tnd" : "symbol" : "1.0-0")
+          : ""
+      }}</clr-control-helper>
+    </clr-number-input-container>
+
+    <clr-number-input-container>
+      <label for="duree"
+        ><cds-icon shape="clock" solid></cds-icon> Durée (en mois):</label
+      >
+      <input
+        clrNumberInput
+        type="number"
+        formControlName="duree"
+        name="duree"
+      />
+    </clr-number-input-container>
+    <clr-number-input-container>
+      <label for="taux_cca"
+        ><cds-icon shape="plugin" solid></cds-icon> Taux d'intérêt CCA:</label
+      >
+      <input
+        clrNumberInput
+        type="number"
+        formControlName="taux_cca"
+        name="taux_cca"
+      />
+    </clr-number-input-container>
+
+    <clr-select-container>
+      <label for="modalite_payment"
+        ><cds-icon shape="container-volume" solid></cds-icon> Modalité de
+        paiement de l'intérêt:</label
+      >
+      <select clrSelect name="options" formControlName="modalite_payment">
+        @for(modalite of modalite_payments; track $index){
+        <option [value]="modalite.value">
+          {{ modalite.label }}
+        </option>
+        }
+      </select>
+    </clr-select-container>
+  </form>
+
+  <!-- Buttons save and delete -->
+  <div cds-layout="horizontal gap:sm m-t:lg">
+    <div class="btn-group">
+      <cds-button
+        action="flat-inline"
+        status="primary"
+        [disabled]="ccaSaveForm.invalid"
+        (click)="saveSouscription()"
+      >
+        <cds-icon shape="floppy" size="md" solid></cds-icon> Sauvegarder
+      </cds-button>
+    </div>
+
+    <cds-divider orientation="vertical"></cds-divider>
+
+    <div class="btn-group">
+      <cds-button
+        action="flat-inline"
+        status="danger"
+        [disabled]="souscription == undefined"
+        (click)="deleteSouscription()"
+      >
+        <cds-icon shape="trash" size="md" status="danger" solid></cds-icon>
+        Supprimer
+      </cds-button>
+    </div>
+  </div>
+
+  <!-- Bulletin de souscription CCA  -->
+  <div class="label bs" cds-layout="m-t:lg m-b:sm">
+    <span class="badge badge-info">Bulletin de souscription:</span>
+    <cds-button
+      action="flat"
+      status="primary"
+      [disabled]="souscription == undefined"
+    >
+      <cds-icon shape="scroll" size="md" solid></cds-icon> Générer
+    </cds-button>
+
+    <cds-button
+      (click)="showSouscriptionModal()"
+      action="flat"
+      status="primary"
+      [disabled]="souscription == undefined"
+    >
+      <cds-icon shape="upload" size="md" solid></cds-icon> Télécharger
+    </cds-button>
+
+    <cds-button
+      action="flat"
+      status="primary"
+      [disabled]="souscription == undefined"
+    >
+      <cds-icon shape="eye" size="md" solid></cds-icon> Visualiser
+    </cds-button>
+  </div>
+
+  <!-- Liberation form -->
+  <vesting-create-form
+    [souscription]="souscription"
+    [type]="'cca'"
+  ></vesting-create-form>
+
+  <!-- Buttons convert and reglement -->
+  <div cds-layout="horizontal m-t:md">
+    <div class="btn-group">
+      <cds-button
+        status="warning"
+        [disabled]="souscription == undefined"
+        (click)="conversion_modal_open = true"
+      >
+        <cds-icon shape="recycle" solid size="md"></cds-icon> Convertir en
+        Actions
+      </cds-button>
+    </div>
+
+    <div class="btn-group">
+      <cds-button
+        status="neutral"
+        [disabled]="souscription == undefined"
+        (click)="reglement_modal_open = true"
+      >
+        <cds-icon shape="gavel" solid size="md"></cds-icon> Règlement des CCA
+      </cds-button>
+    </div>
+  </div>
+  }
+</div>
+
+<!-- Modal conversion cca -->
+<clr-modal [(clrModalOpen)]="conversion_modal_open" [clrModalSize]="'md'">
+  <!--Modal header-->
+  <h3 class="modal-title">
+    <cds-icon shape="recycle" size="lg" status="warning" solid=""></cds-icon>
+    Conversion des CCA en Actions
+  </h3>
+
+  <!--Modal body-->
+  <div class="modal-body" cds-layout="p:lg">
+    <cca-convertion-create-form
+      #ccaConversionForm
+      [souscription]="souscription"
+      [fonds]="fonds()"
+      [(conversion)]="conversion"
+      (refreshEvent)="refreshEventConversion($event)"
+      [financement]="financement()"
+      [(loading)]="conversion_modal_open"
+    ></cca-convertion-create-form>
+  </div>
+  <div class="modal-footer" style="display: none"></div>
+</clr-modal>
+
+<!-- Modal reglement cca -->
+<clr-modal [(clrModalOpen)]="reglement_modal_open" [clrModalSize]="'md'">
+  <!--Modal header-->
+  <h3 class="modal-title">
+    <cds-icon shape="switch" size="lg" solid=""></cds-icon>
+    Règlement des CCA
+  </h3>
+
+  <!--Modal body-->
+  <div class="modal-body" cds-layout="p:lg">
+    <cca-settlement-create-form
+      #ccaSettlementForm
+      [souscription]="souscription"
+      [fonds]="fonds()"
+      [financement]="financement()"
+      [(reglement)]="reglement"
+      [(loading)]="reglement_modal_open"
+    ></cca-settlement-create-form>
+  </div>
+  <div class="modal-footer" style="display: none"></div>
+</clr-modal>
+
+<clr-modal [clrModalSize]="'md'" [(clrModalOpen)]="opened">
+  <h3 class="modal-title">
+    <cds-icon shape="upload" size="lg" solid=""></cds-icon> Télécharger le
+    contrat du CCA
+  </h3>
+  <div class="modal-body">
+    <document-upload
+      [mode]="'flat'"
+      [compliance]="{
+        document: undefined,
+        conformite: souscription_conformite_documentaire[0]
+      }"
+      [data]="souscription"
+      [task_row]="3"
+      [phase_row]="3"
+    ></document-upload>
+  </div>
+</clr-modal>

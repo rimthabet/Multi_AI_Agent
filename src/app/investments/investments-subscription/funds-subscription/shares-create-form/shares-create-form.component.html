@@ -1,0 +1,236 @@
+<div cds-layout="m-t:md m-r:md m-b:md">
+  <!-- Header -->
+  <span cds-text="title" class="title"> Souscription en actions </span>
+
+  <!-- PROGRESS BAR -->
+  @if (loading) {
+  <div cds-layout="m-t:md">
+    <label for="demoProgressBar">Téléchargement </label>
+    <clr-progress-bar id="progressBar" clrLoop></clr-progress-bar>
+  </div>
+  }
+
+  <!-- action form -->
+  <form
+    cds-layout="m-t:xl"
+    clrForm
+    [formGroup]="actionSaveForm!"
+    clrLabelSize="3"
+    class="clr-form-compact"
+  >
+    <clr-date-container>
+      <label for="date_bulletin_souscription" class="clr-required-mark">
+        <cds-icon shape="calendar" solid></cds-icon> Date du Bulletin de
+        souscription:
+      </label>
+      <input
+        clrDate
+        type="date"
+        formControlName="date_bulletin_souscription"
+        name="date_bulletin_souscription"
+      />
+    </clr-date-container>
+
+    <clr-number-input-container>
+      <label for="montant" class="clr-required-mark"
+        ><cds-icon shape="dollar-bill" solid></cds-icon> Montant de
+        souscription:</label
+      >
+      <input
+        clrNumberInput
+        type="number"
+        formControlName="montant"
+        name="montant"
+        min="0"
+        step="0.01"
+      />
+      <clr-control-helper>
+        {{
+          actionSaveForm.controls["montant"].value != 0
+            ? (actionSaveForm.controls["montant"].value
+              | currency : "tnd" : "symbol" : "1.2-2")
+            : ""
+        }}
+      </clr-control-helper>
+    </clr-number-input-container>
+
+    <clr-number-input-container>
+      <label for="nombre_action" class="clr-required-mark"
+        ><cds-icon shape="plugin" solid></cds-icon> Nombre d'actions:</label
+      >
+      <input
+        clrNumberInput
+        type="number"
+        formControlName="nombre_action"
+        name="nombre_action"
+        min="0"
+        step="1"
+      />
+      <clr-control-helper>
+        {{
+          actionSaveForm.controls["nombre_action"].value != 0
+            ? (actionSaveForm.controls["nombre_action"].value
+              | number : "1.2-2")
+            : ""
+        }}
+      </clr-control-helper>
+    </clr-number-input-container>
+
+    <clr-number-input-container>
+      <label for="valeur_nominale" class="clr-required-mark"
+        ><cds-icon shape="dollar" solid></cds-icon> Valeur nominale
+        (tnd):</label
+      >
+      <input
+        clrNumberInput
+        type="number"
+        formControlName="valeur_nominale"
+        name="valeur_nominale"
+        min="0"
+        step="1"
+      />
+      <clr-control-helper>{{
+        actionSaveForm.controls["valeur_nominale"].value != 0
+          ? (actionSaveForm.controls["valeur_nominale"].value
+            | currency : "tnd" : "symbol" : "1.2-2")
+          : ""
+      }}</clr-control-helper>
+    </clr-number-input-container>
+
+    <clr-number-input-container>
+      <label for="prime" class="clr-required-mark"
+        ><cds-icon shape="wallet" solid></cds-icon> Prime d'émission
+        (tnd):</label
+      >
+      <input
+        clrNumberInput
+        type="number"
+        formControlName="prime"
+        name="prime"
+        min="0"
+        step="1"
+      />
+      <clr-control-helper>{{
+        actionSaveForm.controls["prime"].value != 0
+          ? (actionSaveForm.controls["prime"].value
+            | currency : "tnd" : "symbol" : "1.2-2")
+          : (0 | currency : "tnd" : "symbol" : "1.2-2")
+      }}</clr-control-helper>
+    </clr-number-input-container>
+  </form>
+
+  <!-- Buttons -->
+  <div cds-layout="horizontal gap:sm m-t:lg">
+    <div class="btn-group">
+      <cds-button
+        action="flat-inline"
+        status="primary"
+        [disabled]="actionSaveForm.invalid"
+        (click)="saveAction()"
+      >
+        <cds-icon shape="floppy" size="md" solid></cds-icon> Sauvegarder
+      </cds-button>
+    </div>
+
+    <cds-divider orientation="vertical"></cds-divider>
+
+    <div class="btn-group">
+      <cds-button
+        action="flat-inline"
+        status="danger"
+        [disabled]="souscription == undefined"
+        (click)="deleteSouscription()"
+      >
+        <cds-icon shape="trash" size="md" status="danger" solid></cds-icon>
+        Supprimer
+      </cds-button>
+    </div>
+  </div>
+
+  <!-- Bulletin de souscription -->
+  <div class="label bs" cds-layout="m-t:lg m-b:sm">
+    <span class="badge badge-info">Bulletin de souscription:</span>
+    <cds-button
+      action="flat"
+      status="primary"
+      [disabled]="souscription == undefined"
+      (click)="showCompteBancaireMondel()"
+    >
+      <cds-icon shape="scroll" size="md" solid></cds-icon> Générer
+    </cds-button>
+
+    <cds-button
+      action="flat"
+      status="primary"
+      [disabled]="souscription == undefined"
+      (click)="showBulletin()"
+    >
+      <cds-icon shape="upload" size="md" solid></cds-icon> Télécharger
+    </cds-button>
+
+    <cds-button
+      action="flat"
+      status="primary"
+      (click)="openBulletin()"
+      [disabled]="
+        souscription == undefined || bulletin_souscription_link == undefined
+      "
+    >
+      <cds-icon shape="eye" size="md" solid></cds-icon> Visualiser
+    </cds-button>
+  </div>
+</div>
+
+<!-- Liberation form -->
+<vesting-create-form
+  [souscription]="souscription"
+  [type]="'action'"
+  [disabled]="false"
+>
+</vesting-create-form>
+
+<!-- Modal bulletin de souscription -->
+<clr-modal [clrModalSize]="'lg'" [(clrModalOpen)]="openedBulletin">
+  <!-- Modal header -->
+  <h3 class="modal-title">
+    <cds-icon shape="upload" size="lg" solid=""></cds-icon> Télécharger le
+    bulletin de souscription
+  </h3>
+
+  <!-- Modal body -->
+  <div class="modal-body" cds-layout="p-b:xxl">
+    @if(conformite_documentaire){
+    <document-upload
+      #docUpload
+      [mode]="'flat'"
+      [compliance]="{ conformite: conformite_documentaire[0] }"
+      [data]="souscription"
+      [task_row]="1"
+      [phase_row]="3"
+    ></document-upload>
+    }
+  </div>
+
+  <!-- Modal footer -->
+  <div class="modal-footer" style="display: none"></div>
+</clr-modal>
+
+<!-- Modal Bank Account-->
+<clr-modal [clrModalSize]="'lg'" [(clrModalOpen)]="openedBankAccount">
+  <!-- Modal header -->
+  <h3 class="modal-title">
+    <cds-icon shape="bank" size="lg" solid=""></cds-icon> Les informations du
+    compte bancaire
+  </h3>
+
+  <!-- Modal body -->
+  <div class="modal-body">
+    <shares-bank-account-form
+      [souscription]="souscription"
+      (closeEvent)="openedBankAccount = false"
+    ></shares-bank-account-form>
+  </div>
+
+  <!-- Modal footer -->
+  <div class="modal-footer" style="display: none"></div>
+</clr-modal>

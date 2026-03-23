@@ -1,0 +1,25 @@
+.statut-info {
+    font-size: 24px;
+    letter-spacing: 2px;
+    padding: 1em 0 0 0;
+
+    &.APPROUVE {
+        margin-top: 1.5em
+    }
+
+
+    span {
+
+        color: var(--clr-color-action-600);
+        font-weight: 600;
+
+        &.REFUSE {
+            color: var(--clr-color-danger-700) !important
+        }
+
+        &.APPROUVE {
+            color: var(--clr-color-success-700) !important
+        }
+    }
+
+}

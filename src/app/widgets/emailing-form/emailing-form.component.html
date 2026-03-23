@@ -1,0 +1,54 @@
+<!-- Email form -->
+<form clrForm [formGroup]="emailSaveForm!" clrLabelSize="3">
+    <clr-input-container>
+        <label for="titre" class="clr-required-mark">Titre:</label>
+        <input clrInput type="text" formControlName="titre" name="titre" />
+    </clr-input-container>
+
+    <clr-input-container>
+        <label for="adresse" class="clr-required-mark">Destinataire:</label>
+        <input clrInput type="text" formControlName="adresse" name="adresse" />
+    </clr-input-container>
+
+    <clr-textarea-container>
+        <label for="textModel" class="clr-required-mark">Message:</label>
+        <textarea clrTextarea cols="85" rows="10" id="textModel" formControlName="textModel"
+            [placeholder]="'Saisissez le message...'"></textarea>
+        <clr-control-helper>
+            Vous pouvez utiliser la synthaxe
+            <a href="https://www.markdownguide.org/basic-syntax/" target="_blank">Markdown</a>
+            pour formater votre ordre du jour</clr-control-helper>
+    </clr-textarea-container>
+
+
+    <div [style.display]="'flex'" [style.gap]="'10px'" cds-layout="horizontal  gap:lg p-y:md">
+        @for (file of selectedFiles; track $index){
+        <span class="label" cds-layout="horizontal gap:sm">
+            <cds-icon shape="paperclip" size="sm" style="rotate:90deg; margin-right:.3em"></cds-icon>
+            <span cds-layout="align:left">{{ file.name }}</span>
+            <cds-icon shape="close" class="failure" (click)="removeSelectedFile(file)"
+                style="cursor: pointer; margin-left:.5em"></cds-icon>
+        </span>
+        }
+    </div>
+</form>
+
+<!-- File upload -->
+<cds-file layout="vertical" buttonLabel="Explorer" label="Explorer">
+    <label></label>
+    <input type="file" #fileInput style="display:none" (change)="onFilesSelected($event)" multiple>
+</cds-file>
+
+<!-- Buttons -->
+<div cds-layout="horizontal m-y:lg">
+    <div class="btn-group">
+        <cds-button (click)="saveEmail()" [disabled]="emailSaveForm.invalid">
+            <cds-icon shape="envelope" size="md"></cds-icon> Envoyer
+        </cds-button>
+    </div>
+    <div class="btn-group">
+        <cds-button (click)="hideModal()" action="outline">
+            Annuler
+        </cds-button>
+    </div>
+</div>

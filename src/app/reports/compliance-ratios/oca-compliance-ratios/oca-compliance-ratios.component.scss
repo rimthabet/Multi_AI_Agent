@@ -1,0 +1,33 @@
+td,
+th {
+    font-size: 90%;
+    font-weight: 500 !important;
+    padding: 0.75em;
+}
+
+th {
+    color: var(--cds-alias-object-interaction-color-selected);
+
+    &:first-of-type {
+        text-align: left;
+    }
+}
+
+label {
+    white-space: nowrap;
+}
+
+td {
+    &.digit {
+        text-align: right !important;
+    }
+
+    &:first-of-type {
+        text-align: left;
+        font-size: 100%;
+    }
+}
+
+a {
+    text-decoration: none;
+}

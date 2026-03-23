@@ -1,0 +1,193 @@
+<!-- Header -->
+<span cds-text="title">
+  <cds-icon
+    status="info"
+    shape="checkbox-list"
+    size="lg"
+    cds-layout="m-b:sm"
+  ></cds-icon>
+  Gestion des listes de contrôle
+  <sup
+    role="tooltip"
+    aria-haspopup="true"
+    class="tooltip tooltip-lg tooltip-bottom-right"
+  >
+    <cds-icon shape="info-circle" size="24"></cds-icon>
+    <span class="tooltip-content">
+      Les listes de contrôle (checklists) définissent les listes des documents à
+      demander des promoteurs ou tout autre collaborateur au niveau d'un
+      processus quelconque, en l'occurence la phase d'étude de chaque
+      projet.</span
+    >
+  </sup></span
+>
+
+<!-- Data grid -->
+<div class="list-side">
+  <clr-datagrid
+    [(clrDgSingleSelected)]="selectedChecklist"
+    [clrDgLoading]="loading"
+    style="height: calc(100vh - 150px)"
+  >
+    <clr-dg-action-bar>
+      <!-- Actions -->
+      <div class="btn-group">
+        <cds-button
+          action="outline"
+          status="primary"
+          (click)="
+            selectedChecklist = []; this.crud_modal_open = true; showEdit(true)
+          "
+          onKeyPress=""
+        >
+          <cds-icon shape="plus" size="md"></cds-icon> Ajouter
+        </cds-button>
+      </div>
+      <div class="btn-group">
+        <cds-button
+          action="outline"
+          status="warning"
+          (click)="showEdit(true)"
+          [disabled]="!selectedChecklist?.id"
+          onKeyPress=""
+        >
+          <cds-icon shape="note" size="md"></cds-icon> Modifier
+        </cds-button>
+      </div>
+      <div class="btn-group">
+        <cds-button
+          action="outline"
+          status="danger"
+          (click)="deleteChecklists()"
+          [disabled]="!selectedChecklist?.id"
+          onKeyPress=""
+        >
+          <cds-icon shape="trash" size="md"></cds-icon> Supprimer
+        </cds-button>
+      </div>
+      <!-- Divider -->
+      <cds-divider
+        cds-layout="m-t:lg m-b:sm"
+        class="htitled-divider"
+        title="Inventaire des listes de contrôle"
+      ></cds-divider>
+    </clr-dg-action-bar>
+
+    <clr-dg-column style="width: 300px" [clrDgField]="'libelle'"
+      ><cds-icon shape="checkbox-list"></cds-icon> &nbsp; Nom de la liste de
+      contrôle</clr-dg-column
+    >
+    <clr-dg-column
+      style="width: 220px"
+      [clrDgField]="'typeInvestissement.libelle'"
+      >Type d'Investissement
+    </clr-dg-column>
+    <clr-dg-column style="min-width: 250px"
+      ><cds-icon shape="layers"></cds-icon> &nbsp; Liste des documents à
+      demander</clr-dg-column
+    >
+
+    <clr-dg-row
+      *clrDgItems="let checklist of checklists!"
+      [clrDgItem]="checklist"
+    >
+      <clr-dg-cell>{{ checklist.libelle }} </clr-dg-cell>
+      <clr-dg-cell>{{ checklist.typeInvestissement?.libelle }} </clr-dg-cell>
+      <clr-dg-cell>
+        <ul class="check-list">
+          @for (d of checklist.conformiteDocumentaires; track d.id) {
+          <li>
+            {{ d.documentType.libelle }}
+          </li>
+          }
+        </ul>
+      </clr-dg-cell>
+    </clr-dg-row>
+    <clr-dg-footer>{{ checklists?.length }} checklists</clr-dg-footer>
+  </clr-datagrid>
+</div>
+
+<!-- Modal form checklist -->
+<clr-modal [(clrModalOpen)]="crud_modal_open" [clrModalSize]="'lg'">
+  <h3 class="modal-title">
+    <cds-icon
+      status="info"
+      shape="checkbox-list"
+      size="lg"
+      cds-layout="m-b:md"
+    ></cds-icon>
+    Liste de contrôle:
+  </h3>
+  <div class="modal-body">
+    <form clrForm [formGroup]="checklistSaveForm!" clrLabelSize="4">
+      <clr-input-container>
+        <label class="clr-required-mark">Libellé :</label>
+        <input
+          clrInput
+          type="text"
+          name="libelle"
+          formControlName="libelle"
+          style="width: 500px"
+        />
+      </clr-input-container>
+      <clr-select-container>
+        <label class="clr-required-mark">Type d'investissement :</label>
+        <select
+          clrSelect
+          name="typeInvestissement"
+          formControlName="typeInvestissement"
+          [compareWith]="equals"
+        >
+          @for (invest of typesInvestments; track invest.id) {
+          <option [ngValue]="invest" [attr.data-value]="invest">
+            {{ invest?.libelle }}
+          </option>
+          }
+        </select>
+      </clr-select-container>
+
+      <clr-combobox-container>
+        <label for="conformiteDocumentaires" class="clr-required-mark"
+          >Documents:</label
+        >
+        <clr-combobox formControlName="conformiteDocumentaires" clrMulti="true">
+          <ng-container *clrOptionSelected="let selected">
+            <cds-icon shape="filter-grid"></cds-icon>
+            {{ selected?.documentType?.libelle }}
+          </ng-container>
+
+          <clr-options>
+            <clr-option
+              *clrOptionItems="
+                let document of conformiteDocumentaires;
+                filter: filterDocuments
+              "
+              [clrValue]="document"
+            >
+              <cds-icon shape="filter-grid"></cds-icon>
+              {{ document.documentType.libelle }}
+            </clr-option>
+          </clr-options>
+        </clr-combobox>
+
+        <clr-control-helper>
+          Veuillez choisir le(s) type(s) de(s) document(s)
+        </clr-control-helper>
+      </clr-combobox-container>
+    </form>
+  </div>
+
+  <div class="modal-footer">
+    <button class="btn btn-outline" (click)="hideChecklistModal()">
+      Annuler
+    </button>
+
+    <button
+      class="btn btn-primary"
+      (click)="saveChecklist()"
+      [disabled]="checklistSaveForm.invalid"
+    >
+      <cds-icon shape="floppy" size="md"></cds-icon> Sauvegarder
+    </button>
+  </div>
+</clr-modal>

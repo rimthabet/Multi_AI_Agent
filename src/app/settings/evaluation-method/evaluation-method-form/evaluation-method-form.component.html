@@ -1,0 +1,52 @@
+<!-- Modal method CRUD -->
+<clr-modal [clrModalOpen]="isOpen()" [clrModalSize]="'md'" (clrModalOpenChange)="handleModalChange($event)">
+    <!-- Header -->
+    <div class="modal-title">
+        <cds-icon status="info" shape="update" size="lg"></cds-icon>
+        Gestion des Méthodes d'évaluation
+    </div>
+
+    <!-- Body -->
+    <div class="modal-body">
+
+        @if(!modal()){
+        <!-- Form -->
+        <form clrForm [formGroup]="methodeForm" clrLabelSize="2">
+            <clr-input-container>
+                <label>Libellé:</label>
+                <input clrInput placeholder="Méthode d'évaluation" type="text" formControlName="libelle"
+                    style="width: 375px" />
+            </clr-input-container>
+        </form> }
+    </div>
+
+    <!-- Footer -->
+    <div class="modal-footer">
+        <!-- Buttons -->
+        <cds-button action="outline" (click)="closeModal()" onKeyPress="closeModal()">
+            Annuler
+        </cds-button>
+
+        <cds-button status="primary" (click)="saveMethod()" [disabled]="methodeForm.invalid" onkeypress="">
+            Sauvegarder
+        </cds-button>
+    </div>
+</clr-modal>
+
+
+
+@if(modal()){
+<form clrForm [formGroup]="methodeForm" clrLabelSize="2">
+    <clr-input-container>
+        <label>Libellé:</label>
+        <input clrInput placeholder="Méthode d'évaluation" type="text" formControlName="libelle"
+            style="width: 450px !important" />
+    </clr-input-container>
+</form>
+
+<div cds-layout="horizontal align:right m-y:sm">
+    <cds-button status="primary" (click)="saveMethod()" [disabled]="methodeForm.invalid" onkeypress="">
+        Sauvegarder
+    </cds-button>
+</div>
+}

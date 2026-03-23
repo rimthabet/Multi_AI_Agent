@@ -1,0 +1,80 @@
+<div cds-layout="m-y:md">
+
+    <!-- Year Form -->
+    <form clrForm clrLayout="horizontal align:stretch gap:md" clrLabelSize="6" [formGroup]="yearForm">
+        <div style="
+            display: grid;
+            grid-template-columns: 1fr 20px 1fr 20px 1fr;
+            padding: 1em;
+          ">
+            <clr-number-input-container>
+                <label for="year" class="clr-required-mark">
+                    <cds-icon shape="calendar" size="md" status="info" solid=""></cds-icon> Année de
+                    référence:
+                </label>
+                <input style="
+                font-weight: 500;
+                font-size: 18px;
+                color: var(--clr-color-action-700);
+                width: 180px;
+              " clrNumberInput type="number" formControlName="year" name="year" />
+            </clr-number-input-container>
+            @if (selectedTab == 0 || selectedTab == 4) {
+            <cds-divider orientation="vertical" style="margin-top: 0.8em; margin-left:.5em"></cds-divider>
+            }
+            @if (selectedTab == 0) {
+            <clr-number-input-container>
+                <label for="nb_years" class="clr-required-mark">
+                    <cds-icon shape="hashtag" size="md" status="info" solid=""></cds-icon> Nombre
+                    d'années:
+                </label>
+                <input style="
+                font-weight: 500;
+                font-size: 18px;
+                color: var(--clr-color-action-700);
+                width: 180px;
+              " clrNumberInput type="number" formControlName="nb_years" name="nb_years" />
+            </clr-number-input-container>
+            }
+            @if (selectedTab == 1 || selectedTab == 2) {
+            <cds-divider orientation="vertical" style="margin-top: 0.8em; margin-left:.5em"></cds-divider>
+
+            <clr-select-container>
+                <label for="bp" class="clr-required-mark"><cds-icon shape="bullseye" size="sm" solid=""></cds-icon>
+                    Business
+                    Plan:</label>
+                <select clrSelect name="bp" formControlName="bp">
+                    @for(bp of bps; track bp.id) {
+                    <option value="{{ bp?.id }}">
+                        {{ bp?.label }}
+                    </option>
+                    }
+                </select>
+            </clr-select-container>
+            }
+        </div>
+    </form>
+
+    @if (loading) {
+    <clr-progress-bar clrValue="15" clrLoop></clr-progress-bar>
+    }
+
+    <!-- Tabs -->
+    <div cds-layout="m-y:md">
+        <clr-tabs>
+            @for(item of fin_statements; track $index) {
+            <clr-tab>
+                <button (click)="selectedTab = $index" clrTabLink [title]="item?.libelle">
+                    {{ item?.libelle }}
+                </button>
+
+                <clr-tab-content *clrIfActive="selectedTab == $index">
+                    <financial-statement [prospection]="prospection()" [ref2]="-1" [ref3]="-1" [ref4]="-1" [ref5]="-1"
+                        [item]="item" [data]="items" [year]="yearForm!.value['year']"
+                        [columns]="item?.columns"></financial-statement>
+                </clr-tab-content>
+            </clr-tab>
+            }
+        </clr-tabs>
+    </div>
+</div>

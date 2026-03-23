@@ -1,0 +1,540 @@
+<form
+  clrStepper
+  clrForm
+  (ngSubmit)="saveFund()"
+  class="clr-form-compact"
+  cds-layout="m-t:lg"
+  [clrLabelSize]="2"
+>
+  <clr-stepper-panel ngModelGroup="profile">
+    <clr-step-title>Profile du fonds </clr-step-title>
+    <clr-step-description
+      >Dénomination, Adresse, Montant projeté et Durée</clr-step-description
+    >
+    <clr-step-content>
+      <!-- Dénomination -->
+      <clr-input-container>
+        <label for="denomination" class="clr-required-mark">Dénomination</label>
+        <input
+          clrInput
+          type="text"
+          [(ngModel)]="templateForm.profile.denomination"
+          name="denomination"
+          size="26"
+          required=""
+        />
+      </clr-input-container>
+
+      <!-- Alias -->
+      <clr-input-container>
+        <label
+          for="alias"
+          class="clr-required-mark"
+          role="tooltip"
+          aria-haspopup="true"
+        >
+          Alias
+          <sup>
+            <clr-tooltip>
+              <cds-icon
+                clrTooltipTrigger
+                shape="info-circle"
+                size="24"
+                status="info"
+              ></cds-icon>
+              <clr-tooltip-content
+                [clrPosition]="'bottom-right'"
+                [clrSize]="'lg'"
+              >
+                En majuscules et sans espaces (sert comme nom du répertoire des
+                documents du fonds)
+              </clr-tooltip-content>
+            </clr-tooltip></sup
+          >
+        </label>
+        <input
+          clrInput
+          type="text"
+          [(ngModel)]="templateForm.profile.alias"
+          name="alias"
+          size="26"
+          required=""
+        />
+      </clr-input-container>
+
+      <!-- Adresse -->
+      <clr-input-container>
+        <label for="adresseFonds" class="clr-required-mark">Adresse</label>
+        <input
+          clrInput
+          type="text"
+          [(ngModel)]="templateForm.profile.adresseFonds"
+          name="adresseFonds"
+          size="26"
+          required=""
+        />
+      </clr-input-container>
+
+      <!-- Web site -->
+      <clr-input-container>
+        <label for="adresseFonds" class="clr-required-mark">Site Web</label>
+        <input
+          clrInput
+          type="text"
+          [(ngModel)]="templateForm.profile.webSite"
+          name="webSite"
+          size="26"
+        />
+      </clr-input-container>
+
+      <!-- Montant projeté -->
+      <clr-number-input-container>
+        <label for="montant" class="clr-required-mark">Montant projeté</label>
+        <input
+          clrNumberInput
+          type="number"
+          [(ngModel)]="templateForm.profile.montant"
+          name="montant"
+          size="26"
+          required=""
+        />
+      </clr-number-input-container>
+
+      <!-- Durée du fonds -->
+      <clr-number-input-container>
+        <label for="duree" class="clr-required-mark">Durée du fonds</label>
+        <input
+          clrNumberInput
+          type="number"
+          [(ngModel)]="templateForm.profile.duree"
+          name="duree"
+          size="26"
+          required=""
+        />
+      </clr-number-input-container>
+
+      <button clrStepButton="next">Suivant</button>
+    </clr-step-content>
+  </clr-stepper-panel>
+
+  <clr-stepper-panel ngModelGroup="dates">
+    <clr-step-title>Dates clés du fonds</clr-step-title>
+    <clr-step-description
+      >Date d'agrément, Date d'obtention du visa CMF, Date du lancement, Date de
+      la 1ère souscription, Date d'expiration.</clr-step-description
+    >
+    <clr-step-content>
+      <!-- Date d'agrément -->
+      <clr-date-container>
+        <label for="date_agrement" class="clr-required-mark"
+          >Date d'agrément</label
+        >
+        <input
+          clrDate
+          type="date"
+          [(ngModel)]="templateForm.dates.date_agrement"
+          name="date_agrément"
+          size="23"
+          required=""
+        />
+      </clr-date-container>
+
+      <!-- Date d'obtention du visa CMF -->
+      <clr-date-container>
+        <label for="date_visa_cmf" class="clr-required-mark"
+          >Date d'obtention du visa CMF</label
+        >
+        <input
+          clrDate
+          type="date"
+          [(ngModel)]="templateForm.dates.date_visa_cmf"
+          name="date_VisaCMF"
+          size="23"
+          required=""
+        />
+      </clr-date-container>
+
+      <!-- Date du lancement -->
+      <clr-date-container>
+        <label for="date_lancement" class="clr-required-mark"
+          >Date du lancement
+          <sup>
+            <clr-tooltip>
+              <cds-icon
+                clrTooltipTrigger
+                shape="info-circle"
+                size="24"
+                status="info"
+              ></cds-icon>
+              <clr-tooltip-content
+                [clrPosition]="'bottom-right'"
+                [clrSize]="'lg'"
+              >
+                Date de la 1<sup>ère</sup> souscription
+              </clr-tooltip-content>
+            </clr-tooltip></sup
+          >
+        </label>
+        <input
+          clrDate
+          type="date"
+          [(ngModel)]="templateForm.dates.date_lancement"
+          name="date_lancement"
+          size="23"
+          required=""
+        />
+      </clr-date-container>
+
+      <!-- Date d'expiration -->
+      <clr-date-container>
+        <label for="date_expiration" class="clr-required-mark"
+          >Date d'expiration
+          <sup>
+            <clr-tooltip>
+              <cds-icon
+                clrTooltipTrigger
+                shape="info-circle"
+                size="24"
+                status="info"
+              ></cds-icon>
+              <clr-tooltip-content
+                [clrPosition]="'bottom-right'"
+                [clrSize]="'lg'"
+              >
+                Date d'expiration du fonds
+              </clr-tooltip-content>
+            </clr-tooltip></sup
+          >
+        </label>
+        <input
+          clrDate
+          type="date"
+          [(ngModel)]="templateForm.dates.date_expiration"
+          name="date_expiration"
+          size="23"
+          required=""
+        />
+      </clr-date-container>
+
+      <button clrStepButton="previous">Précédent</button>
+      <button clrStepButton="next">Suivant</button>
+    </clr-step-content>
+  </clr-stepper-panel>
+
+  <!-- Identité financière -->
+  <clr-stepper-panel ngModelGroup="financial_identity">
+    <clr-step-title>Identité financière du fonds</clr-step-title>
+    <clr-step-description
+      >N° du visa CMF, Matricule fiscal, Banque
+      dépositaire</clr-step-description
+    >
+    <clr-step-content>
+      <clr-input-container>
+        <label for="num_visa_cmf" class="clr-required-mark"
+          >N° du visa CMF</label
+        >
+        <input
+          clrInput
+          [(ngModel)]="templateForm.financial_identity.num_visa_cmf"
+          name="num_visaCMF"
+          required=""
+        />
+      </clr-input-container>
+
+      <clr-input-container>
+        <label for="matricule_fiscal" class="clr-required-mark"
+          >Matricule fiscal</label
+        >
+        <input
+          [(ngModel)]="templateForm.financial_identity.matricule_fiscal"
+          clrInput
+          name="matricule_fiscal"
+          required=""
+        />
+      </clr-input-container>
+
+      <clr-select-container>
+        <label for="banque" class="clr-required-mark">Banque dépositaire</label>
+        <select
+          clrSelect
+          name="options"
+          [(ngModel)]="templateForm.financial_identity.banque"
+          [compareWith]="equals"
+        >
+          <option [ngValue]="undefined" [attr.data-value]="undefined" size="27">
+            Choisir une banque...
+          </option>
+          @for (banque of banques; track banque) {
+          <option [ngValue]="banque">
+            {{ banque.libelle }}
+          </option>
+          }
+        </select>
+      </clr-select-container>
+
+      <button clrStepButton="previous">Précédent</button>
+      <button clrStepButton="next">Suivant</button>
+    </clr-step-content>
+  </clr-stepper-panel>
+
+  <!-- Identité légale -->
+  <clr-stepper-panel ngModelGroup="legal_identity">
+    <clr-step-title>Forme légale et nature du fonds</clr-step-title>
+    <clr-step-content>
+      <clr-select-container>
+        <label for="forme_legale" class="clr-required-mark">Forme légale</label>
+        <select
+          clrSelect
+          name="options"
+          [(ngModel)]="templateForm.legal_identity.forme_legale"
+          [compareWith]="equals"
+          required=""
+        >
+          <option [ngValue]="undefined" [attr.data-value]="undefined">
+            Choisir une forme légale...
+          </option>
+          @for (forme_legale of forme_legales; track forme_legale) {
+          <option [ngValue]="forme_legale" [attr.data-value]="forme_legale">
+            {{ forme_legale.libelle }}
+          </option>
+          }
+        </select>
+      </clr-select-container>
+
+      <!-- Nature -->
+      <clr-select-container>
+        <label for="nature" class="clr-required-mark">Nature</label>
+        <select
+          clrSelect
+          name="options"
+          [(ngModel)]="templateForm.legal_identity.nature"
+          [compareWith]="equals"
+          required=""
+        >
+          <option [ngValue]="undefined" [attr.data-value]="undefined">
+            Choisir une nature...
+          </option>
+          @for (nature of natures; track nature) {
+          <option [ngValue]="nature">
+            {{ nature.libelle }}
+          </option>
+          }
+        </select>
+      </clr-select-container>
+
+      <!-- Cadre d'investissement -->
+
+      <clr-combobox-container>
+        <label for="cadre_investissement" class="clr-required-mark"
+          >Cadre(s) d'investissement</label
+        >
+        <clr-combobox
+          [(ngModel)]="templateForm.legal_identity.cadre_investissement"
+          name="cadre_investissement"
+          clrMulti="true"
+          required=""
+        >
+          <ng-container *clrOptionSelected="let selected">
+            <cds-icon
+              shape="filter-grid"
+              role="img"
+              aria-label="cadre_investissement list"
+            ></cds-icon>
+            {{ selected?.libelle }}
+          </ng-container>
+          <clr-options>
+            @for (cadre of cadresInvestissement; track cadre) {
+            <clr-option [clrValue]="cadre">
+              {{ cadre.libelle }}
+            </clr-option>
+            }
+          </clr-options>
+        </clr-combobox>
+      </clr-combobox-container>
+
+      <button clrStepButton="previous">Précédent</button>
+      <button clrStepButton="next">Suivant</button>
+    </clr-step-content>
+  </clr-stepper-panel>
+
+  <!-- Frais de gestion -->
+  <clr-stepper-panel ngModelGroup="management_charges">
+    <clr-step-title>Frais du dépositaire et frais de gestion</clr-step-title>
+
+    <clr-step-content>
+      <clr-number-input-container>
+        <label for="frais_depositaire" class="clr-required-mark"
+          >Frais du dépositaire (%)</label
+        >
+        <input
+          clrNumberInput
+          type="number"
+          [(ngModel)]="templateForm.management_charges.frais_depositaire"
+          name="frais_depositaire"
+          required=""
+        />
+      </clr-number-input-container>
+
+      <clr-number-input-container>
+        <label for="frais_gestion" class="clr-required-mark"
+          >Frais de gestion (%)</label
+        >
+        <input
+          clrNumberInput
+          type="number"
+          [(ngModel)]="templateForm.management_charges.frais_gestion"
+          name="frais_gestion"
+          required=""
+        />
+      </clr-number-input-container>
+
+      <button clrStepButton="previous">Précédent</button>
+      <button clrStepButton="next">Suivant</button>
+    </clr-step-content>
+  </clr-stepper-panel>
+
+  <!-- Ratios règlementaires -->
+  @if (templateForm.legal_identity.nature &&
+  templateForm.legal_identity.nature['id'] == 2) {
+  <clr-stepper-panel ngModelGroup="compliance_ratios">
+    <clr-step-title>Ratios règlementaires</clr-step-title>
+    <clr-step-description
+      >Les ratios règlementaires sont obligatoires en cas de fonds
+      défiscalisé</clr-step-description
+    >
+    <clr-step-content>
+      <clr-number-input-container>
+        <label for="ratio_reglementaire" class="clr-required-mark"
+          >Ratio règlementaire (Fonds)</label
+        >
+        <input
+          clrNumberInput
+          type="number"
+          step="0.01"
+          [(ngModel)]="templateForm.compliance_ratios.ratio_reglementaire"
+          name="ratio_reglementaire"
+          required=""
+        />
+      </clr-number-input-container>
+
+      <clr-number-input-container>
+        <label for="ratio_reglementaire_2" class="clr-required-mark"
+          >Ratio règlementaire (Souscripteurs)</label
+        >
+        <input
+          clrNumberInput
+          type="number"
+          step="0.01"
+          [(ngModel)]="templateForm.compliance_ratios.ratio_reglementaire_2"
+          name="ratio_reglementaire_2"
+          required=""
+        />
+      </clr-number-input-container>
+
+      <clr-number-input-container>
+        <label for="ratio_secteur_activite" class="clr-required-mark"
+          >Ratio par secteur d'activité</label
+        >
+        <input
+          clrNumberInput
+          type="number"
+          step="0.01"
+          [(ngModel)]="templateForm.compliance_ratios.ratio_secteur_activite"
+          name="ratio_secteur_activite"
+          required=""
+        />
+      </clr-number-input-container>
+
+      <clr-number-input-container>
+        <label for="ratio_societe" class="clr-required-mark"
+          >Ratio par société</label
+        >
+        <input
+          clrNumberInput
+          type="number"
+          step="0.01"
+          [(ngModel)]="templateForm.compliance_ratios.ratio_societe"
+          name="ratio_societe"
+          required=""
+        />
+      </clr-number-input-container>
+
+      <clr-number-input-container>
+        <label for="ratio_quasi_fond_propre" class="clr-required-mark"
+          >Ratio en quasi fonds propre</label
+        >
+        <input
+          clrNumberInput
+          type="number"
+          step="0.01"
+          [(ngModel)]="templateForm.compliance_ratios.ratio_quasi_fond_propre"
+          name="ratio_quasi_fond_propre"
+          required=""
+        />
+      </clr-number-input-container>
+
+      <clr-number-input-container>
+        <label for="ratio_conformite_oca" class="clr-required-mark"
+          >Ratio de conformité OCA</label
+        >
+        <input
+          clrNumberInput
+          type="number"
+          step="0.01"
+          [(ngModel)]="templateForm.compliance_ratios.ratio_conformite_oca"
+          name="ratio_conformite_oca"
+          required=""
+        />
+      </clr-number-input-container>
+
+      <clr-number-input-container>
+        <label for="ratio_investissement" class="clr-required-mark"
+          >Ratio d'investissement sur le marché alternatif</label
+        >
+        <input
+          clrNumberInput
+          type="number"
+          step="0.01"
+          [(ngModel)]="templateForm.compliance_ratios.ratio_investissement"
+          name="ratio_investissement"
+          required=""
+        />
+      </clr-number-input-container>
+
+      <button clrStepButton="previous">Précédent</button>
+      <button clrStepButton="next">Suivant</button>
+    </clr-step-content>
+  </clr-stepper-panel>
+  }
+
+  <!-- Ratios règlementaires -->
+  <clr-stepper-panel ngModelGroup="subscriptions_periode_length">
+    <clr-step-title>Limite de souscription</clr-step-title>
+    <clr-step-description
+      >Durée limite de souscription (en nombre d'années)</clr-step-description
+    >
+    <clr-step-content>
+      <clr-number-input-container>
+        <label for="nombre_annees" class="clr-required-mark"
+          >Nombre d'années
+        </label>
+        <input
+          clrNumberInput
+          type="number"
+          step="1"
+          [(ngModel)]="templateForm.subscriptions_periode_length.nombre_annees"
+          name="nombre_annees"
+          required=""
+        />
+      </clr-number-input-container>
+
+      <button clrStepButton="previous">Précédent</button>
+      <button clrStepButton="submit">Soumettre</button>
+    </clr-step-content>
+  </clr-stepper-panel>
+</form>
+<div cds-text="caption">
+  (<span style="font-weight: bold; color: var(--cds-alias-status-danger)"
+    >*</span
+  >) : champs obligatoire
+</div>

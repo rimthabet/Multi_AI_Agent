@@ -1,0 +1,27 @@
+.modal-body.unlock {
+
+    background-image: url('/assets/images/unchain.png');
+    background-size: auto 150%;
+    background-position: right center;
+    background-repeat: no-repeat;
+}
+
+.modal-footer {
+    background-color: transparent !important;
+}
+
+.modal-title {
+    color: var(--clr-color-action-700);
+}
+
+.alert-text {
+    text-align: justify;
+}
+
+.pass-phrase {
+    text-align: center;
+    font-style: italic;
+    color: var(--clr-color-action-600);
+    user-select: all;
+    cursor: pointer;
+}

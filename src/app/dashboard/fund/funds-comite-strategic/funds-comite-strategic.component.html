@@ -1,0 +1,33 @@
+<!-- Header -->
+<div cds-layout="m-y:sm">
+    <span cds-text="title">
+        <cds-icon shape="cog" size="lg" status="info"></cds-icon>
+        Derniers comités de suivi et de stratégie</span>
+</div>
+
+<!-- Data grid -->
+<clr-datagrid cds-layout="m-y:md" style="height: 210px">
+    <clr-dg-column>Date</clr-dg-column>
+    <clr-dg-column>PV</clr-dg-column>
+  
+    <clr-dg-row *clrDgItems="let c of comitesStrategie() ?? []" [clrDgItem]="c">
+      <clr-dg-cell>{{ c.dateComite | date : "dd/MM/yyyy" }}</clr-dg-cell>
+  
+      <clr-dg-cell>
+        @for (document of c.documents; track $index) {
+        <div
+          cds-layout="vertical"
+          style="padding-bottom: 0.4em"
+        >
+          <a [title]="document.titre"
+            [href]="document.chemin"
+            target="_blank"
+            cds-layout="align:left"
+          >
+            {{ document.titre }}</a
+          >
+        </div>
+      }
+      </clr-dg-cell>
+    </clr-dg-row>
+  </clr-datagrid>

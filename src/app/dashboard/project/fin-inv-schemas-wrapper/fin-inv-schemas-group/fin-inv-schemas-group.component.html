@@ -1,0 +1,64 @@
+@if (loading()) {
+<span class="spinner spinner-inline">Chargement...</span>
+<span>Chargement...</span>
+}
+<clr-tabs>
+  @for (scif of scifs; track $index) {
+  <clr-tab>
+    <button clrTabLink>{{ scif.libelle }}</button>
+    <clr-tab-content *clrIfActive="true">
+      <div
+        cds-layout="grid cols:12 cols@md:6 cols@sm:12  cols@lg:3 align:stretch gap:sm m-t:lg"
+      >
+        <!-- Coût du projet -->
+
+        <app-kpi-badge-01
+          [title]="'Coût du projet'"
+          [value]="financement()?.projet?.cout"
+          [type]="'currency'"
+          [primary]="false"
+          [color]="'var(--cds-alias-status-info)'"
+        ></app-kpi-badge-01>
+
+        <!-- Montant sollicité -->
+
+        <app-kpi-badge-01
+          [title]="'Montant sollicité'"
+          [value]="financement()?.montant"
+          [type]="'currency'"
+          [primary]="false"
+          [color]="'var(--cds-alias-status-info)'"
+        ></app-kpi-badge-01>
+
+        <!-- Total investissement -->
+
+        <app-kpi-badge-01
+          [title]="'Total investissement'"
+          [value]="totalInvestissement()"
+          [type]="'currency'"
+          [primary]="false"
+          [color]="'var(--cds-alias-viz-sequential-aqua-600)'"
+        ></app-kpi-badge-01>
+
+        <!-- Total financement -->
+        <app-kpi-badge-01
+          [title]="'Total financement'"
+          [value]="totalFinancing()"
+          [type]="'currency'"
+          [primary]="false"
+          [color]="'var(--cds-alias-status-warning)'"
+        ></app-kpi-badge-01>
+      </div>
+
+      <!--INVESTISSEMENTS & FINANCEMENTS-->
+
+      <fin-inv-schema
+        [scif]="scif"
+        [(totalInvestissement)]="totalInvestissement"
+        [(totalFinancing)]="totalFinancing"
+        [financement]="financement()"
+      ></fin-inv-schema>
+    </clr-tab-content>
+  </clr-tab>
+  }
+</clr-tabs>

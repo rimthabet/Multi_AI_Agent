@@ -1,0 +1,30 @@
+<div cds-layout="vertical align:stretch gap:xs">
+  <!-- Section Total Investi -->
+  <div
+    class="large-text-snippet thin"
+    cds-text="monospace"
+    style="--border-color: var(--TOTAL)"
+  >
+    <div cds-layout="vertical align:space-between gap:xxxs">
+      <span
+        class="big-text"
+        style="--fore-color: var(--TOTAL); font-variant: small-caps"
+        cds-text="title"
+      >
+        {{ totalInvesti | currency : "tnd" : "symbol" : "1.0-0" }}
+      </span>
+      <span cds-text="title" style="margin-top: 0.2em !important"
+        >Total investi</span
+      >
+    </div>
+  </div>
+
+  <cds-divider
+    class="htitled-divider"
+    cds-layout="m-y:lg"
+    title="Répartition : Actions, OCA et CCA"
+  ></cds-divider>
+
+  <!-- Section Pie Chart -->
+  <pie-chart-02 [liquiditeActifsFunds]="liquiditeActifsFunds()"> </pie-chart-02>
+</div>

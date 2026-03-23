@@ -1,0 +1,17 @@
+<!-- Modal About -->
+<clr-modal [(clrModalOpen)]="open" [clrModalSize]="'md'" [clrModalStaticBackdrop]="false" [style.height]="'480px'">
+    <div class="modal-body">
+        <div cds-layout="vertical gap:md align:center p:sm" style="overflow-y: hidden">
+            <img src="images/pams-screen-light.png" [style.display]="theme === 'dark' ? 'none' : 'block'"
+                alt="PAMs Main Screen" cds-layout="align:center m-b:lg" />
+            <img src="images/pams-screen-dark.png" [style.display]="theme === 'light' ? 'none' : 'block'"
+                alt="PAMs Main Screen" cds-layout="align:center m-b:lg" />
+
+            <span cds-text="title">Private Assets Management System</span>
+            <span cds-text="caption">PAMS <b>v{{ version }}</b></span>
+            <span cds-text="caption">Développé par
+                <a href="http://www.nasoft.net" target="nasoft">NASoft</a></span>
+            <span cds-text="caption">{{ getCopyRight() }}</span>
+        </div>
+    </div>
+</clr-modal>

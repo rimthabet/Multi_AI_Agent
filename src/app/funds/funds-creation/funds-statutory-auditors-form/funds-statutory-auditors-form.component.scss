@@ -1,0 +1,44 @@
+h4 {
+    font-weight: 500;
+    letter-spacing: 2px;
+    font-variant: small-caps;
+    // border-bottom: 1px solid #EEE;
+    color: var(--cds-alias-status-info-shade)
+}
+
+.cac-div {
+    display: flex;
+    gap: 1em;
+    margin: 1em;
+
+    &>span {
+        font-size: 16px;
+        font-weight: 500;
+        line-height: 2em;
+
+        &.label {
+            font-size: 110%;
+            font-weight: 300;
+            padding: 1em 1em;
+
+            .badge {
+                font-size: 110%;
+                padding: .7em;
+                font-weight: 500;
+            }
+        }
+    }
+
+    cds-icon {
+        color: var(--cds-alias-status-info-shade)
+    }
+}
+
+
+input[clrNumberInput] {
+    min-width: 250px !important;
+}
+
+select[clrSelect] {
+    min-width: 294px !important;
+}

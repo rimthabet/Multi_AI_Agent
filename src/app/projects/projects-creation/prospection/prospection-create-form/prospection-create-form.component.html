@@ -1,0 +1,223 @@
+<!-- Form prospection -->
+<form clrForm [formGroup]="prospectionSaveForm!" [clrLabelSize]="3">
+  <!-- Nom -->
+  <clr-input-container>
+    <label for="nom" class="clr-required-mark">Nom du projet / société:</label>
+    <input clrInput type="text" formControlName="nom" name="nom" />
+  </clr-input-container>
+
+  <!-- Promoteur selection -->
+  <clr-select-container>
+    <label for="promoteur" class="clr-required-mark">Promoteur:</label>
+    <select clrSelect name="options" formControlName="promoteur">
+      <option>Choisir un promoteur...</option>
+      @for (promoteur of promoteurs; track $index) {
+      <option value="{{ promoteur.id }}">
+        {{ promoteur?.nom }}
+      </option>
+      }
+    </select>
+  </clr-select-container>
+
+  <!-- Activite -->
+  <clr-input-container>
+    <label for="activite" class="clr-required-mark">Activité:</label>
+    <input clrInput type="text" formControlName="activite" name="activite" />
+  </clr-input-container>
+
+  <!-- Forme juridique -->
+  <clr-select-container>
+    <label for="forme" class="clr-required-mark">Forme juridique:</label>
+    <select clrSelect name="options" formControlName="forme">
+      <option>Choisir une forme...</option>
+      @for(forme of formes; track $index){
+      <option value="{{ forme?.value }}">
+        {{ forme?.label }}
+      </option>
+      }
+    </select>
+  </clr-select-container>
+
+  <!-- Capital social -->
+  <clr-number-input-container>
+    <label for="capitalSocial" class="clr-required-mark">Capital social:</label>
+    <input
+      clrNumberInput
+      type="number"
+      formControlName="capitalSocial"
+      name="capitalSocial"
+    />
+    <clr-control-helper>
+      {{
+        prospectionSaveForm!.value.capitalSocial
+          | currency : "symbol" : "tnd" : "1.2-2"
+      }}
+    </clr-control-helper>
+  </clr-number-input-container>
+
+  <!-- Alert capital social -->
+  @if ( _prospection?.actualCapital != 0 && _prospection?.actualCapital != null
+  && _prospection?.actualCapital != _prospection?.capitalSocial ) {
+  <div class="alert alert-warning" role="alert">
+    <div class="alert-items">
+      <div class="alert-item static">
+        <div class="alert-icon-wrapper">
+          <cds-icon class="alert-icon" shape="exclamation-circle"></cds-icon>
+        </div>
+        <span class="alert-text">
+          La valeur actuelle du capital social a changé. Le capital actuel est :
+          <span style="font-size: 120%; color: var(--cds-alias-status-info)">
+            {{ _prospection?.actualCapital | number : "1.2-2" }}
+            <small>tnd</small>
+          </span>
+        </span>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- Adresse siège -->
+  <clr-input-container>
+    <label for="adresseSiege" class="clr-required-mark">Adresse siège:</label>
+    <input
+      clrInput
+      type="text"
+      formControlName="adresseSiege"
+      name="adresseSiege"
+    />
+  </clr-input-container>
+
+  <!-- Adresse usine -->
+  <clr-input-container>
+    <label for="adresseUsine">Adresse usine:</label>
+    <input
+      clrInput
+      type="text"
+      formControlName="adresseUsine"
+      name="adresseUsine"
+    />
+  </clr-input-container>
+
+  <!-- RNE -->
+  <clr-input-container>
+    <label for="rne" class="clr-required-mark"> RNE:</label>
+    <input clrInput type="text" formControlName="rne" name="rne" />
+  </clr-input-container>
+
+  <!-- Latitude -->
+  <clr-number-input-container>
+    <label for="latitude">Latitude: </label>
+    <input
+      clrNumberInput
+      type="number"
+      formControlName="latitude"
+      name="latitude"
+    />
+  </clr-number-input-container>
+  <clr-number-input-container>
+    <label for="longitude">Longitude: </label>
+    <input
+      clrNumberInput
+      type="number"
+      formControlName="longitude"
+      name="longitude"
+    />
+  </clr-number-input-container>
+
+  <!-- Observations -->
+  <clr-textarea-container>
+    <label for="observations">Observations:</label>
+    <textarea
+      clrTextarea
+      formControlName="observations"
+      name="observations"
+      cols="34"
+      rows="1"
+    ></textarea>
+    <clr-control-helper>
+      Vous pouvez utiliser la synthaxe
+      <a href="https://www.markdownguide.org/basic-syntax/" target="_blank"
+        >Markdown</a
+      >
+      pour formater vos observations.</clr-control-helper
+    >
+  </clr-textarea-container>
+
+  <!-- Secteur -->
+  <clr-combobox-container>
+    <label for="secteurs" class="clr-required-mark">Secteur:</label>
+    <clr-combobox formControlName="secteurs" name="policies">
+      <ng-container *clrOptionSelected="let selected">
+        <cds-icon
+          shape="filter-grid"
+          role="img"
+          aria-label="policies list"
+        ></cds-icon>
+        {{ selected?.libelle }}
+      </ng-container>
+      <clr-options>
+        <clr-option
+          *clrOptionItems="let secteur of secteurs; field: 'libelle'"
+          [clrValue]="secteur"
+        >
+          <cds-icon
+            shape="filter-grid"
+            role="img"
+            aria-label="policies list of choice"
+          ></cds-icon>
+          {{ secteur.libelle }}
+        </clr-option>
+      </clr-options>
+    </clr-combobox>
+  </clr-combobox-container>
+
+  <!-- Nature d'investissement -->
+  <clr-select-container>
+    <label for="natureInvestissements" class="clr-required-mark"
+      >Nature d'investissement:</label
+    >
+    <select
+      clrSelect
+      name="options"
+      formControlName="natureInvestissements"
+      [compareWith]="equals"
+    >
+      @for(nature of naturesInvestissement; track $index){
+      <option [ngValue]="nature" [attr.data-value]="nature">
+        {{ nature?.libelle }}
+      </option>
+      }
+    </select>
+  </clr-select-container>
+
+  <!-- Type d'investissement -->
+  <clr-select-container>
+    <label for="typeInvestissements" class="clr-required-mark"
+      >Type d'investissement:</label
+    >
+    <select
+      clrSelect
+      name="options"
+      formControlName="typeInvestissements"
+      [compareWith]="equals"
+    >
+      @for(type of typesInvestissement; track $index){
+      <option [ngValue]="type" [attr.data-value]="type">
+        {{ type?.libelle }}
+      </option>
+      }
+    </select>
+  </clr-select-container>
+
+  <!-- Button save -->
+  <div cds-layout="horizontal m-t:xl">
+    <cds-button
+      action="outline"
+      status="primary"
+      [disabled]="prospectionSaveForm!.invalid"
+      (click)="saveProjet()"
+    >
+      <cds-icon shape="floppy" size="md"></cds-icon> Sauvegarder la prospection
+    </cds-button>
+  </div>
+</form>

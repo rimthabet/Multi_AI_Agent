@@ -1,0 +1,53 @@
+tr {
+
+    td {
+        size: 14px;
+        font-weight: 500;
+        letter-spacing: 1px;
+        padding: .5em 1em;
+        vertical-align: middle !important;
+        line-height: inherit !important;
+
+        &:first-of-type {
+            max-width: 80px !important;
+        }
+    }
+
+    &.formula_row {
+
+
+        td,
+        th {
+            font-weight: 500 !important;
+            color: var(--cds-alias-utility-dark-blue) !important;
+            background-color: var(--cds-alias-utility-gray-tint) !important;
+            border-bottom: 1px solid var(--cds-alias-object-container-background-shade);
+        }
+    }
+
+    th {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--cds-alias-object-interaction-info-hover);
+        letter-spacing: 2px;
+
+
+        &:first-of-type {
+            max-width: 80px !important;
+        }
+
+        .icon-btn {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        span {
+            line-height: 2em;
+            font-weight: 500;
+        }
+
+    }
+
+
+}

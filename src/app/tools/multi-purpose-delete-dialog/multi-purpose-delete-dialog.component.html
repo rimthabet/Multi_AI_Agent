@@ -1,0 +1,98 @@
+<clr-modal [(clrModalOpen)]="auth_show">
+  <h3 class="modal-title">
+    <cds-icon
+      shape="warning-standard"
+      solid
+      size="lg"
+      style="color: red"
+    ></cds-icon>
+    Opération administrateur
+  </h3>
+  <div class="modal-body unlock">
+    <form clrForm>
+      <clr-password-container>
+        <label class="clr-col-3">Mot de passe : </label>
+        <input
+          class="clr-col-9"
+          clrPassword
+          autocomplete="current-password"
+          placeholder="Mot de passe super admin!"
+          name="admin_pwd"
+          [(ngModel)]="admin_pwd"
+          size="25"
+        />
+      </clr-password-container>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline" (click)="auth_show = false">
+      Annuler
+    </button>
+    <button
+      type="button"
+      class="btn btn-primary"
+      (click)="authenticated = true; auth_show = false; show = true"
+    >
+      <cds-icon shape="thumbs-up"></cds-icon> Confirmer
+    </button>
+  </div>
+</clr-modal>
+
+<clr-modal [(clrModalOpen)]="show">
+  <h3 class="modal-title">
+    <cds-icon shape="trash" size="lg"></cds-icon> Opération de suppression
+  </h3>
+  <div class="modal-body">
+    <div class="alert alert-danger" role="alert">
+      <div class="alert-items">
+        <div class="alert-item static">
+          <div class="alert-icon-wrapper">
+            <cds-icon class="alert-icon" shape="exclamation-circle"></cds-icon>
+          </div>
+          <span class="alert-text" [innerHTML]="warn_message()"> </span>
+        </div>
+      </div>
+    </div>
+
+    <div style="padding: 1em 0">
+      <form clrForm>
+        <div>
+          Veuillez saisir le texte suivant pour pouvoir activer la suppression
+        </div>
+        <cds-icon shape="block-quote" size="md"></cds-icon>
+        <span class="pass-phrase" (click)="copyPassPhrase()"
+          >{{ pass_phrase() }}
+        </span>
+
+        <cds-icon
+          shape="block-quote"
+          size="md"
+          style="transform: rotate(180deg)"
+        ></cds-icon>
+        {{ copied ? "(Copié)" : "" }}
+
+        <clr-input-container>
+          <input
+            class="clr-col-12"
+            clrInput
+            autocomplete="current-password"
+            placeholder="Veuillez saisir le texte en haut"
+            name="pass_phrase"
+            [(ngModel)]="entered_pass_phrase"
+            size="64"
+          />
+        </clr-input-container>
+      </form>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <cds-button status="primary" (click)="hide()"> Annuler </cds-button>
+    <cds-button
+      status="danger"
+      [disabled]="!pass_phrase() || entered_pass_phrase !== pass_phrase()"
+      (click)="delete(); hide()"
+    >
+      <cds-icon shape="thumbs-up"></cds-icon> Confirmer
+    </cds-button>
+  </div>
+</clr-modal>

@@ -1,0 +1,422 @@
+<!-- Financing Switch -->
+<financing-switch
+  (financementChanged)="financementChanged($event)"
+  [prospection]="prospection()"
+  [message]="'Veuillez spécifier le plan de financement en premier!'"
+></financing-switch>
+
+<!-- Stats -->
+<div cds-layout="horizontal align:stretch gap:lg m-y:lg">
+  <!-- Coût du projet -->
+  <app-kpi-badge-01
+    [value]="prospection()?.cout"
+    [type]="'currency'"
+    [title]="'Coût du projet'"
+    [color]="'var(--cds-alias-viz-sequential-blue-600)'"
+    [primary]="false"
+  ></app-kpi-badge-01>
+
+  <!-- Montant sollicité -->
+
+  <app-kpi-badge-01
+    [value]="selectedFinancement?.montant"
+    [type]="'currency'"
+    [title]="'Montant sollicité'"
+    [color]="'var(--cds-alias-status-info-shade)'"
+    [primary]="false"
+  ></app-kpi-badge-01>
+
+  <!-- Total investissement -->
+
+  <app-kpi-badge-01
+    [value]="total_investissement"
+    [type]="'currency'"
+    [title]="'Total investissement'"
+    [color]="'var(--cds-alias-utility-light-blue)'"
+    [primary]="false"
+  ></app-kpi-badge-01>
+
+  <!-- Total financement -->
+
+  <app-kpi-badge-01
+    [value]="total_financement"
+    [type]="'currency'"
+    [title]="'Total financement'"
+    [color]="'var(--cds-alias-viz-sequential-aqua-700)'"
+    [primary]="false"
+  ></app-kpi-badge-01>
+</div>
+
+<!-- Schéma Investment form -->
+<form
+  clrForm
+  [formGroup]="schInFinForm"
+  clrLabelSize="2"
+  style="
+    border: 1px solid var(--clr-color-neutral-500);
+    border-radius: 5px;
+    margin-top: 1em;
+    padding-top: 0;
+    background-color: var(--cds-alias-object-interaction-background);
+  "
+>
+  @if(scifs_loading || part_loading || fin_loading || exp_loading ||
+  inv_loading) {
+  <clr-progress-bar
+    [style.height]="'7px'"
+    id="progressBar"
+    clrLoop
+  ></clr-progress-bar>
+  }
+  <div style="padding: 0 2em">
+    <clr-input-container>
+      <label style="padding-top: 1em" for="libelle" class="clr-required-mark"
+        >Libellé du Schéma:
+      </label>
+      <input
+        clrInput
+        type="text"
+        formControlName="libelle"
+        name="libelle"
+        size="50"
+      />
+    </clr-input-container>
+    <clr-date-container>
+      <label
+        style="padding-top: 1em"
+        for="elaboration_date"
+        class="clr-required-mark"
+        >Date d'élaboration :
+      </label>
+      <input
+        clrDate
+        type="date"
+        formControlName="elaboration_date"
+        name="elaboration_date"
+      />
+    </clr-date-container>
+
+    <div cds-layout="horizontal m-y:lg gap:md">
+      <cds-button
+        action="outline"
+        status="primary"
+        [disabled]="schInFinForm.invalid || selectedFinancement == undefined"
+        (click)="saveSchemaInvFin()"
+      >
+        <cds-icon shape="plus" size="md"></cds-icon> Ajouter le Schéma
+      </cds-button>
+
+      <clr-dropdown>
+        <cds-button action="outline" status="primary" clrDropdownTrigger>
+          Autres schémas
+          <cds-icon shape="angle" direction="down"></cds-icon>
+        </cds-button>
+        <clr-dropdown-menu clrPosition="down-left" *clrIfOpen>
+          @for(scif of scifs; track scif) {
+          <div clrDropdownItem (click)="selectScif(scif)">
+            {{ scif.dateSchema | date : "dd-MM-yyyy" }} - {{ scif.libelle }}
+          </div>
+          }
+        </clr-dropdown-menu>
+      </clr-dropdown>
+    </div>
+  </div>
+</form>
+
+<!-- title -->
+<h1>
+  {{ selectedScif?.libelle }}
+</h1>
+<!-- end title -->
+
+<div cds-layout="horizontal gap:md m-y:md">
+  <h4>
+    Veuillez détailler les investissements et les financements pour ce schéma
+  </h4>
+  <cds-button
+    cds-layout="horizontal align:right"
+    action="solid"
+    status="danger"
+    [disabled]="selectedScif == undefined"
+    (click)="deleteSchemaInvFin()"
+  >
+    <cds-icon shape="trash"></cds-icon> Supprimer ce schéma ?
+  </cds-button>
+</div>
+
+<!-- Tabs -->
+<clr-tabs>
+  <!-- Investissement -->
+  <clr-tab>
+    <button clrTabLink>
+      <cds-icon shape="wallet" size="md"></cds-icon> Investissement
+    </button>
+    <clr-tab-content *clrIfActive="true">
+      @if(total_investissement != total_financement) {
+      <div style="margin-top: 1.5em !important">
+        <clr-alert [clrAlertClosable]="false" [clrAlertType]="'danger'">
+          <clr-alert-item>
+            Une différence de &nbsp;
+            <b
+              >{{
+                total_financement - total_investissement | number : "1.0-0"
+              }}
+              <sup>tnd</sup></b
+            >
+            &nbsp; entre les investissements et les financements.
+          </clr-alert-item>
+        </clr-alert>
+      </div>
+      }
+      <clr-datagrid
+        [(clrDgSingleSelected)]="selectedInvestissement"
+        [clrDgLoading]="inv_loading"
+      >
+        <clr-dg-action-bar>
+          <div class="btn-group">
+            <cds-button
+              (click)="addInvestissment()"
+              [disabled]="selectedScif == undefined"
+              action="outline"
+            >
+              <cds-icon shape="plus"></cds-icon> Ajouter un investissement
+            </cds-button>
+          </div>
+          <div class="btn-group">
+            <cds-button
+              action="outline"
+              (click)="addInvestissment()"
+              [disabled]="
+                selectedInvestissement == null ||
+                selectedInvestissement?.id == undefined
+              "
+              status="warning"
+            >
+              <cds-icon shape="note"></cds-icon> Modifier l'investissement
+            </cds-button>
+          </div>
+          <div class="btn-group">
+            <cds-button
+              action="outline"
+              [disabled]="
+                selectedInvestissement == null ||
+                selectedInvestissement?.id == undefined
+              "
+              (click)="supprimerSchemaInvestissement()"
+              status="danger"
+            >
+              <cds-icon shape="trash" solid=""></cds-icon> Supprimer
+              l'investissement
+            </cds-button>
+          </div>
+        </clr-dg-action-bar>
+
+        <clr-dg-column [clrDgField]="'libelle'">Investissement</clr-dg-column>
+
+        <clr-dg-column [clrDgField]="'montant'">Montant (tnd)</clr-dg-column>
+        <clr-dg-column>%</clr-dg-column>
+
+        <clr-dg-row
+          *clrDgItems="let investissement of investissements"
+          [clrDgItem]="investissement"
+        >
+          <clr-dg-cell>{{ investissement?.libelle }}</clr-dg-cell>
+
+          <clr-dg-cell class="text-right">{{
+            investissement?.montant | number : "1.0-0"
+          }}</clr-dg-cell>
+          <clr-dg-cell class="text-right">{{
+            (investissement?.montant * 100) / total_investissement
+              | number : "1.0-0"
+          }}</clr-dg-cell>
+        </clr-dg-row>
+        <clr-dg-footer>
+          Total Investissement :
+          <span class="digit"
+            >{{ total_investissement | number : "1.0-0" }}
+            <small>tnd</small></span
+          ></clr-dg-footer
+        >
+      </clr-datagrid>
+    </clr-tab-content>
+  </clr-tab>
+  <!-- Financement -->
+  <clr-tab>
+    <button clrTabLink>
+      <cds-icon shape="bank" size="md"></cds-icon> Financement
+    </button>
+    <clr-tab-content *clrIfActive>
+      <clr-datagrid
+        [(clrDgSingleSelected)]="selectedFin"
+        [clrDgLoading]="fin_loading"
+      >
+        <clr-dg-action-bar>
+          <div class="btn-group">
+            <cds-button
+              (click)="addFinancement()"
+              [disabled]="selectedScif == undefined"
+            >
+              <cds-icon shape="plus"></cds-icon> Ajouter un financement
+            </cds-button>
+          </div>
+          <div class="btn-group">
+            <cds-button
+              (click)="addFinancement()"
+              [disabled]="selectedFin == null || selectedFin?.id == undefined"
+              status="warning"
+            >
+              <cds-icon shape="note"></cds-icon> Modifier le financement
+            </cds-button>
+          </div>
+          <div class="btn-group">
+            <cds-button
+              [disabled]="selectedFin == null || selectedFin?.id == undefined"
+              (click)="supprimerSchemaFinancement()"
+              status="danger"
+            >
+              <cds-icon shape="trash"></cds-icon> Supprimer le financement
+            </cds-button>
+          </div>
+        </clr-dg-action-bar>
+
+        <clr-dg-column [clrDgField]="'libelle'">Financement</clr-dg-column>
+        <clr-dg-column [clrDgField]="'montant'">Montant (tnd)</clr-dg-column>
+        <clr-dg-column [clrDgField]="'nature'"
+          >Nature de l'apport</clr-dg-column
+        >
+        <clr-dg-column>%</clr-dg-column>
+
+        <clr-dg-row
+          *clrDgItems="let financement of financements"
+          [clrDgItem]="financement"
+          [class]="
+            financement?.natureBailleurFonds?.libelle == 'FCPR'
+              ? 'fund-row'
+              : ''
+          "
+          [clrDgSelectable]="
+            financement?.natureBailleurFonds?.libelle != 'FCPR'
+          "
+        >
+          <clr-dg-cell>{{ financement?.libelle }}</clr-dg-cell>
+          <clr-dg-cell class="text-right">{{
+            financement?.montant | number : "1.0-0"
+          }}</clr-dg-cell>
+
+          <clr-dg-cell style="letter-spacing: 1px">{{
+            financement?.natureBailleurFonds?.libelle?.toUpperCase()
+          }}</clr-dg-cell>
+          <clr-dg-cell class="text-right">{{
+            financement?.montant / total_financement | percent : "1.0-0"
+          }}</clr-dg-cell>
+        </clr-dg-row>
+
+        <clr-dg-footer>
+          Total Financement :
+          <span class="digit"
+            >{{ total_financement | number : "1.0-0" }} <small>tnd</small></span
+          ></clr-dg-footer
+        >
+      </clr-datagrid>
+    </clr-tab-content>
+  </clr-tab>
+  <!-- Autres frais -->
+  <clr-tab>
+    <button clrTabLink>
+      <cds-icon shape="credit-card" size="md"></cds-icon> Autres frais
+    </button>
+    <clr-tab-content *clrIfActive>
+      <clr-datagrid
+        [(clrDgSingleSelected)]="selectedExpense"
+        [clrDgLoading]="exp_loading"
+      >
+        <clr-dg-action-bar>
+          <div class="btn-group">
+            <cds-button
+              (click)="addExpense()"
+              [disabled]="selectedScif == undefined"
+            >
+              <cds-icon shape="plus"></cds-icon> Ajouter une dépense
+            </cds-button>
+          </div>
+          <div class="btn-group">
+            <cds-button
+              (click)="addExpense()"
+              [disabled]="
+                selectedExpense == null || selectedExpense?.id == undefined
+              "
+              status="warning"
+            >
+              <cds-icon shape="note"></cds-icon> Modifier la dépense
+            </cds-button>
+          </div>
+          <div class="btn-group">
+            <cds-button
+              [disabled]="
+                selectedExpense == null || selectedExpense?.id == undefined
+              "
+              (click)="supprimerSchemaExpense()"
+              status="danger"
+            >
+              <cds-icon shape="trash"></cds-icon> Supprimer la dépense
+            </cds-button>
+          </div>
+        </clr-dg-action-bar>
+
+        <clr-dg-column [clrDgField]="'libelle'">Dépense</clr-dg-column>
+        <clr-dg-column [clrDgField]="'montant'">Montant (tnd)</clr-dg-column>
+        <clr-dg-column>%</clr-dg-column>
+
+        <clr-dg-row *clrDgItems="let expense of expenses" [clrDgItem]="expense">
+          <clr-dg-cell>{{ expense?.libelle }}</clr-dg-cell>
+          <clr-dg-cell class="text-right">{{
+            expense?.montant | number : "1.0-0"
+          }}</clr-dg-cell>
+
+          <clr-dg-cell class="text-right">{{
+            expense?.montant / total_expense | percent : "1.0-0"
+          }}</clr-dg-cell>
+        </clr-dg-row>
+
+        <clr-dg-footer>
+          Total dépenses :
+          <span class="digit"
+            >{{ total_expense | number : "1.0-0" }} <small>tnd</small></span
+          >,
+          <span class="digit">{{ expenses?.length }}</span>
+          Dépenses</clr-dg-footer
+        >
+      </clr-datagrid>
+    </clr-tab-content>
+  </clr-tab>
+</clr-tabs>
+
+<!-- Financing Form -->
+<financing-create-form
+  (refresh)="refreshFinancements($event)"
+  (closed)="modalFinancing = false"
+  [financement]="selectedFin"
+  [prospection]="prospection()"
+  [schema]="selectedScif"
+  [opened]="modalFinancing"
+></financing-create-form>
+
+<!-- Investment Form -->
+<investment-create-form
+  (refresh)="refreshInvestissements($event)"
+  (closed)="modalInvestissement = false"
+  [investissement]="selectedInvestissement"
+  [prospection]="prospection()"
+  [schema]="selectedScif"
+  [opened]="modalInvestissement"
+></investment-create-form>
+
+<!-- Due Diligence Form -->
+<due-diligence-creation-form
+  (refresh)="refreshExpenses($event)"
+  (closed)="modalExpensee = false"
+  [expense]="selectedExpense"
+  [prospection]="prospection()"
+  [schema]="selectedScif"
+  [opened]="modalExpensee"
+></due-diligence-creation-form>

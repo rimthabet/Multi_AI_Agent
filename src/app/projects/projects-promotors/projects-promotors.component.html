@@ -1,0 +1,327 @@
+<span cds-text="title">
+  <cds-icon shape="employee-group" size="lg" status="info"></cds-icon>
+  Gestion des promoteurs
+</span>
+
+<cds-divider
+  cds-layout="m-t:xl "
+  class="htitled-divider"
+  title="Inventaire de tous les promoteurs"
+></cds-divider>
+
+<!-- Promotors Data Grid -->
+<clr-datagrid
+  style="height: calc(100vh - 165px)"
+  [(clrDgSingleSelected)]="selectedItem"
+  [clrDgLoading]="loading"
+>
+  <!-- Action bar -->
+  <clr-dg-action-bar>
+    <div class="btn-group">
+      <cds-button
+        action="outline"
+        status="primary"
+        (click)="showPromotorModal(true)"
+      >
+        <cds-icon shape="plus" size="md"></cds-icon> Ajouter
+      </cds-button>
+    </div>
+
+    <div class="btn-group">
+      <cds-button
+        action="outline"
+        status="warning"
+        [disabled]="!selectedItem?.id"
+        (click)="showPromotorModal(false)"
+      >
+        <cds-icon shape="note" size="md"></cds-icon> Modifier
+      </cds-button>
+    </div>
+
+    <div class="btn-group">
+      <cds-button
+        action="outline"
+        status="danger"
+        [disabled]="!selectedItem?.id"
+        (click)="deletePromoteur()"
+      >
+        <cds-icon shape="trash" size="md"></cds-icon> Supprimer
+      </cds-button>
+    </div>
+  </clr-dg-action-bar>
+
+  <!-- Columns -->
+  <clr-dg-column [clrDgField]="'nom'"
+    ><cds-icon shape="employee"></cds-icon> &nbsp; Promoteur</clr-dg-column
+  >
+  <clr-dg-column
+    ><cds-icon shape="calendar"></cds-icon> &nbsp; Date de
+    contact</clr-dg-column
+  >
+  <clr-dg-column>
+    <ng-container *clrDgHideableColumn="{ hidden: true }">
+      Lieu de contact
+    </ng-container></clr-dg-column
+  >
+  <clr-dg-column
+    ><cds-icon shape="envelope"></cds-icon> &nbsp; EMail</clr-dg-column
+  >
+  <clr-dg-column
+    ><cds-icon shape="phone-handset"></cds-icon> &nbsp; Téléphone</clr-dg-column
+  >
+  <clr-dg-column
+    ><ng-container *clrDgHideableColumn="{ hidden: true }">
+      Age
+    </ng-container></clr-dg-column
+  >
+  <clr-dg-column
+    ><ng-container *clrDgHideableColumn="{ hidden: true }">
+      Diplôme
+    </ng-container></clr-dg-column
+  >
+  <clr-dg-column
+    ><ng-container *clrDgHideableColumn="{ hidden: true }">
+      Expérience
+    </ng-container></clr-dg-column
+  >
+  <clr-dg-column
+    ><cds-icon shape="employee"></cds-icon> &nbsp; Poste occupé</clr-dg-column
+  >
+  <clr-dg-column
+    ><cds-icon shape="user"></cds-icon> &nbsp; Contact Réf.</clr-dg-column
+  >
+
+  <!-- Rows -->
+  <clr-dg-row *clrDgItems="let promoteur of promoteurs" [clrDgItem]="promoteur">
+    <clr-dg-cell>{{ promoteur.nom }}</clr-dg-cell>
+    <clr-dg-cell>{{ promoteur.dateContact }}</clr-dg-cell>
+    <clr-dg-cell>{{ promoteur.lieuContact }}</clr-dg-cell>
+    <clr-dg-cell>{{ promoteur.email }}</clr-dg-cell>
+    <clr-dg-cell>{{ promoteur.telephone }}</clr-dg-cell>
+    <clr-dg-cell>{{ promoteur.age }}</clr-dg-cell>
+    <clr-dg-cell>{{ promoteur.diplome }}</clr-dg-cell>
+    <clr-dg-cell>{{ promoteur.experience }}</clr-dg-cell>
+    <clr-dg-cell>{{ promoteur.poste }}</clr-dg-cell>
+    <clr-dg-cell>{{ promoteur.contact?.nom }}</clr-dg-cell>
+
+    <!-- Row detail -->
+    <clr-dg-row-detail *clrIfExpanded>
+      <cds-divider
+        cds-layout="m-y:lg "
+        class="htitled-divider"
+        title="Observations"
+      ></cds-divider>
+
+      <div class="panel" cds-layout="p:lg m-b:md">
+        {{ promoteur.observation }}
+      </div>
+    </clr-dg-row-detail>
+  </clr-dg-row>
+
+  <!-- Footer -->
+  <clr-dg-footer>{{ promoteurs.length }} Promoteurs</clr-dg-footer>
+</clr-datagrid>
+
+<!-- Modal promotors CRUD -->
+<clr-modal
+  #modal
+  [(clrModalOpen)]="showPromotorForm"
+  [clrModalSize]="'md'"
+  [clrModalStaticBackdrop]="false"
+>
+  <!-- Header -->
+  <h3 class="modal-title">
+    <cds-icon shape="employee" size="lg" status="info" solid=""></cds-icon>
+    Promoteur
+  </h3>
+
+  <!-- Body -->
+  <div class="modal-body">
+    <!-- Form -->
+    <form
+      [formGroup]="promotorForm"
+      clrForm
+      clrLabelSize="5"
+      class="clr-form-compact"
+      cds-layout="p-y:lg"
+    >
+      <clr-input-container>
+        <label class="clr-required-mark"
+          ><cds-icon shape="employee" size="sm" solid></cds-icon> Nom et
+          prénom</label
+        >
+        <input
+          clrInput
+          type="text"
+          formControlName="nom"
+          name="nom"
+          style="width: 280px"
+          required
+        />
+      </clr-input-container>
+
+      <clr-date-container>
+        <label class="clr-required-mark"
+          ><cds-icon shape="calendar" size="sm" solid></cds-icon> Date de
+          contact</label
+        >
+        <input
+          clrDate
+          type="date"
+          clrDate
+          formControlName="dateContact"
+          name="dateContact"
+          style="width: 265px"
+          required
+        />
+      </clr-date-container>
+
+      <clr-input-container>
+        <label class="clr-required-mark"
+          ><cds-icon shape="map-marker" size="sm" solid></cds-icon> Lieu de
+          Contact</label
+        >
+        <input
+          clrInput
+          type="text"
+          formControlName="lieuContact"
+          name="lieuContact"
+          style="width: 280px"
+          required
+        />
+      </clr-input-container>
+
+      <clr-select-container>
+        <label for="contact" class="clr-required-mark"
+          ><cds-icon shape="user" size="sm" solid></cds-icon> Contact
+          Référence</label
+        >
+        <select
+          clrSelect
+          formControlName="contact"
+          style="width: 280px"
+          required
+        >
+          <option value="">Sélectionner un utilisateur</option>
+          @for (contact of contacts; track $index) {
+          <option [value]="contact.id">
+            {{ contact.nom }}
+          </option>
+          }
+        </select>
+      </clr-select-container>
+
+      <clr-input-container>
+        <label class="clr-required-mark"
+          ><cds-icon shape="envelope" size="sm" solid></cds-icon> Email:</label
+        >
+        <input
+          clrInput
+          type="email"
+          formControlName="email"
+          name="email"
+          style="width: 280px"
+          required
+        />
+      </clr-input-container>
+
+      <clr-input-container>
+        <label class="clr-required-mark"
+          ><cds-icon shape="phone-handset" size="sm" solid></cds-icon>
+          Téléphone:</label
+        >
+        <input
+          clrInput
+          type="tel"
+          formControlName="telephone"
+          name="telephone"
+          style="width: 280px"
+          required
+        />
+      </clr-input-container>
+
+      <clr-number-input-container>
+        <label
+          ><cds-icon shape="hashtag" size="sm" solid></cds-icon> Âge:</label
+        >
+        <input
+          clrNumberInput
+          type="number"
+          formControlName="age"
+          name="age"
+          style="width: 235px"
+        />
+      </clr-number-input-container>
+
+      <clr-input-container>
+        <label
+          ><cds-icon shape="certificate" size="sm" solid></cds-icon>
+          Diplôme:</label
+        >
+        <input
+          clrInput
+          type="text"
+          formControlName="diplome"
+          name="diplome"
+          style="width: 280px"
+        />
+      </clr-input-container>
+
+      <clr-input-container>
+        <label
+          ><cds-icon shape="briefcase" size="sm" solid></cds-icon> Poste
+          occupé:</label
+        >
+        <input
+          clrInput
+          type="text"
+          formControlName="poste"
+          name="poste"
+          style="width: 280px"
+        />
+      </clr-input-container>
+
+      <clr-textarea-container>
+        <label
+          ><cds-icon shape="lightbulb" size="sm" solid></cds-icon>
+          Expérience:</label
+        >
+        <textarea
+          clrTextarea
+          formControlName="experience"
+          name="experience"
+          rows="1"
+          cols="27"
+        ></textarea>
+      </clr-textarea-container>
+
+      <clr-textarea-container>
+        <label
+          ><cds-icon shape="note" size="sm" solid></cds-icon>
+          Observations:</label
+        >
+        <textarea
+          clrTextarea
+          formControlName="observation"
+          name="observation"
+          rows="1"
+          cols="27"
+        ></textarea>
+      </clr-textarea-container>
+    </form>
+  </div>
+
+  <!-- Footer -->
+  <div class="modal-footer">
+    <!-- Buttons -->
+    <cds-button action="outline" (click)="showPromotorForm = false"
+      >Annuler</cds-button
+    ><cds-button
+      status="primary"
+      [disabled]="this.promotorForm!.invalid"
+      (click)="savePromotor()"
+    >
+      <cds-icon shape="floppy"></cds-icon>Sauvegarder
+    </cds-button>
+  </div>
+</clr-modal>

@@ -1,0 +1,95 @@
+<!-- Header -->
+<span cds-text="title">
+    <cds-icon shape="lightbulb" size="lg" status="info" cds-layout="m-b:sm"></cds-icon>
+    Comités de valorisation des fonds</span>
+
+<!-- Divider -->
+<cds-divider cds-layout="m-t:xl " class="htitled-divider"
+    title="Inventaire des comités de valorisation par fonds"></cds-divider>
+
+<!-- Search fonds -->
+<div cds-layout="horizontal align:left gap:md m-t:xl">
+  <clr-combobox-container style="margin-top: 0.7em !important">
+  <clr-combobox
+    [(ngModel)]="selectedFonds"
+    name="fondsName"
+    (ngModelChange)="switchTheFund($event)"
+  >
+
+    <!-- Affichage du fonds sélectionné -->
+    <ng-container *clrOptionSelected="let selected">
+      <cds-icon
+        shape="filter-grid"
+        role="img"
+        aria-label="fonds list"
+      ></cds-icon>
+      {{ selected?.denomination }}
+    </ng-container>
+
+    <!-- Options -->
+    <clr-options>
+      <clr-option
+        *clrOptionItems="let f of fonds; field: 'denomination'"
+        [clrValue]="f"
+      >
+        <cds-icon
+          shape="filter-grid"
+          role="img"
+          aria-label="fonds list"
+        ></cds-icon>
+        {{ f.denomination }}
+      </clr-option>
+    </clr-options>
+
+  </clr-combobox>
+
+</clr-combobox-container>
+
+    <div class="fund-name {{ selectedFonds ? 'active' : '' }}" style="margin-top: 0px !important">
+        {{ selectedFonds ? selectedFonds.denomination : "Nom du projet ..." }}
+        <cds-icon onkeypress="" shape="dashboard" size="md" title="Cliquer pour consulter la fiche projet"
+            style="cursor: pointer" (click)="goToFiche()"></cds-icon>
+    </div>
+
+
+</div>
+
+
+<div cds-layout="horizontal gap:md">
+    <div cds-layout="m-t:xl m-b:lg align:stretch">
+        <cds-divider class="htitled-divider" title="Timeline des comités de valorisation"></cds-divider>
+    </div>
+    <div cds-layout="horizontal align:right" style="padding: 1em 0">
+        <cds-button action="outline" (click)="collapseAll()" size="sm" onkeypress="">
+            <cds-icon shape="shrink" size="sm"></cds-icon> Réduire tout
+        </cds-button>
+    </div>
+</div>
+
+
+<!-- Timeline -->
+<ul class="clr-timeline clr-timeline-vertical">
+    @for(year of years; track $index; ) {
+    <li class="clr-timeline-step">
+        <div class="clr-timeline-step-header">
+            <strong class="digit" [style.fontSize]="'x-large !important'">{{
+                year
+                }}</strong>
+        </div>
+        @if(year < thisYear) { <cds-icon shape="success-standard" aria-label="Completed"></cds-icon>
+            }
+            @else if(year == thisYear) {
+            <cds-icon shape="dot-circle"></cds-icon>
+            }
+            @else {
+            <cds-icon shape="circle" aria-label="Not started"></cds-icon>
+            }
+
+            <div class="clr-timeline-step-body">
+                <comite-create-form-and-grid #grid [fonds]="selectedFonds" [year]="year" [projets]="projets"
+                    [methodesEvaluation]="methodesEvaluation"
+                    (refreshEvent)="loadMethodesEvaluation()"></comite-create-form-and-grid>
+            </div>
+    </li>
+    }
+</ul>

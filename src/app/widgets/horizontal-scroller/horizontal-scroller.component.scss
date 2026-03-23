@@ -1,0 +1,241 @@
+// Variables
+$primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+$container-gradient: linear-gradient(135deg, var(--cds-alias-status-neutral-tint) 0%, var(--cds-alias-status-disabled-tint) 100%);
+$shadow-light: 0 8px 24px rgba(0, 0, 0, 0.12);
+$shadow-medium: 0 12px 32px rgba(0, 0, 0, 0.18);
+$shadow-heavy: 0 20px 40px rgba(0, 0, 0, 0.1);
+$arrow-bg: rgba(255, 255, 255, 0.85);
+$arrow-bg-hover: rgba(255, 255, 255, 0.95);
+$transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+// Main container styling
+.scroll-container-wrapper {
+    max-width: 100%;
+    margin: 0 auto;
+    // background: white;
+    border-radius: 16px;
+    // padding: 30px;
+    // box-shadow: $shadow-heavy;
+
+    h1 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 30px;
+        font-size: 2rem;
+        font-weight: 600;
+    }
+}
+
+// Scroll container
+.scroll-container {
+    position: relative;
+    width: 100%;
+    height: fit-content;
+    background: $container-gradient;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+// Scrollable content area
+.scroll-content {
+    display: flex;
+    height: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+    scrollbar-width: none; // Firefox
+    -ms-overflow-style: none; // IE and Edge
+    gap: 20px;
+    padding: 20px;
+    cursor: grab;
+    user-select: none; // Prevent text selection during drag
+
+    // Hide scrollbar for Chrome, Safari, Opera
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    // Dragging state
+    &.dragging {
+        cursor: grabbing;
+        scroll-behavior: auto; // Disable smooth scroll during drag
+
+        .content-item {
+            pointer-events: none; // Prevent hover effects during drag
+            user-select: none;
+        }
+    }
+
+    // Active drag state
+    &:active {
+        cursor: grabbing;
+    }
+}
+
+// Individual content items
+.content-item {
+    flex: 0 0 200px;
+    height: 100%;
+    background: var(--cds-alias-object-app-background);
+    border-radius: 12px;
+    padding: 1em;
+    box-shadow: $shadow-light;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    user-select: none; // Prevent text selection
+
+    &:hover {
+        transform: translateY(-5px);
+        box-shadow: $shadow-medium;
+    }
+
+    // Prevent selection during drag
+    &::selection {
+        background: transparent;
+    }
+
+    .emoji {
+        font-size: 3rem;
+        margin-bottom: 10px;
+        pointer-events: none; // Prevent emoji from interfering with drag
+    }
+
+    h3 {
+        margin: 0 0 15px 0;
+        color: #2c3e50;
+        font-size: 1.5rem;
+        font-weight: 600;
+        pointer-events: none;
+    }
+
+    p {
+        margin: 0 0 20px 0;
+        color: #7f8c8d;
+        line-height: 1.6;
+        font-size: 1rem;
+        pointer-events: none;
+    }
+}
+
+// Navigation arrows
+.scroll-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 60px;
+    height: 60px;
+    border: none;
+    border-radius: 50%;
+    background: $arrow-bg;
+    color: #2c3e50;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    backdrop-filter: blur(15px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    transition: $transition-smooth;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+
+    &:hover {
+        background: $arrow-bg-hover;
+        transform: translateY(-50%) scale(1.15);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+
+        svg {
+            transform: scale(1.2);
+        }
+    }
+
+    &:active {
+        transform: translateY(-50%) scale(1.05);
+    }
+
+    &.hidden {
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(-50%) scale(0.8);
+    }
+
+    svg {
+        transition: transform 0.2s ease;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+    }
+}
+
+// Arrow positioning
+.scroll-arrow-left {
+    left: 20px;
+}
+
+.scroll-arrow-right {
+    right: 20px;
+}
+
+// Instructions
+.instructions {
+    text-align: center;
+    margin-top: 20px;
+    color: #666;
+    font-size: 0.9rem;
+    font-style: italic;
+}
+
+// Responsive design
+@media (max-width: 768px) {
+    .demo-container {
+        padding: 20px;
+        margin: 10px;
+        border-radius: 12px;
+
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+    }
+
+    .scroll-container {
+        height: fit-content;
+    }
+
+    .content-item {
+        flex: 0 0 250px;
+        padding: 20px;
+
+        .emoji {
+            font-size: 2.5rem;
+        }
+
+        h3 {
+            font-size: 1.25rem;
+        }
+
+        p {
+            font-size: 0.9rem;
+        }
+    }
+
+    .scroll-arrow {
+        width: 50px;
+        height: 50px;
+
+        svg {
+            width: 24px;
+            height: 24px;
+        }
+    }
+
+    .scroll-arrow-left {
+        left: 15px;
+    }
+
+    .scroll-arrow-right {
+        right: 15px;
+    }
+}

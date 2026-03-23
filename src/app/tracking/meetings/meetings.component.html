@@ -1,0 +1,81 @@
+<!-- Header -->
+<span cds-text="title">
+  <cds-icon shape="event" status="info" solid size="lg"></cds-icon> Gestion des
+  réunions</span>
+
+<!-- Divider -->
+<cds-divider cds-layout="m-t:lg m-b:sm" class="htitled-divider"
+  title="Mémoriser toutes les réunions par projet et archiver leurs documents"
+  style="padding-bottom: 10px"></cds-divider>
+
+<!-- Project name -->
+<div class="project-name {{ selectedProjet ? 'active' : '' }}">
+  {{ selectedProjet ? selectedProjet.nom : "Nom du projet ..." }}
+  <cds-icon onkeypress="" shape="dashboard" size="lg" title="Cliquer pour consulter la fiche projet"
+    style="cursor: pointer" (click)="goToFiche()"></cds-icon>
+</div>
+
+<!-- Search fonds -->
+<div cds-layout="horizontal align:left gap:md m-t:xl">
+  <clr-dropdown>
+    <cds-button size="md" action="outline" clrDropdownTrigger>
+      {{ selectedProjet?.nom || "Sélectionner un projet" }}
+      <cds-icon shape="angle" status="info" direction="down"></cds-icon>
+    </cds-button>
+
+    <clr-dropdown-menu *clrIfOpen>
+      @for(p of projets; track p.id) {
+      <div clrDropdownItem (click)="setProjet(p)" onkeypress="">
+        {{ p.nom | uppercase }}
+      </div>
+      }
+    </clr-dropdown-menu>
+  </clr-dropdown>
+
+  <cds-divider orientation="vertical"></cds-divider>
+
+  <!-- Add meeting button -->
+
+  <cds-button action="outline" status="primary" (click)="formOpened = true" onKeyPress="">
+    <cds-icon shape="plus"></cds-icon> Ajouter une réunion
+  </cds-button>
+</div>
+
+<!-- Timeline -->
+<ul class="clr-timeline clr-timeline-vertical">
+  @for(year of years; track year) {
+  <li class="clr-timeline-step">
+    <div class="clr-timeline-step-header">
+      <strong class="digit" [style.fontSize]="'large !important'">{{
+        year
+        }}</strong>
+    </div>
+    @if(year < thisYear) { <cds-icon shape="success-standard" aria-label="Completed"></cds-icon>
+      } @if(year == thisYear) {
+      <cds-icon shape="dot-circle" aria-label="Current"></cds-icon>
+      } @if(year > thisYear) {
+      <cds-icon shape="circle" aria-label="Not started"></cds-icon>
+      }
+
+      <div class="clr-timeline-step-body">
+        <!-- Reunion grid -->
+        <meeting-grid #reunion_grid [projet]="selectedProjet" [reunions]="getMeetingsByYear(year)" [membres]="membres"
+          [decisions]="decisions" [year]="year" (refresh)="loadMeetings()" (delete)="meetingDeleted()"
+          (refresh)="meetingSaved($event)" (refreshMeeting)="refreshMeeting($event)">
+        </meeting-grid>
+      </div>
+  </li>
+  }
+</ul>
+
+<!-- Modal -->
+<clr-modal #modal [(clrModalOpen)]="formOpened" [clrModalSize]="'lg'">
+  <h1 class="modal-title">
+    <cds-icon shape="event" status="info" solid size="25"></cds-icon> Ajout de
+    réunion
+  </h1>
+  <div class="modal-body">
+    <!-- Form -->
+    <meeting-form [projet]="selectedProjet" (refresh)="handleMeetingSaved($event)"></meeting-form>
+  </div>
+</clr-modal>

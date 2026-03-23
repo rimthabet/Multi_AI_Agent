@@ -1,0 +1,198 @@
+<div
+  class="modal-backdrop"
+  aria-hidden="true"
+  [style.display]="
+    loadingFonds || loadingProjets || loadingFundStats || loadingSubscriptions
+      ? 'block'
+      : 'none'
+  "
+  (dblclick)="
+    loadingFonds = false;
+    loadingProjets = false;
+    loadingFundStats = false;
+    loadingSubscriptions = false
+  "
+>
+  <span
+    class="spinner"
+    style="
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    "
+    >Loading...</span
+  >
+</div>
+
+<clr-alerts cds-layout="m-b:lg">
+  <clr-alert [clrAlertType]="'info'" [clrAlertAppLevel]="true">
+    <clr-alert-item>
+      <span class="alert-text">This is the first app level alert.</span>
+      <div class="alert-actions">
+        <button class="btn alert-action">Fix</button>
+      </div>
+    </clr-alert-item>
+  </clr-alert>
+  <clr-alert [clrAlertType]="'danger'" [clrAlertAppLevel]="true">
+    <clr-alert-item>
+      <span class="alert-text">This is a second app level alert.</span>
+      <div class="alert-actions">
+        <button class="btn alert-action">Fix</button>
+      </div>
+    </clr-alert-item>
+  </clr-alert>
+</clr-alerts>
+
+<div cds-layout="grid  align:stretch gap:lg">
+  <div cds-layout="grid col@lg:8 col@md:12 col@sm:12  gap:lg">
+    <!-- Liste des fonds -->
+    <div
+      class="card"
+      cds-layout="col@sm:12 col@md:12 col@lg:6 col@xl:6 col@2xl:6"
+    >
+      <div class="card-header">Liste des fonds</div>
+      <div class="card-block">
+        <div class="card-text" style="height: 225px; overflow-y: auto">
+          <inventory-funds
+            #inventoryFundsComponent
+            [fonds]="fonds"
+          ></inventory-funds>
+        </div>
+      </div>
+    </div>
+
+    <!-- Statut actuel des fonds -->
+    <div
+      class="card"
+      cds-layout="col@md:12 col@sm:12 col@lg:6 col@xl:6 col@2xl:6"
+    >
+      <div class="card-header">Répartition des fonds par état</div>
+      <div class="card-block">
+        <div class="card-text" style="height: 225px">
+          <app-bar-chart-11 [fonds]="fonds"></app-bar-chart-11>
+        </div>
+      </div>
+    </div>
+
+    <!-- Total investi -->
+    <div
+      class="card"
+      cds-layout="col@md:12 col@sm:12 col@lg:6 col@xl:6 col@2xl:6"
+    >
+      <div class="card-header">Total actif</div>
+      <div class="card-block">
+        <funds-assets [subscriptions]="funds_assets_investments"></funds-assets>
+      </div>
+    </div>
+    <div
+      class="card"
+      cds-layout="col@md:12 col@sm:12 col@lg:6 col@xl:6 col@2xl:6"
+    >
+      <div class="card-header">Total investi</div>
+      <div class="card-block">
+        <funds-investment
+          [liquiditeActifsFunds]="liquiditeActifsFunds"
+        ></funds-investment>
+      </div>
+    </div>
+    <div
+      class="card"
+      cds-layout="col@md:12 col@sm:12 col@lg:12 col@xl:12 col@2xl:12"
+    >
+      <div class="card-header">Répartition des projets par année et statut</div>
+      <div class="card-block" style="height: 334px">
+        <app-bar-chart-15
+          [projectsByYearAndStatus]="projects_by_year_and_status"
+        ></app-bar-chart-15>
+      </div>
+    </div>
+    <div
+      class="card"
+      cds-layout="col@md:12 col@sm:12 col@lg:12 col@xl:12 col@2xl:12"
+    >
+      <div class="card-header">Allocation des investissements par palier</div>
+      <div class="card-block" style="height: 334px">
+        <app-bar-chart-14
+          [statsByBadgeRange]="stats_by_badge_range"
+        ></app-bar-chart-14>
+      </div>
+    </div>
+  </div>
+  <!-- Carte du projet -->
+  <div
+    cds-layout="vertical gap:lg col@lg:4 col@md:12 col@sm:12 col@xl:4 col@2xl:4"
+  >
+    <div
+      class="card"
+      cds-layout="col@md:12 col@sm:12 col@lg:6 col@xl:6 col@2xl:6"
+    >
+      <div class="card-header">Chiffres clés</div>
+      <div class="card-block">
+        <global-kpis
+          [fonds]="fonds"
+          [subscriptions]="subscriptions"
+          [projets]="projets"
+        ></global-kpis>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-block" cds-layout="horizontal align:stretch p:xxs">
+        <project-geolocation
+          [height]="'1215px'"
+          [projets]="activeProjects"
+          [showTitles]="false"
+        ></project-geolocation>
+      </div>
+    </div>
+  </div>
+
+  <!-- Liquidité des actifs par fonds -->
+  <div
+    class="card"
+    cds-layout="col@lg:12 col@md:12 col@sm:12 col@xl:12 col@2xl:12"
+  >
+    <div class="card-header">Liquidité des actifs par fonds</div>
+
+    <div class="card-block">
+      <div class="card-text">
+        <app-bar-chart-13
+          [liquiditeActifs]="liquiditeActifsFunds"
+        ></app-bar-chart-13>
+      </div>
+    </div>
+  </div>
+
+  <!-- Souscripteurs & montants souscrit par type d'établissement -->
+  <div
+    class="card"
+    cds-layout="col@lg:12 col@md:12 col@sm:12 col@xl:12 col@2xl:12"
+  >
+    <div class="card-header">
+      Souscripteurs & montants souscrits par type d'établissement
+    </div>
+
+    <div class="card-block">
+      <div class="card-text">
+        <app-bar-chart-12 [subscriptions]="subscriptions"></app-bar-chart-12>
+      </div>
+    </div>
+  </div>
+
+  <!--Desinvestissements-->
+  <div
+    class="card"
+    cds-layout="col@lg:12 col@md:12 col@sm:12 col@xl:12 col@2xl:12 "
+  >
+    <div class="card-header">Désinvestissements</div>
+
+    <div class="card-block">
+      <div class="card-text">
+        <funds-divestment
+          [funds_divestment]="funds_divestment"
+        ></funds-divestment>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,74 @@
+
+<!-- Table -->
+<table class="table table-vertical" style="margin-top: 0">
+    <caption style="text-align: right">
+        <cds-button action="outline" status="primary" onKeyPress="">
+            <cds-icon shape="xls-file" status="info" size="md"></cds-icon> Générer la fiche fonds</cds-button>
+    </caption>
+    <thead>
+        <th>Détail</th>
+        <th>Donnée</th>
+    </thead>
+    <tbody>
+        <tr>
+            <th>Nom légal</th>
+            <td>{{ fonds?.denomination }}</td>
+        </tr>
+        <tr>
+            <th>Forme légale</th>
+            <td>{{ fonds?.formeLegale?.libelle }}</td>
+        </tr>
+        <tr>
+            <th>Date de l'agrément</th>
+            <td>{{ fonds?.dateAgrement | date : "dd/MM/yyyy" }}</td>
+        </tr>
+        <tr>
+            <th>Durée</th>
+            <td>
+                {{ fonds?.duree | number : "1.0-0" }} Ans pouvant être prorogés de deux
+                périodes d'une année chacune
+            </td>
+        </tr>
+        <tr>
+            <th>Visa CMF</th>
+            <td>
+                Visa CMF Numéro
+                <span style="
+              color: var(--cds-alias-object-interaction-background-highlight);
+            ">{{ fonds?.numVisaCMF }}</span>
+                obteneu le
+                {{ fonds?.dateVisaCMF | date : "dd/MM/yyyy" }}
+            </td>
+        </tr>
+        <tr>
+            <th>Matricule fisacal</th>
+            <td>{{ fonds?.matriculeFiscal }}</td>
+        </tr>
+        <tr>
+            <th>Gestionnaire</th>
+            <td>{{ gestionnaire }}</td>
+        </tr>
+        <tr>
+            <th>Siège social du gestionnaire</th>
+            <td>{{ fonds?.adresseFonds }}</td>
+        </tr>
+        <tr>
+            <th>Banque dépositaire</th>
+            <td>{{ fonds?.banque?.libelle }}</td>
+        </tr>
+        <tr>
+            <th>Date de signature du fonds</th>
+            <td>{{ fonds?.dateLancement | date : "dd/MM/yyyy" }}</td>
+        </tr>
+        <tr>
+            <th>Premier exercice</th>
+            <td>
+                {{ firstExerciseYear }}
+            </td>
+        </tr>
+        <tr>
+            <th>Responsable de l’information</th>
+            <td [innerHTML]="responsable_information"></td>
+        </tr>
+    </tbody>
+</table>

@@ -1,0 +1,127 @@
+<div cds-layout="m-y:lg">
+  <span class="project-name" style="opacity: 1">
+    {{ this.fonds()?.denomination }}</span
+  >
+</div>
+
+<cds-divider
+  title="
+            Montants préliminaires des participations du fonds, spécifiés dans la
+            phase d'étude
+"
+  class="htitled-divider"
+></cds-divider>
+
+<!-- Stats -->
+<div cds-layout="horizontal align:stretch gap:sm m-y:lg">
+  <!-- ACTIONS -->
+  <app-kpi-badge-01
+    [title]="'# Participation en ACTIONS'"
+    [value]="participation?.montantActions"
+    [type]="'currency'"
+    [size]="'large'"
+    [color]="'var(--cds-alias-status-info-shade)'"
+  >
+  </app-kpi-badge-01>
+
+  <!-- OCA -->
+  <app-kpi-badge-01
+    [title]="'# Participation en OCA'"
+    [value]="participation?.montantOCA"
+    [type]="'currency'"
+    [size]="'large'"
+    [color]="'var(--cds-alias-viz-sequential-blue-500)'"
+  >
+  </app-kpi-badge-01>
+
+  <!-- CCA -->
+  <app-kpi-badge-01
+    [title]="'# Participation en CCA'"
+    [value]="participation?.montantCCA"
+    [type]="'currency'"
+    [size]="'large'"
+    [color]="'var(--cds-alias-status-alt-tint)'"
+  >
+  </app-kpi-badge-01>
+</div>
+
+<!-- Tabs -->
+<div cds-layout="m-y:lg">
+  <clr-tabs>
+    <!-- Details -->
+    <clr-tab>
+      <button clrTabLink id="link1">
+        <cds-icon shape="details" solid></cds-icon> Details des comités
+        d'investissement
+      </button>
+      <clr-tab-content id="content1" *clrIfActive="true">
+        <comite-investment-form
+          #comiteForm
+          [prospection]="prospection()"
+          [fonds]="fonds()"
+          [financement]="financement()"
+          [participation]="participation"
+        >
+        </comite-investment-form>
+      </clr-tab-content>
+    </clr-tab>
+
+    <!-- Generation -->
+    <clr-tab>
+      <button clrTabLink>
+        <cds-icon shape="digital-signature"></cds-icon> PV et notification de
+        paiement
+      </button>
+      <clr-tab-content *clrIfActive>
+        <comite-investment-document-generation [prospection]="prospection()">
+        </comite-investment-document-generation>
+      </clr-tab-content>
+    </clr-tab>
+
+    <!-- Upload -->
+    <clr-tab>
+      <button clrTabLink>
+        <cds-icon shape="upload"></cds-icon> Téléchargement des documents
+      </button>
+      <clr-tab-content *clrIfActive>
+        <form clrForm cds-layout="horizontal" clrLabelSize="4">
+          <clr-select-container>
+            <label>
+              <cds-icon
+                shape="calendar"
+                solid
+                size="md"
+                status="info"
+              ></cds-icon>
+              Date du comité
+            </label>
+            <select
+              clrSelect
+              name="options"
+              [ngModel]="selectedComite?.id"
+              (ngModelChange)="onComiteChange($event)"
+            >
+              @for(comite of comites_investissement; track $index){
+              <option [value]="comite.id">
+                {{ comite.dateComite | date : "dd/MM/yyyy" }}
+              </option>
+              }
+            </select>
+          </clr-select-container>
+        </form>
+
+        @if(selectedComite) { @for(conformite of conformite_documentaires; track
+        $index) {
+        <div cds-layout="p-l:xs">
+          <document-upload
+            [compliance]="{ document: undefined, conformite: conformite }"
+            [data]="selectedComite"
+            [task_row]="11"
+            [phase_row]="2"
+          ></document-upload>
+        </div>
+        } }
+      </clr-tab-content>
+    </clr-tab>
+  </clr-tabs>
+</div>

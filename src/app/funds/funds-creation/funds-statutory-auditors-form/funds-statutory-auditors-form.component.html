@@ -1,0 +1,145 @@
+<div cds-layout="m-t:md">
+  <div class="alert alert-info" role="alert">
+    <div class="alert-items">
+      <div class="alert-item static">
+        <div class="alert-icon-wrapper">
+          <cds-icon class="alert-icon" shape="exclamation-triangle"></cds-icon>
+        </div>
+        <span class="alert-text"
+          >Le mandat du commissaire aux comptes ne dépasse pas une période de 3
+          ans.</span
+        >
+      </div>
+    </div>
+  </div>
+
+  <!-- Add auditor -->
+  <cds-button cds-layout="m-t:lg" action="outline" (click)="openModal()">
+    <cds-icon shape="add-text"></cds-icon> Ajouter des commissaires aux comptes
+  </cds-button>
+
+  <!-- List of auditors -->
+  <h4 cds-layout="m-t:lg">
+    <cds-icon shape="view-list" size="md"></cds-icon> Liste des commissaires aux
+    comptes:
+  </h4>
+
+  @for (m of mandats; track m) {
+  <div class="cac-div">
+    <span
+      ><cds-icon shape="employee" size="md" solid></cds-icon>
+      {{ m.cac.libelle }}</span
+    >
+    <span class="label"
+      >Année début : <span class="badge"> {{ m.anneeD }}</span></span
+    >
+    <span class="label"
+      >Année fin : <span class="badge"> {{ m.anneeF }}</span></span
+    >
+    <cds-button action="flat" status="danger" (click)="deleteMandat(m)">
+      <cds-icon shape="trash"></cds-icon> Supprimer
+    </cds-button>
+  </div>
+  }
+
+  <!-- Modal -->
+  <clr-modal [clrModalSize]="'md'" [(clrModalOpen)]="auditorModalOpened">
+    <h3 class="modal-title">
+      <cds-icon shape="bullseye" status="info" size="lg" solid></cds-icon>
+      Ajouter un commissaire aux comptes
+    </h3>
+
+    <div class="modal-body">
+      <form
+        clrForm
+        [formGroup]="commissaireSaveForm!"
+        clrLabelSize="4"
+        cds-layout="p-l:md"
+      >
+        <clr-select-container>
+          <label for="commissaire" class="clr-required-mark"
+            ><cds-icon
+              shape="employee"
+              size="sm"
+              status="info"
+              solid
+            ></cds-icon>
+            Commissaire aux comptes</label
+          >
+
+          <select
+            clrSelect
+            name="commissaire"
+            formControlName="commissaire"
+            [compareWith]="equals"
+          >
+            <option [ngValue]="undefined" [attr.data-value]="undefined">
+              Choisir un commissaire au compte...
+            </option>
+            @for (c of auditors; track c.id) {
+            <option [value]="c.id">
+              {{ c.libelle }}
+            </option>
+            }
+          </select>
+        </clr-select-container>
+
+        <clr-number-input-container>
+          <label for="annee_d" class="clr-required-mark">
+            <cds-icon
+              shape="calendar"
+              size="sm"
+              status="info"
+              solid
+              badge="success"
+            ></cds-icon>
+            Année de début</label
+          >
+          <input
+            clrNumberInput
+            type="number"
+            formControlName="annee_d"
+            name="annee_d"
+          />
+        </clr-number-input-container>
+
+        <clr-number-input-container>
+          <label for="annee_f" class="clr-required-mark"
+            ><cds-icon
+              shape="calendar"
+              size="sm"
+              status="info"
+              solid
+              badge="danger"
+            >
+            </cds-icon>
+            Année de fin</label
+          >
+          <input
+            clrNumberInput
+            type="number"
+            formControlName="annee_f"
+            name="annee_f"
+          />
+        </clr-number-input-container>
+
+        <!-- Add auditor button -->
+        <div cds-layout="horizontal m-t:lg"></div>
+      </form>
+    </div>
+
+    <div class="modal-footer" cds-layout="horizontal gap:sm">
+      <button class="btn btn-outline" (click)="auditorModalOpened = false">
+        Annuler
+      </button>
+      <cds-button
+        (click)="addMandat()"
+        [disabled]="commissaireSaveForm!.invalid"
+      >
+        <cds-icon shape="floppy" size="md"></cds-icon> Sauvegarder
+      </cds-button>
+    </div>
+  </clr-modal>
+
+  <!-- Form auditor -->
+</div>

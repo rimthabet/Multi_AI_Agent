@@ -1,0 +1,159 @@
+<!-- TABLE -->
+<table class="table">
+    <!-- TABLE CAPTION -->
+    <caption>
+        <div class="alert alert-info" role="alert" cds-layout="m-b:xl" style="margin-top: -2.1em">
+            <div class="alert-items">
+                <div class="alert-item static">
+                    <div class="alert-icon-wrapper">
+                        <cds-icon class="alert-icon" shape="exclamation-triangle" status="info"></cds-icon>
+                    </div>
+                    <span class="alert-text">
+                        Vous pouvez cliquer sur chaque item pour visualiser son évolution graphique
+                    </span>
+                </div>
+            </div>
+        </div>
+    </caption>
+
+    <!-- TABLE HEAD -->
+    <thead>
+        <tr>
+            <th scope="col"></th>
+            <th scope="col"></th>
+            <th scope="col"></th>
+            <th scope="col"></th>
+
+            @for (c of [].constructor(columns()); track $index) {
+            <th scope="col">
+                {{ year() - columns() + $index + 1 }}
+            </th>
+            }
+        </tr>
+    </thead>
+
+    <!-- TABLE BODY -->
+    <tbody>
+        @for (item of tree_data; track item.id) {
+        <!-- LEVEL 1 -->
+        @if (!item.leaf) {
+        <tr (click)="onRowClick(item)" style="cursor: pointer" title="Cliquer pour visualiser l'évolution graphique">
+            <th class="left" scope="row" [attr.colspan]="item.input ? columns() + 4 : 4">
+                {{ item.libelle }}
+            </th>
+            @if (!item.input) {
+            @for ( c of [].constructor(columns()); track $index) {
+            <th scope="row">
+                <data-form [readonly]="true" [prospection]="prospection()" [ref2]="ref2()" [ref3]="ref3()"
+                    [ref4]="ref4()" [ref5]="ref5()" [item]="item" [year]="year() - columns() + $index + 1"
+                    [years]="years()" [row]="$index + 1"></data-form>
+            </th>
+            }
+            }
+        </tr>
+        } @else {
+        <tr (click)="onRowClick(item)" style="cursor: pointer" title="Cliquer pour visualiser l'évolution graphique">
+            <th class="left" scope="row" colspan="4" style="min-width: 300px">
+                {{ item.libelle }}
+            </th>
+            @for (c of [].constructor(columns()); track $index) {
+            <th scope="row">
+                <data-form [readonly]="true" [prospection]="prospection()" [ref2]="ref2()" [ref3]="ref3()"
+                    [ref4]="ref4()" [ref5]="ref5()" [item]="item" [year]="year() - columns() + $index + 1"
+                    [row]="$index + 1"></data-form>
+            </th>
+            }
+        </tr>
+        }
+
+        <!-- LEVEL 2 -->
+        @for (it of item.items; track it.id) {
+        <tr (click)="onRowClick(it)" style="cursor: pointer" title="Cliquer pour visualiser l'évolution graphique">
+            @if (!it.leaf) {
+            <th scope="row"></th>
+            <th class="left" scope="row" [attr.colspan]="it.input ? columns() + 3 : 3">
+                {{ it.libelle }}
+            </th>
+            @if (!it.input) {
+            @for (c of [].constructor(columns()); track $index) {
+            <th scope="row">
+                <data-form [readonly]="true" [prospection]="prospection()" [ref2]="ref2()" [ref3]="ref3()"
+                    [ref4]="ref4()" [ref5]="ref5()" [item]="it" [year]="year() - columns() + $index + 1"
+                    [row]="$index + 1"></data-form>
+            </th>
+            }
+            }
+            } @else {
+            <td></td>
+            <td class="left" [attr.colspan]="3">
+                {{ it.libelle }}
+            </td>
+            @for ( c of [].constructor(columns()); track $index) {
+            <td>
+                <data-form [readonly]="true" [prospection]="prospection()" [ref2]="ref2()" [ref3]="ref3()"
+                    [ref4]="ref4()" [ref5]="ref5()" [item]="it" [year]="year() - columns() + $index + 1"
+                    [row]="$index + 1"></data-form>
+            </td>
+            }
+            }
+        </tr>
+
+        <!-- LEVEL 3 -->
+        @for ( i of it.items; track i.id) {
+        <tr (click)="onRowClick(i)" style="cursor: pointer" title="Cliquer pour visualiser l'évolution graphique">
+            @if (!i.leaf) {
+            <th scope="row"></th>
+            <th scope="row"></th>
+            <th class="left" scope="row" [attr.colspan]="i.input ? columns() + 2 : 2">
+                {{ i.libelle }}
+            </th>
+            @if (!i.input) {
+            @for (c of [].constructor(columns()); track $index) {
+            <th scope="row">
+                <data-form [readonly]="true" [prospection]="prospection()" [ref2]="ref2()" [ref3]="ref3()"
+                    [ref4]="ref4()" [ref5]="ref5()" [item]="i" [year]="year() - columns() + $index + 1"
+                    [row]="$index + 1"></data-form>
+            </th>
+            }
+            }
+            } @else {
+            <td></td>
+            <td></td>
+            <td class="left" [attr.colspan]="2">
+                {{ i.libelle }}
+            </td>
+            @for (c of [].constructor(columns()); track $index) {
+            <td>
+                <data-form [readonly]="true" [prospection]="prospection()" [ref2]="ref2()" [ref3]="ref3()"
+                    [ref4]="ref4()" [ref5]="ref5()" [item]="i" [year]="year() - columns() + $index + 1"
+                    [row]="$index + 1"></data-form>
+            </td>
+            }
+            }
+        </tr>
+
+        <!-- LEVEL 4 -->
+        @for ( k of i.items; track k.id) {
+        <tr (click)="onRowClick(k)" style="cursor: pointer" title="Cliquer pour visualiser l'évolution graphique">
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="left">{{ k.libelle }}</td>
+            @for (c of [].constructor(columns()); track $index) {
+            <td>
+                <data-form [readonly]="true" [prospection]="prospection()" [ref2]="ref2()" [ref3]="ref3()"
+                    [ref4]="ref4()" [ref5]="ref5()" [item]="k" [year]="year() - columns() + $index + 1"
+                    [row]="$index + 1"></data-form>
+            </td>
+            }
+        </tr>
+        }
+        <!-- END LEVEL 4 -->
+        }
+        <!-- END LEVEL 3 -->
+        }
+        <!-- END LEVEL 2 -->
+        }
+        <!-- END LEVEL 1 -->
+    </tbody>
+</table>

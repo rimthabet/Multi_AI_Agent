@@ -1,0 +1,111 @@
+<!-- Loading Spinner -->
+<div
+  class="modal-backdrop"
+  aria-hidden="true"
+  [style.display]="
+    loading || loadingDetails || loadingSocietes ? 'block' : 'none'
+  "
+  (click)="loading = false; loadingDetails = false; loadingSocietes = false"
+>
+  <span
+    class="spinner"
+    style="
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    "
+    >Loading...</span
+  >
+</div>
+
+<!-- Header -->
+<span cds-text="title">
+  <cds-icon shape="list" size="lg" solid status="info"></cds-icon> Fiche des
+  sociétés du fonds</span
+>
+
+<!-- Search fonds -->
+<div cds-layout="horizontal align:left gap:md m-t:xl">
+  <clr-dropdown>
+    <cds-button size="md" action="outline" clrDropdownTrigger>
+      {{ selectedFonds?.fonds?.denomination || "Nom du fonds ..." }}
+      <cds-icon shape="angle" status="info" direction="down"></cds-icon>
+    </cds-button>
+
+    <clr-dropdown-menu *clrIfOpen>
+      @for (f of fonds; track $index) {
+      <div clrDropdownItem (click)="selectFonds(f)" onkeypress="">
+        {{ f.fonds?.denomination }}
+      </div>
+      }
+    </clr-dropdown-menu>
+  </clr-dropdown>
+
+  <span class="fund-name active" [style.marginBottom]="'0.2em'">
+    {{ selectedFonds?.fonds?.denomination }}
+    <cds-icon
+      onkeypress=""
+      shape="dashboard"
+      size="lg"
+      title="Cliquer pour consulter la fiche funds"
+      style="cursor: pointer"
+      (click)="goToFiche()"
+    ></cds-icon>
+  </span>
+</div>
+
+<!-- Fund state -->
+@if (selectedFonds?.fonds.etat.libelle == 'En liquidation' ||
+selectedFonds?.fonds.etat.libelle == 'En pré-liquidation') {
+<div class="badge badge-warning" cds-text="caption" cds-layout="p:sm">
+  Fonds {{ selectedFonds?.fonds.etat.libelle }}
+</div>
+}
+
+<!-- Divider -->
+<cds-divider
+  cds-layout="m-t:lg"
+  class="htitled-divider"
+  title="Liste des sociétés"
+></cds-divider>
+
+<!-- List of societies -->
+<div
+  style="width: 100%; min-height: calc(100vh - 260px)"
+  cds-layout="horizontal align:stretch gap:sm"
+>
+  <div style="width: 290px" cds-layout="align:left">
+    <h4>
+      <cds-icon shape="building" status="info" size="md"></cds-icon>
+      Liste des sociétés
+    </h4>
+    <cds-divider orientation="horizontal"></cds-divider>
+    <div cds-layout="vertical align:stretch">
+      @for (societe of fondsSocietes; track $index) {
+      <span
+        onkeypress=""
+        (click)="selectProjet(societe)"
+        [class]="'item ' + (selectedProjet?.id == societe.id ? 'active' : '')"
+      >
+        {{ societe.nom }} </span
+      ><cds-divider orientation="horizontal"></cds-divider>
+      }
+    </div>
+  </div>
+  <cds-divider orientation="vertical"></cds-divider>
+
+  <!-- Project details -->
+  <div class="projet-details-content">
+    @if (selectedProjet == undefined) {
+    <fund-details #fundDetails [data]="selectedFonds"></fund-details>
+    } @if (selectedProjet != undefined) {
+    <project-details
+      #projectDetails
+      [projet]="selectedProjet"
+      [fonds]="selectedFonds"
+      [(loading)]="loadingDetails"
+    ></project-details>
+    }
+  </div>
+</div>

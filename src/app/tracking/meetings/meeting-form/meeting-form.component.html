@@ -1,0 +1,85 @@
+<!-- Meeting form -->
+<form clrForm [formGroup]="reunionSaveForm!" clrLabelSize="3">
+  <clr-date-container>
+    <label class="clr-required-mark">Date de la réunion:</label>
+    <input
+      clrDate
+      type="date"
+      formControlName="dateReunion"
+      name="dateReunion"
+    />
+  </clr-date-container>
+
+  <clr-input-container>
+    <label class="clr-required-mark">Lieu de la réunion:</label>
+    <input clrInput type="text" formControlName="lieu" name="lieu" size="64" />
+  </clr-input-container>
+
+  <clr-select-container>
+    <label class="clr-required-mark">Type de la réunion:</label>
+    <select
+      clrSelect
+      name="options"
+      formControlName="typeReunion"
+      [compareWith]="equals"
+    >
+      <option
+        *ngFor="let type of types"
+        [ngValue]="type"
+        [attr.data-value]="type"
+      >
+        {{ type.libelle }}
+      </option>
+    </select>
+  </clr-select-container>
+
+  <clr-textarea-container>
+    <label class="clr-required-mark">Ordre du jour:</label>
+    <textarea
+      clrTextarea
+      name="ordreJour"
+      cols="70"
+      rows="3"
+      placeholder="Ajouter une description brève de l'ordre du jour"
+      formControlName="ordreJour"
+    ></textarea>
+    <clr-control-helper
+      >Vous pouvez utiliser le format
+      <a href="https://www.markdownguide.org/basic-syntax/" target="_blank"
+        >Markdown</a
+      ></clr-control-helper
+    >
+  </clr-textarea-container>
+
+  <clr-textarea-container>
+    <label>Remarques:</label>
+    <textarea
+      clrTextarea
+      name="remarques"
+      cols="70"
+      rows="2"
+      formControlName="remarques"
+      placeholder="Ajouter les remarques, une par ligne"
+    ></textarea>
+    <clr-control-helper
+      >Vous pouvez utiliser le format
+      <a href="https://www.markdownguide.org/basic-syntax/" target="_blank"
+        >Markdown</a
+      ></clr-control-helper
+    >
+  </clr-textarea-container>
+</form>
+
+<!-- Separator -->
+<div class="separator"></div>
+
+<!-- Save button -->
+<div cds-layout="horizontal align:right">
+  <button
+    class="btn btn-primary"
+    [disabled]="reunionSaveForm.invalid"
+    (click)="saveReunion()"
+  >
+    <cds-icon shape="floppy"></cds-icon> Sauvegarder
+  </button>
+</div>

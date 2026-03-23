@@ -1,0 +1,38 @@
+<!-- Header -->
+<div cds-layout="m-y:lg">
+    <span cds-text="title">
+        <cds-icon shape="bullseye" size="md" status="info" cds-layout="m-b:sm"></cds-icon>
+        Business Plans
+    </span>
+
+    <!-- Tabs -->
+    <div cds-layout="m-y:md">
+        <clr-tabs>
+            @for (bp of bps; track $index) {
+            <clr-tab>
+                <button clrTabLink (click)="selectedTab = $index" [title]="bp.label">
+                    {{ bp.label }}
+                    <span class="badge badge-info" style="padding: 0.7em; margin-bottom: 0.5em; font-size: 14px">
+                        {{ bp.elaboration_date | date : "dd-MM-YYYY" }}</span>
+                </button>
+
+                <clr-tab-content *clrIfActive="$index == selectedTab">
+                    <div cds-layout="grid gap:md">
+                        <div cds-layout="col@sm:12 col@md:12 col@lg:12">
+                            @if(selectedItem != undefined) {
+                            <app-bar-chart-09 [prospection]="prospection()" [item]="selectedItem"
+                                [bp]="bp"></app-bar-chart-09>
+                            }
+                        </div>
+                        <div cds-layout="col@sm:12 col@md:12 col@lg:12">
+                            <financial-statement-sheet [prospection]="prospection()" [ref2]="bp.id" [ref3]="-1"
+                                [ref4]="-1" [ref5]="-1" [item]="item" [data]="items" [year]="bp.year"
+                                (itemSelected)="handleData($event)"></financial-statement-sheet>
+                        </div>
+                    </div>
+                </clr-tab-content>
+            </clr-tab>
+            }
+        </clr-tabs>
+    </div>
+</div>

@@ -1,0 +1,80 @@
+<!-- Header -->
+<span cds-text="title">
+  <cds-icon shape="sync" size="lg" status="info"></cds-icon> Liste des projets
+  en cours d'étude
+</span>
+
+<!-- Divider -->
+<cds-divider
+  cds-layout="m-t:xl "
+  class="htitled-divider"
+  title="Inventaire des projets en cours d'étude"
+></cds-divider>
+
+<!-- Data grid -->
+<clr-datagrid
+  style="height: calc(100vh - 185px)"
+  cds-layout="m-t:sm"
+  [clrDgLoading]="loading"
+>
+  <clr-dg-column [clrDgField]="'projet.nom'">Projet</clr-dg-column>
+  <clr-dg-column [clrDgField]="'projet.promoteur.nom'"
+    ><ng-container *clrDgHideableColumn="{ hidden: false }"
+      >Promoteur</ng-container
+    ></clr-dg-column
+  >
+  <clr-dg-column [clrDgField]="'projet.activite'"
+    ><ng-container *clrDgHideableColumn="{ hidden: false }"
+      >Activité</ng-container
+    ></clr-dg-column
+  >
+  <clr-dg-column
+    ><ng-container *clrDgHideableColumn="{ hidden: true }"
+      >Secteur</ng-container
+    ></clr-dg-column
+  >
+  <clr-dg-column [clrDgField]="'projet.natureInvestissement.libelle'"
+    ><ng-container *clrDgHideableColumn="{ hidden: false }"
+      >Critère(s) de présélection</ng-container
+    ></clr-dg-column
+  >
+  <clr-dg-column [clrDgField]="'projet.natureInvestissement.libelle'"
+    ><ng-container *clrDgHideableColumn="{ hidden: true }"
+      >Nature Investissement</ng-container
+    ></clr-dg-column
+  >
+  <clr-dg-column [clrDgField]="'projet.capitalSocial'"
+    >Capital social &nbsp;<small>(tnd)</small></clr-dg-column
+  >
+
+  <!-- ROW -->
+  <clr-dg-row *clrDgItems="let record of projets">
+    <clr-dg-cell>
+      <a
+        class="show-hide-icon"
+        style="margin-top: auto; color: var(--cds-alias-status-info)"
+        [routerLink]="['/dashboard/projects/', record.projet?.id]"
+      >
+        {{ record.projet?.nom }}
+        <cds-icon shape="link" size="sm"></cds-icon>
+      </a>
+    </clr-dg-cell>
+    <clr-dg-cell>{{ record.projet.promoteur?.nom }}</clr-dg-cell>
+    <clr-dg-cell>{{ record.projet.activite }}</clr-dg-cell>
+    <clr-dg-cell>{{ record.projet.secteurs[0]?.libelle }}</clr-dg-cell>
+    <clr-dg-cell>
+      @for(c of record.projet.criteresPreselection; track c) {
+
+      {{ c.libelle }}
+
+      }
+    </clr-dg-cell>
+    <clr-dg-cell>{{ record.projet.natureInvestissement?.libelle }}</clr-dg-cell>
+    <clr-dg-cell class="right digit">{{
+      record.projet.capitalSocial | number : "1.0-0"
+    }}</clr-dg-cell>
+  </clr-dg-row>
+
+  <!-- Footer -->
+  <clr-dg-footer>{{ projets.length }} projets</clr-dg-footer>
+</clr-datagrid>

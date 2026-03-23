@@ -1,0 +1,115 @@
+<!-- Header -->
+<span cds-text="title">
+  <cds-icon
+    shape="id-badge"
+    status="info"
+    size="lg"
+    cds-layout="m-b:xs"
+  ></cds-icon>
+  Gestion des chargés d'investissement</span
+>
+
+<!-- Data grid -->
+<clr-datagrid
+  [(clrDgSingleSelected)]="selectedItem"
+  [clrDgLoading]="loading"
+  style="height: calc(100vh - 155px); margin-top: 1em"
+>
+  <clr-dg-action-bar>
+    <!-- Actions -->
+    <div class="btn-group">
+      <cds-button
+        action="outline"
+        status="primary"
+        (click)="openAddModal()"
+        onKeyPress=""
+      >
+        <cds-icon shape="plus" size="md"></cds-icon> Ajouter
+      </cds-button>
+    </div>
+    <div class="btn-group">
+      <cds-button
+        action="outline"
+        status="warning"
+        [disabled]="!selectedItem?.id"
+        (click)="toggleShowEdit(selectedItem)"
+        onkeypress=""
+      >
+        <cds-icon shape="note" size="md"></cds-icon> Modifier
+      </cds-button>
+    </div>
+    <div class="btn-group">
+      <cds-button
+        action="outline"
+        status="danger"
+        (click)="deleteInvestmentCharge()"
+        [disabled]="!selectedItem?.id"
+        onkeypress=""
+      >
+        <cds-icon shape="trash" size="md"></cds-icon> Supprimer
+      </cds-button>
+    </div>
+    <!-- Divider -->
+    <cds-divider
+      cds-layout="m-t:lg m-b:sm"
+      class="htitled-divider"
+      title="Chargés d'investissement"
+    ></cds-divider>
+  </clr-dg-action-bar>
+  <clr-dg-column [clrDgField]="'nom'">Chargé d'investissement</clr-dg-column>
+  <clr-dg-row *clrDgItems="let charge of charges" [clrDgItem]="charge">
+    <clr-dg-cell>{{ charge.nom }}</clr-dg-cell>
+  </clr-dg-row>
+  <clr-dg-footer>{{ charges.length }} Chargés d'investissement</clr-dg-footer>
+</clr-datagrid>
+
+<!-- Modal method CRUD -->
+<clr-modal #modal [(clrModalOpen)]="openModal" [clrModalSize]="'md'">
+  <!-- Header -->
+  <div class="modal-title">
+    <cds-icon status="info" shape="id-badge" size="lg"></cds-icon> Gestion des
+    chargés d'investissement
+  </div>
+  <!-- Body -->
+  <div class="modal-body">
+    <!-- Form -->
+    <form clrForm [formGroup]="investmentChargeForm!" clrLabelSize="2">
+      <clr-input-container>
+        <label>Nom:</label>
+        <input
+          clrInput
+          placeholder="Nom du chargé d'investissement"
+          type="text"
+          formControlName="nom"
+          style="width: 375px"
+        />
+      </clr-input-container>
+    </form>
+  </div>
+  <!-- Footer -->
+  <div class="modal-footer">
+    <!-- Buttons -->
+    <cds-button
+      action="outline"
+      (click)="openModal = false"
+      onKeyPress="openModal = false"
+      >Annuler</cds-button
+    >
+    <cds-button
+      status="primary"
+      (click)="saveInvestmentCharge()"
+      [disabled]="investmentChargeForm.invalid"
+      onkeypress=""
+    >
+      Sauvegarder
+    </cds-button>
+  </div>
+</clr-modal>
+
+<!-- Super admin dialog for deletion -->
+<app-multi-purpose-delete-dialog
+  #mp_delete_popup
+  [warn_message]="delete_message"
+  [pass_phrase]="selectedItem?.nom"
+  [rest_url]="rest_url"
+></app-multi-purpose-delete-dialog>

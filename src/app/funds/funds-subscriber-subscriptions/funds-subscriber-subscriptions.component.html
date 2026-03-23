@@ -1,0 +1,252 @@
+<!-- Header -->
+<span cds-text="title">
+  <cds-icon
+    shape="employee"
+    size="lg"
+    status="info"
+    cds-layout="m-b:sm"
+  ></cds-icon>
+  Gestion des souscriptions par souscripteur</span
+>
+
+<!-- Divider -->
+<cds-divider
+  cds-layout="m-t:lg "
+  class="htitled-divider"
+  title="Inventaire des souscriptions par souscripteur"
+></cds-divider>
+
+<!-- Search fonds -->
+<div cds-layout="horizontal align:left gap:md m-t:xl">
+  <clr-dropdown>
+    <!-- Button trigger -->
+    <cds-button action="outline" clrDropdownTrigger>
+      {{ selectedFund?.denomination }}
+      <cds-icon shape="angle" status="info" direction="down"></cds-icon>
+    </cds-button>
+
+    <!-- Dropdown menu -->
+    <clr-dropdown-menu *clrIfOpen>
+      @for(f of fonds; track $index) {
+      <div clrDropdownItem (click)="switchTheFund(f)">
+        {{ f.denomination }}
+      </div>
+      }
+    </clr-dropdown-menu>
+  </clr-dropdown>
+
+  <div
+    class="project-name {{ selectedFund ? 'active' : '' }}"
+    style="margin-top: 0px !important"
+  >
+    {{ selectedFund ? selectedFund.denomination : "Nom du projet ..." }}
+    <cds-icon
+      onkeypress=""
+      shape="dashboard"
+      size="lg"
+      title="Cliquer pour consulter la fiche projet"
+      style="cursor: pointer"
+      (click)="goToFiche()"
+    ></cds-icon>
+  </div>
+</div>
+
+<!-- Loading Spinner -->
+<div
+  class="modal-backdrop"
+  aria-hidden="true"
+  [style.display]="loading ? 'block' : 'none'"
+  (click)="loading = false"
+>
+  <span
+    class="spinner"
+    style="
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    "
+    >Loading...</span
+  >
+</div>
+
+<!-- KPIs -->
+<div cds-layout="horizontal align:stretch m-t:lg gap:xxl">
+  <app-kpi-badge-01
+    [value]="selected_fund_subscriptions_total_amount"
+    [title]="'Montant Total souscrit'"
+    [type]="'currency'"
+    [size]="'large'"
+  >
+  </app-kpi-badge-01>
+
+  <app-kpi-badge-01
+    [value]="selected_fund_liberations_total_amount"
+    [title]="'Montant Total libéré'"
+    [type]="'currency'"
+    [size]="'large'"
+    [color]="'var(--cds-alias-status-success)'"
+  >
+  </app-kpi-badge-01>
+</div>
+
+<!-- Data Grid -->
+<clr-datagrid style="height: calc(100vh - 385px)" [clrDgLoading]="loading">
+  <clr-dg-column [clrDgField]="'souscripteur'"
+    ><cds-icon shape="bank"></cds-icon> &nbsp; Souscripteur</clr-dg-column
+  >
+  <clr-dg-column [clrDgField]="'totalMontantSouscription'"
+    ><cds-icon shape="layers"></cds-icon> &nbsp; Total
+    Souscriptions</clr-dg-column
+  >
+  <clr-dg-column [clrDgField]="'totalMontantLibere'"
+    ><cds-icon shape="coin-bag"></cds-icon> &nbsp; Total libérations
+    (mDT)</clr-dg-column
+  >
+
+  <!-- Data Grid Rows -->
+  <clr-dg-row *clrDgItems="let s of data(); let j = index" [clrDgItem]="s">
+    <clr-dg-cell>{{ s.souscripteur }}</clr-dg-cell>
+    <clr-dg-cell class="text-right"
+      >{{ s.totalMontantSouscription | number : "1.2-2" }}
+      <small>tnd</small></clr-dg-cell
+    >
+    <clr-dg-cell class="text-right"
+      >{{ s.totalMontantLibere | number : "1.2-2" }}
+      <small>tnd</small></clr-dg-cell
+    >
+  </clr-dg-row>
+
+  <!-- Data Grid Details -->
+  <clr-dg-detail *clrIfDetail="let detail">
+    <!-- Data Grid Details Header -->
+    <clr-dg-detail-header>
+      <cds-icon shape="bank" size="md"></cds-icon>
+      {{ detail.souscripteur }}</clr-dg-detail-header
+    >
+
+    <clr-dg-detail-body>
+      <!-- Main Header Badges -->
+      <div
+        cds-layout="grid gap:md align:stretch cols@lg:3 cols@md:6 cols@sm:12"
+      >
+        <!-- Total souscrit # -->
+
+        <app-kpi-badge-01
+          [value]="detail.souscriptions?.length"
+          [title]="'# Souscriptions'"
+          [type]="'number'"
+          [color]="'var(--cds-alias-status-info)'"
+          [primary]="false"
+        >
+        </app-kpi-badge-01>
+
+        <!-- Total souscrit -->
+
+        <app-kpi-badge-01
+          [value]="detail.totalMontantSouscription"
+          [title]="'Total souscrit'"
+          [type]="'currency'"
+          [color]="'var(--cds-alias-status-info)'"
+          [primary]="false"
+        >
+        </app-kpi-badge-01>
+
+        <!-- Total libéré # -->
+
+        <app-kpi-badge-01
+          [value]="detail.liberationsCount"
+          [title]="'# Libérations'"
+          [type]="'number'"
+          [color]="'var(--cds-alias-status-success)'"
+          [primary]="false"
+        >
+        </app-kpi-badge-01>
+
+        <!-- Total libéré -->
+
+        <app-kpi-badge-01
+          [value]="detail.totalMontantLibere"
+          [title]="'Total libéré'"
+          [type]="'currency'"
+          [color]="'var(--cds-alias-status-success)'"
+          [primary]="false"
+        >
+        </app-kpi-badge-01>
+      </div>
+
+      <!-- Subscriptions List -->
+
+      <cds-divider
+        cds-layout="m-y:lg"
+        class="htitled-divider"
+        title="Liste des souscriptions"
+      ></cds-divider>
+
+      <!-- Subscriptions Table -->
+      <table class="table">
+        <caption></caption>
+        <thead>
+          <tr>
+            <th>Date de souscription</th>
+            <th>Montant de souscription</th>
+            <th style="width: 320px">Liberations</th>
+            <th>Montant libéré</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for(s of detail.souscriptions; track s.souscription?.id){
+          <tr>
+            <td>
+              {{ s.souscription?.dateSouscription | date : "dd/MM/yyyy" }}
+            </td>
+            <td class="text-right" style="padding-right: 2em">
+              <span class="currency"
+                >{{ s.souscription?.montantSouscription | number : "1.2-2" }}
+                <small>tnd</small></span
+              >
+            </td>
+            <td class="text-left">
+              @if (s.liberations.length > 0) {
+              <div>
+                @for (liberation of s.liberations; track liberation.id) {
+                <div class="liberation-entry" style="white-space: nowrap">
+                  <span class="aria-label">
+                    <cds-icon
+                      shape="success-standard"
+                      size="sm"
+                      class="success"
+                    ></cds-icon>
+                    {{ liberation.dateLiberation | date : "dd/MM/yyyy" }}
+
+                    <span class="badge badge-5">
+                      {{ liberation.montantLiberation | number : "1.2-2" }}
+                      <small>&nbsp;tnd</small>
+                    </span>
+                  </span>
+                </div>
+                }
+              </div>
+              } @else {
+              <div>
+                <cds-icon shape="ban" class="failure" size="sm"></cds-icon>
+                <span class="failure">Aucune libération</span>
+              </div>
+              }
+            </td>
+
+            <td class="text-right">
+              {{
+                s.montantLibere / s.souscription?.montantSouscription
+                  | percent : "1.2-2"
+              }}
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </clr-dg-detail-body>
+  </clr-dg-detail>
+
+  <clr-dg-footer>{{ data().length }} souscripteur(s)</clr-dg-footer>
+</clr-datagrid>

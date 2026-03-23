@@ -1,0 +1,224 @@
+<span cds-text="title">
+  <cds-icon shape="gavel" status="info" size="lg" cds-layout="m-b:sm"></cds-icon>
+  Gestion des conformités documentaires
+  <sup role="tooltip" aria-haspopup="true" class="tooltip tooltip-lg tooltip-bottom-right">
+    <cds-icon shape="info-circle" size="24"></cds-icon>
+    <span class="tooltip-content">
+      Les conformités documentaires définissent les documents nécessaires à
+      télécharger sur la plateforme FMS au niveau de chaque phase et tâche de
+      traitrement.</span>
+  </sup>
+</span>
+
+<!-- Conformites list -->
+
+<clr-datagrid [(clrDgSingleSelected)]="selectedConformite" [clrDgLoading]="loading"
+  style="clear: both; height: calc(100vh - 138px)">
+  <!-- Actions button and search area-->
+  <clr-dg-action-bar>
+    <!-- Actions buttons -->
+    <div class="btn-group">
+      <cds-button action="outline" status="primary" (click)="selectedConformite = []; this.opened = true" onkeypress="">
+        <cds-icon shape="plus" size="md"></cds-icon> Ajouter
+      </cds-button>
+    </div>
+
+    <div class="btn-group">
+      <cds-button action="outline" status="warning" (click)="showEdit()" [disabled]="!selectedConformite?.id"
+        onkeypress="">
+        <cds-icon shape="note" size="md"></cds-icon> Modifier
+      </cds-button>
+    </div>
+
+    <div class="btn-group">
+      <cds-button action="outline" status="danger" (click)="deleteConformite()" [disabled]="!selectedConformite?.id"
+        onkeypress="">
+        <cds-icon shape="trash" size="md"></cds-icon>
+        Supprimer
+      </cds-button>
+    </div>
+
+    <!-- Filters -->
+    <div cds-layout="horizontal align:left gap:md m-t:md">
+      <span cds-text="section" cds-layout="m-t:xs" style="font-weight: 400">
+        Filtrer <cds-icon shape="filter"></cds-icon>:
+      </span>
+
+      <!-- Type dropdown -->
+      <clr-dropdown>
+        <cds-button size="sm" action="outline" clrDropdownTrigger>
+          Type
+          <cds-icon shape="angle" direction="down"></cds-icon>
+        </cds-button>
+        <clr-dropdown-menu *clrIfOpen>
+          <div clrDropdownItem (click)="selectType('FONDS')" onkeypress="">
+            Fonds
+          </div>
+          <div clrDropdownItem (click)="selectType('PROJET')" onkeypress="">
+            Projet
+          </div>
+        </clr-dropdown-menu>
+      </clr-dropdown>
+
+      <!-- Phase dropdown -->
+      <clr-dropdown>
+        <cds-button size="sm" action="outline" clrDropdownTrigger>
+          Phase de traitement
+          <cds-icon shape="angle" direction="down"></cds-icon>
+        </cds-button>
+        <clr-dropdown-menu *clrIfOpen>
+          @for(phase of phase_filter_data; track phase.id){
+          <div clrDropdownItem (click)="selectPhase(phase)" onkeypress="">
+            {{ phase.libelle }}
+          </div>
+          }
+        </clr-dropdown-menu>
+      </clr-dropdown>
+
+      <!-- Task dropdown -->
+      <clr-dropdown>
+        <cds-button size="sm" action="outline" clrDropdownTrigger>
+          Tâche de traiement
+          <cds-icon shape="angle" direction="down"></cds-icon>
+        </cds-button>
+        <clr-dropdown-menu *clrIfOpen>
+          @for(task of task_filter_data; track task.id){
+          <div clrDropdownItem (click)="selectTask(task)" onkeypress="">
+            {{ task.libelle }}
+          </div>
+          }
+        </clr-dropdown-menu>
+      </clr-dropdown>
+    </div>
+
+    <!-- Divider -->
+    <cds-divider cds-layout="m-t:lg m-b:sm" class="htitled-divider"
+      title="Inventaire des conformités documentaires"></cds-divider>
+
+    <!-- Filters Pattern -->
+    <div class="filters-panel">
+      @if(filter.type){
+      <span class="label">
+        Type : {{ filter.type }}
+        <span class="badge" (click)="clearType()" onkeypress="" style="cursor: pointer">X</span>
+      </span>
+      } @if(filter.phase){
+      <span class="label">
+        Phase : {{ filter.phase.libelle }}
+        <span class="badge" (click)="clearPhase()" onkeypress="" style="cursor: pointer">X</span>
+      </span>
+      } @if(filter.task){
+      <span class="label">
+        Tâche : {{ filter.task.libelle }}
+        <span class="badge" (click)="clearTask()" onkeypress="" style="cursor: pointer">X</span>
+      </span>
+      }
+    </div>
+  </clr-dg-action-bar>
+
+  <!-- Columns -->
+  <clr-dg-column>
+    <ng-container *clrDgHideableColumn="{ hidden: true }">
+      Conformite - ID
+    </ng-container>
+  </clr-dg-column>
+  <clr-dg-column [clrDgField]="'type'" style="width: 100px">Type</clr-dg-column>
+  <clr-dg-column [clrDgField]="'documentType.libelle'" style="max-width: 700px">Type document</clr-dg-column>
+  <clr-dg-column [clrDgField]="'phase.libelle'">Phase de traitement</clr-dg-column>
+  <clr-dg-column [clrDgField]="'tache.libelle'">Tâche de traitement</clr-dg-column>
+  <clr-dg-column [clrDgField]="'qualification'">Qualification</clr-dg-column>
+
+  <!-- Data Rows -->
+  <clr-dg-row *clrDgItems="let conformite of filtered_conformites" [clrDgItem]="conformite">
+    <clr-dg-cell>{{ conformite.id }}</clr-dg-cell>
+    <clr-dg-cell>{{ conformite.type }}</clr-dg-cell>
+    <clr-dg-cell style="max-width: 700px">{{ conformite.documentType?.libelle }}
+    </clr-dg-cell>
+    <clr-dg-cell>{{ conformite.phase?.libelle }}</clr-dg-cell>
+    <clr-dg-cell>{{ conformite.tache?.libelle }}</clr-dg-cell>
+    <clr-dg-cell>{{ conformite.qualification }}</clr-dg-cell>
+  </clr-dg-row>
+
+  <clr-dg-footer>{{ filtered_conformites.length }} conformites</clr-dg-footer>
+</clr-datagrid>
+
+
+<!-- Modal CRUD -->
+<clr-modal [(clrModalOpen)]="opened" [clrModalSize]="'md'">
+  <h3 class="modal-title">
+    <cds-icon shape="gavel" size="lg" status="info" solid=""></cds-icon>
+    Conformité documentaire:
+  </h3>
+  <div class="modal-body">
+    <form clrForm [formGroup]="documentComplianceForm!" clrLabelSize="4">
+      <clr-select-container>
+        <label>Type document :</label>
+        <select clrSelect name="options" formControlName="type_document" [compareWith]="equals" style="width: 330px">
+          @for(typeDocument of typesDocuments; track typeDocument.id){
+          <option [ngValue]="typeDocument" [attr.data-value]="typeDocument">
+            {{ typeDocument?.libelle }}
+          </option>
+          }
+        </select>
+      </clr-select-container>
+
+      <clr-select-container>
+        <label>Phase :</label>
+        <select [compareWith]="equals" clrSelect name="options" formControlName="phase" style="width: 330px">
+          @for(phase of phases; track phase.id){
+          <option [ngValue]="phase" [attr.data-value]="phase">
+            {{ phase?.libelle }}
+          </option>
+          }
+        </select>
+      </clr-select-container>
+      <clr-select-container>
+        <label>Tâche :</label>
+        <select clrSelect name="tache" formControlName="tache" [compareWith]="equals" style="width: 330px">
+          @for(tache of taches; track tache.id){
+          <option [ngValue]="tache" [attr.data-value]="tache">
+            {{ tache.libelle }}
+          </option>
+          }
+        </select>
+      </clr-select-container>
+      <clr-radio-container clrInline>
+        <label>Type :</label>
+
+        <clr-radio-wrapper>
+          <input class="clr-col-md-8" type="radio" clrRadio [value]="1" name="type" formControlName="type" />
+          <label>Projet</label>
+        </clr-radio-wrapper>
+
+        <clr-radio-wrapper>
+          <input class="clr-col-md-8" type="radio" clrRadio [value]="0" name="type" formControlName="type" />
+          <label>Fonds</label>
+        </clr-radio-wrapper>
+      </clr-radio-container>
+
+      <clr-radio-container clrInline>
+        <label>Qualification :</label>
+
+        <clr-radio-wrapper>
+          <input class="clr-col-md-8" type="radio" clrRadio [value]="0" formControlName="qualification" />
+          <label>Optionnelle </label>
+        </clr-radio-wrapper>
+
+        <clr-radio-wrapper>
+          <input class="clr-col-md-8" type="radio" clrRadio [value]="1" formControlName="qualification" />
+          <label>Obligatoire</label>
+        </clr-radio-wrapper>
+      </clr-radio-container>
+    </form>
+  </div>
+
+  <div class="modal-footer">
+    <cds-button action="outline" (click)="hideConformiteModal()">
+      Annuler
+    </cds-button>
+
+    <cds-button status="primary" (click)="saveConformite()" [disabled]="documentComplianceForm.invalid">
+      <cds-icon shape="floppy" size="md"></cds-icon> Sauvegarder
+    </cds-button>
+  </div>
+</clr-modal>

@@ -1,0 +1,83 @@
+<!-- Header -->
+<span cds-text="title">
+  <cds-icon shape="factory" solid="" size="lg" status="info"></cds-icon>
+  Projets à suivre</span
+>
+
+<!-- Data grid -->
+<clr-datagrid
+  style="clear: both; height: calc(100vh - 140px)"
+  [clrDgLoading]="loading"
+>
+  <clr-dg-action-bar>
+    <!-- Actions -->
+    <div cds-layout="horizontal gap:md">
+      <div cds-layout="align:stretch">
+        <!-- Divider -->
+        <cds-divider
+          cds-layout="m-t:lg m-b:sm"
+          class="htitled-divider"
+          title="Inventaire des projets à suivre"
+        ></cds-divider>
+      </div>
+      <div cds-layout="align:right">
+        <!-- Button -->
+        <cds-button
+          action="outline"
+          status="primary"
+          (click)="exportSuiviProjetToExcel()"
+          onKeyPress=""
+        >
+          <cds-icon shape="xls-file" size="md"></cds-icon> Export sur excel
+        </cds-button>
+      </div>
+    </div>
+  </clr-dg-action-bar>
+  <clr-dg-column [clrDgField]="'nom'">Nom du projet</clr-dg-column>
+  <clr-dg-column [clrDgField]="'promoteur.nom'" [style.maxWidth]="'220px'"
+    >Promoteur</clr-dg-column
+  >
+  <clr-dg-column [clrDgField]="'activite'">Activité</clr-dg-column>
+  <clr-dg-column [style.maxWidth]="'280px'">Secteur</clr-dg-column
+  ><clr-dg-column [style.maxWidth]="'180px'">Capital social tnd</clr-dg-column>
+
+  <clr-dg-row *clrDgItems="let p of projets" [clrDgItem]="p">
+    <clr-dg-cell class="text-left" [style.textTransform]="'uppercase'">
+      <a
+        class="show-hide-icon"
+        style="margin-top: auto; color: var(--cds-alias-status-info)"
+        [routerLink]="['/dashboard/projects/', p?.id]"
+      >
+        {{ p?.nom }} <cds-icon shape="link" size="sm"></cds-icon>
+      </a>
+    </clr-dg-cell>
+    <clr-dg-cell class="text-left" [style.maxWidth]="'220px'">
+      {{ p.promoteur?.nom }}
+    </clr-dg-cell>
+    <clr-dg-cell class="text-left"> {{ p.activite }} </clr-dg-cell>
+    <clr-dg-cell class="text-left" [style.maxWidth]="'280px'">
+      <div *ngFor="let s of p.secteurs">{{ s.libelle }}</div>
+    </clr-dg-cell>
+    <clr-dg-cell
+      class="text-right digit"
+      [style.witeSpace]="'nowrap'"
+      [style.maxWidth]="'180px'"
+    >
+      {{
+        p.actualCapital
+          ? (p.actualCapital | number : "1.0-0")
+          : (p.capitalSocial | number : "1.0-0")
+      }}
+    </clr-dg-cell>
+
+    <clr-dg-row-detail *clrIfExpanded>
+      <progress-timeline
+        *clrIfExpanded
+        [projet]="p"
+        ngProjectAs="clr-dg-row-detail"
+      >
+      </progress-timeline>
+    </clr-dg-row-detail>
+  </clr-dg-row>
+  <clr-dg-footer>{{ projets?.length }} projets </clr-dg-footer>
+</clr-datagrid>

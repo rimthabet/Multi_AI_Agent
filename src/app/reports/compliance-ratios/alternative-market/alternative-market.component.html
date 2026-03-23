@@ -1,0 +1,197 @@
+<!-- Loading Spinner -->
+<div
+  class="modal-backdrop"
+  aria-hidden="true"
+  [style.display]="loading1 || loading2 ? 'block' : 'none'"
+  (click)="loading1 = false; loading2 = false"
+>
+  <span
+    class="spinner"
+    style="
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    "
+    >Loading...</span
+  >
+</div>
+
+<!-- Header -->
+<span cds-text="title">
+  <cds-icon shape="success-standard" size="lg" solid status="info"></cds-icon>
+  Ratio de conformité investissement sur le marché alternatif</span
+>
+
+<!-- Search fonds -->
+<div cds-layout="horizontal align:left gap:md m-t:xl">
+  <clr-dropdown>
+    <cds-button size="md" action="outline" clrDropdownTrigger>
+      {{ selectedFonds?.fonds?.denomination || "Nom du fonds ..." }}
+      <cds-icon shape="angle" status="info" direction="down"></cds-icon>
+    </cds-button>
+
+    <clr-dropdown-menu *clrIfOpen>
+      @for (f of fonds; track $index) {
+      <div clrDropdownItem (click)="selectFonds(f)" onkeypress="">
+        {{ f.fonds?.denomination }}
+      </div>
+      }
+    </clr-dropdown-menu>
+  </clr-dropdown>
+
+  <span class="fund-name active" [style.marginBottom]="'0.2em'">
+    {{ selectedFonds?.fonds?.denomination }}
+    <cds-icon
+      onkeypress=""
+      shape="dashboard"
+      size="lg"
+      title="Cliquer pour consulter la fiche funds"
+      style="cursor: pointer"
+      (click)="goToFiche()"
+    ></cds-icon>
+  </span>
+</div>
+
+<!-- Fund state -->
+@if (selectedFonds?.fonds.etat.libelle == 'En liquidation' ||
+selectedFonds?.fonds.etat.libelle == 'En pré-liquidation') {
+<div class="badge badge-warning" cds-text="caption" cds-layout="p:sm">
+  Fonds {{ selectedFonds?.fonds.etat.libelle }}
+</div>
+}
+
+<!-- Divider & Button -->
+<div cds-layout="horizontal gap:md">
+  <div cds-layout="align:stretch">
+    <cds-divider
+      cds-layout="m-t:lg m-b:sm"
+      class="htitled-divider"
+      [title]="
+        (selectedFonds?.fonds?.ratioInvestissement | percent : '1.0-0') +
+        ' du taux d\'emploi'
+      "
+    >
+    </cds-divider>
+  </div>
+  <div cds-layout="align:right">
+    <a
+      href="/fmsApi/ratio-conformite-marche-alternatif-xls/{{
+        selectedFonds?.fonds?.id
+      }}"
+    >
+      <cds-button action="outline" status="primary" onKeyPress="">
+        <cds-icon shape="xls-file" status="info" size="md"></cds-icon> Générer
+        un rapport
+      </cds-button>
+    </a>
+  </div>
+</div>
+
+<!-- Ratios table -->
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Projet</th>
+      <th scope="col">Montant investi dans les actions nouvellement émises</th>
+      <th scope="col">% Des investissements par rapport à 80%</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (p of projets; track $index) {
+    <tr>
+      <td [style.textTransform]="'uppercase'">
+        <a
+          class="show-hide-icon"
+          [routerLink]="['/dashboard/project', p?.id]"
+          style="margin-top: auto; color: var(--clr-color-action-600)"
+        >
+          {{ p?.nom }} <cds-icon shape="link" size="sm"></cds-icon>
+        </a>
+      </td>
+      <td class="right digit">
+        {{ p.montantLiberation | currency : "tnd" : "symbol" : "1.2-2" }}
+      </td>
+      <td class="right digit">
+        {{
+          p.montantLiberation / (totalActif * ratioAction) | percent : "1.0-0"
+        }}
+      </td>
+    </tr>
+    }
+  </tbody>
+  <tfoot>
+    <tr>
+      <th scope="row">Total</th>
+      <th scope="row" class="right digit">
+        {{ totalInvesti | currency : "tnd" : "symbol" : "1.2-2" }}
+      </th>
+      <th
+        scope="row"
+        class="right digit"
+        [ngClass]="{
+          'text-danger':
+            totalPercentage > selectedFonds?.fonds?.ratioInvestissement,
+          'text-success':
+            totalPercentage <= selectedFonds?.fonds?.ratioInvestissement
+        }"
+      >
+        {{ totalPercentage | percent : "1.0-0" }}
+      </th>
+    </tr>
+  </tfoot>
+</table>
+
+<!-- Ratios vertical table -->
+<table class="table table-vertical">
+  <thead>
+    <th colspan="2" scope="row"></th>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Taux de conformité</th>
+      <td class="digit">
+        {{ selectedFonds?.fonds?.ratioInvestissement | percent : "1.0-0" }}
+      </td>
+    </tr>
+    <tr>
+      <th>Actif du fonds</th>
+      <td class="digit">{{ totalActif | number : "1.0-0" }} <sup>tnd</sup></td>
+    </tr>
+    <tr>
+      <th>
+        Taux d'emploi
+        {{ selectedFonds?.fonds?.ratioReglementaire | percent : "1.0-0" }}
+      </th>
+      <td class="digit">
+        {{ totalActif * ratioAction | number : "1.0-0" }} <sup>tnd</sup>
+      </td>
+    </tr>
+    <tr>
+      <th>Max à investir sur le marché alternatif</th>
+      <td class="digit">
+        {{
+          totalActif * ratioAction * selectedFonds?.fonds?.ratioInvestissement
+            | number : "1.0-0"
+        }}
+        <sup>tnd</sup>
+      </td>
+    </tr>
+    <tr>
+      <th>Actuellement investi sur le marché alternatif</th>
+      <td class="digit">
+        {{ totalLiberationAction | number : "1.0-0" }} <sup>tnd</sup>
+      </td>
+    </tr>
+    <tr>
+      <th>Restant à investir sur le marché alternatif</th>
+      <td class="digit">
+        {{
+          totalActif * ratioAction * selectedFonds?.fonds?.ratioInvestissement -
+            totalLiberationAction | number : "1.0-0"
+        }}
+        <sup>tnd</sup>
+      </td>
+    </tr>
+  </tbody>
+</table>

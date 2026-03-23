@@ -1,0 +1,59 @@
+<!-- Valuation Methods -->
+<div cds-layout="m-y:md">
+    <clr-tabs>
+        <!-- Nominal Value -->
+        <clr-tab>
+            <button clrTabLink="true">
+                <cds-icon shape="plugin" size="md" status="info"></cds-icon>
+                Valeur nominale
+            </button>
+            <clr-tab-content *clrIfActive>
+                <nominal-value [prospection]="prospection()"></nominal-value>
+            </clr-tab-content>
+        </clr-tab>
+
+        <!-- Last Transaction -->
+        <clr-tab>
+            <button clrTabLink>
+                <cds-icon shape="repeat" size="md" status="info"></cds-icon>
+                Dernière transaction
+            </button>
+            <clr-tab-content *clrIfActive>
+                <last-transaction [prospection]="prospection()"></last-transaction>
+            </clr-tab-content>
+        </clr-tab>
+
+        <!-- Math Value -->
+        <clr-tab>
+            <button clrTabLink>
+                <cds-icon shape="objects" size="md" status="info"></cds-icon>
+                Valeur mathématique
+            </button>
+            <clr-tab-content *clrIfActive>
+                <math-value [prospection]="prospection()"></math-value>
+            </clr-tab-content>
+        </clr-tab>
+
+        <!-- CMP -->
+        <clr-tab>
+            <button clrTabLink>
+                <cds-icon shape="coin-bag" size="md" status="info"></cds-icon>
+                CMP
+            </button>
+            <clr-tab-content *clrIfActive>
+                <cmp [prospection]="prospection()"></cmp>
+            </clr-tab-content>
+        </clr-tab>
+
+        <!-- DCF -->
+        <clr-tab>
+            <button clrTabLink>
+                <cds-icon shape="gavel" size="md" status="info"></cds-icon>
+                DCF: Discounted cash flow
+            </button>
+            <clr-tab-content *clrIfActive>
+                <dcf [prospection]="prospection()"></dcf>
+            </clr-tab-content>
+        </clr-tab>
+    </clr-tabs>
+</div>

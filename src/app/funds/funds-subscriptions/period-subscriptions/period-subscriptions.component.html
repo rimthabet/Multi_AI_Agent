@@ -1,0 +1,241 @@
+<!-- KPIs Badges -->
+<div
+  cds-layout="grid cols:12 cols@lg:2 cols@md:4 cols@sm:12 cols@xl:2 cols@2xl:2 m-t:md m-b:none gap:md"
+>
+  <app-kpi-badge-01
+    [title]="'# Souscripteurs'"
+    [value]="selected_periode_total_subscribers"
+    [type]="'number'"
+    [color]="'var(--cds-alias-status-info)'"
+    [primary]="false"
+  >
+  </app-kpi-badge-01>
+
+  <app-kpi-badge-01
+    [title]="'# Libérations'"
+    [value]="selected_periode_total_liberations"
+    [type]="'number'"
+    [color]="'var(--cds-alias-status-success)'"
+    [primary]="false"
+  >
+  </app-kpi-badge-01>
+
+  <app-kpi-badge-01
+    [title]="'Montant Total souscrit'"
+    [value]="selected_periode_total_souscrit"
+    [type]="'currency'"
+    [color]="'var(--cds-alias-status-info)'"
+    [primary]="false"
+  >
+  </app-kpi-badge-01>
+
+  <app-kpi-badge-01
+    [title]="'Pourcentage souscrit'"
+    [value]="selected_periode_percent_souscrit"
+    [type]="'ratio'"
+    [color]="'var(--cds-alias-status-info)'"
+    [primary]="false"
+  >
+  </app-kpi-badge-01>
+
+  <app-kpi-badge-01
+    [title]="'Total libéré'"
+    [value]="selected_periode_total_libere"
+    [type]="'currency'"
+    [color]="'var(--cds-alias-status-success)'"
+    [primary]="false"
+  >
+  </app-kpi-badge-01>
+
+  <app-kpi-badge-01
+    [title]="'Pourcentage libéré'"
+    [value]="selected_periode_percent_libere"
+    [type]="'ratio'"
+    [color]="'var(--cds-alias-status-success)'"
+    [primary]="false"
+  >
+  </app-kpi-badge-01>
+</div>
+<!-- Subscriptions Data Grid -->
+<clr-datagrid
+  style="max-height: 350px; margin-top: -10px"
+  [clrDgLoading]="loading"
+>
+  <clr-dg-action-bar>
+    <div class="btn-group" cds-layout="horizontal gap:sm">
+      <cds-button
+        action="outline"
+        status="primary"
+        (click)="selectedSubscription = null; showSubscriptionForm = true"
+        ><cds-icon shape="plus"></cds-icon> Ajouter une souscription</cds-button
+      >
+    </div>
+  </clr-dg-action-bar>
+
+  <clr-dg-column
+    [clrDgField]="'souscription.souscripteur.libelle'"
+    [style.minWidth]="'300px'"
+    [style.width]="'300px'"
+    >Souscripteur</clr-dg-column
+  >
+  <clr-dg-column
+    [clrDgField]="'souscription.dateSouscription'"
+    [style.minWidth]="'200px'"
+    [style.width]="'200px'"
+    >Date de Souscription</clr-dg-column
+  >
+  <clr-dg-column
+    [clrDgField]="'souscription.montantSouscription'"
+    [style.minWidth]="'250px'"
+    [style.width]="'250px'"
+    >Montant de Souscription <sup>tnd</sup></clr-dg-column
+  >
+  <clr-dg-column [style.minWidth]="'250px'" [style.width]="'250px'"
+    >Montant Libéré</clr-dg-column
+  >
+  <clr-dg-column>Bulletin de souscription</clr-dg-column>
+
+  <clr-dg-row
+    *clrDgItems="let s of per_periode_subscriptions; let j = index"
+    [clrDgItem]="s"
+  >
+    <clr-dg-action-overflow>
+      <button
+        class="action-item"
+        size="sm"
+        (click)="selectedSubscription = s; showSubscriptionForm = true"
+      >
+        <cds-icon shape="note" status="info"></cds-icon> Modifier la
+        souscription
+      </button>
+      <button class="action-item" size="sm" (click)="deleteSubscription(s)">
+        <cds-icon shape="trash" status="danger"></cds-icon> Supprimer la
+        souscription
+      </button>
+
+      <cds-divider cds-layout="m-y:sm"></cds-divider>
+
+      <button
+        class="action-item"
+        size="sm"
+        (click)="selectedSubscription = s; showVestings = true"
+      >
+        <cds-icon shape="pop-out" status="success"></cds-icon> Libérations par
+        souscription
+      </button>
+    </clr-dg-action-overflow>
+
+    <clr-dg-cell [style.minWidth]="'300px'" [style.width]="'300px'">{{
+      s.souscription?.souscripteur?.libelle
+    }}</clr-dg-cell>
+    <clr-dg-cell [style.minWidth]="'200px'" [style.width]="'200px'">{{
+      s.souscription?.dateSouscription | date : "dd/MM/yyyy"
+    }}</clr-dg-cell>
+    <clr-dg-cell
+      [style.minWidth]="'250px'"
+      [style.width]="'250px'"
+      class="text-right"
+      >{{
+        s.souscription?.montantSouscription
+          | currency : "TND" : "symbol" : "1.0-0"
+      }}</clr-dg-cell
+    >
+    <clr-dg-cell
+      [style.minWidth]="'250px'"
+      [style.width]="'250px'"
+      class="text-right"
+    >
+      {{ s.montantLibere | currency : "TND" : "symbol" : "1.0-0" }} ({{
+        s.montantLibere / s.souscription?.montantSouscription
+          | percent : "1.0-0"
+      }})
+    </clr-dg-cell>
+    <clr-dg-cell>
+      @if (s.souscription?.documents?.length > 0) {
+      <cds-icon
+        shape="success-standard"
+        status="success"
+        solid
+        size="18"
+      ></cds-icon>
+      @for (document of s.souscription.documents; track document) {
+      <span>{{ document.nomFichier }}</span>
+      } } @else {
+      <cds-icon shape="no-access" status="danger" solid size="18"></cds-icon>
+      <span class="failure"> Document manquant!</span>
+      }
+    </clr-dg-cell>
+  </clr-dg-row>
+
+  <!-- DETAIL -->
+
+  <clr-dg-footer
+    >{{ per_periode_subscriptions.length }} souscription(s)</clr-dg-footer
+  >
+</clr-datagrid>
+
+<!-- Ajout/Edit Subscription Modal -->
+<clr-modal
+  #subscription_form_modal
+  [(clrModalOpen)]="showSubscriptionForm"
+  [clrModalSize]="'md'"
+  [clrModalStaticBackdrop]="false"
+>
+  <!-- Header -->
+  <div class="modal-title">
+    <cds-icon shape="layers" size="lg" status="info"></cds-icon>
+    @if(selectedSubscription?.id) { Modifier une souscription }
+    @if(!selectedSubscription?.id) { Ajouter une souscription }
+  </div>
+
+  <!-- Body -->
+  <div class="modal-body" cds-layout="p-t:xxs">
+    <cds-divider
+      cds-layout="m-t:lg"
+      class="htitled-divider"
+      title="Détails de la souscription"
+    ></cds-divider>
+
+    <subscription-form
+      #subscription_form
+      [fonds]="fonds()"
+      [(subscription_record)]="selectedSubscription"
+      [prospection_conformite_documentaire]="
+        prospection_conformite_documentaire()
+      "
+      [subscription_periode]="subscription_periode()"
+      [subscribers]="subscribers()"
+      [(loading)]="showSubscriptionForm"
+      (refreshEvent)="reloadSubscriptions()"
+    ></subscription-form>
+  </div>
+</clr-modal>
+
+<!-- Libérations -->
+<clr-modal
+  #subscription_form_modal
+  [(clrModalOpen)]="showVestings"
+  [clrModalSize]="'xl'"
+  [clrModalStaticBackdrop]="false"
+  (clrModalOpenChange)="checkForUpdate()"
+>
+  <!-- Header -->
+  <div class="modal-title">
+    <cds-icon shape="layers" size="lg" status="info"></cds-icon>
+    Libérations par souscription
+  </div>
+
+  <!-- Body -->
+  <div class="modal-body" cds-layout="p-t:xxs">
+    <subscription-vestings
+      [(subscription_record)]="selectedSubscription"
+      [prospection_conformite_documentaire]="
+        prospection_conformite_documentaire()
+      "
+      [liberation_conformite_documentaire]="
+        liberation_conformite_documentaire()
+      "
+      [(tagged_to_update)]="tagged_to_update"
+    ></subscription-vestings>
+  </div>
+</clr-modal>

@@ -1,0 +1,186 @@
+<div
+  class="card"
+  [style]="{
+    'border-top': '3px solid ' + fund().etat?.couleur,
+    'margin-top': '0'
+  }"
+>
+  <!-- Header -->
+  <div class="card-header">
+    <div class="title" [title]="fund().denomination">
+      <cds-icon
+        shape="coin-bag"
+        solid=""
+        size="md"
+        [style]="{ color: fund().etat?.couleur }"
+      ></cds-icon>
+      {{ fund().denomination }}
+    </div>
+
+    <!-- Actions in dropdown -->
+    <div class="actions">
+      <clr-dropdown cds-layout="align:right m:none">
+        <cds-button action="flat" size="icon" clrDropdownTrigger
+          ><cds-icon shape="ellipsis-vertical"></cds-icon
+        ></cds-button>
+        <clr-dropdown-menu [clrPosition]="'bottom-right'" *clrIfOpen>
+          <div
+            clrDropdownItem
+            [routerLink]="['/funds/edition-funds/', fund().id]"
+          >
+            <cds-icon shape="pencil" status="info"></cds-icon>Éditer le fonds
+          </div>
+          <div
+            clrDropdownItem
+            (click)="displayEtatChangePopup.emit(fund()); log()"
+          >
+            <cds-icon shape="stop" status="info"></cds-icon>Changer l'état du
+            fonds
+          </div>
+          <div
+            class="dropdown-divider"
+            role="separator"
+            aria-hidden="true"
+          ></div>
+          <div clrDropdownItem [routerLink]="['/dashboard/funds/', fund().id]">
+            <cds-icon shape="file" status="info"></cds-icon>Fiche fonds
+          </div>
+        </clr-dropdown-menu>
+      </clr-dropdown>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="card-block">
+    <div class="card-text">
+      <!-- Informations -->
+      <div class="notice-01" cds-layout="m-b:xs">
+        {{ fund().formeLegale?.libelle }}
+        {{ fund().nature?.libelle?.toLowerCase() }} créé le
+        {{ fund().dateLancement | date : "dd/MM/yyyy" }}
+        avec un montant projeté de
+        {{ fund().montant | number : "1.2-2" }}
+        tnd sur {{ fund().duree }} ans et ayant le visa CMF numéro :
+        {{ fund().numVisaCMF }}
+      </div>
+
+      <!-- Status -->
+      <section cds-layout="horizontal align:left gap:xs m-b:lg">
+        <cds-icon
+          shape="stop"
+          size="sm"
+          solid=""
+          [style.color]="fund().etat?.couleur"
+          [style.marginTop]="'2px'"
+        ></cds-icon>
+        Le fonds est
+        <span class="fund_status">{{ fund().etat?.libelle }}</span>
+      </section>
+
+      <!-- Divider -->
+      <cds-divider class="htitled-divider" title="Chiffres clés"></cds-divider>
+
+      <!-- Chiffres clés -->
+      <div cds-layout="horizontal align:stretch m-t:lg m-b:lg gap:md">
+        <!-- Actifs sous gestion -->
+        <app-kpi-badge-01
+          [value]="total_actif"
+          [color]="'var(--cds-alias-status-info)'"
+          [size]="'small'"
+          [type]="'currency'"
+          [title]="'Actifs sous gestion'"
+          [primary]="false"
+        ></app-kpi-badge-01>
+
+        <!-- Actifs investis -->
+        <app-kpi-badge-01
+          [value]="
+            total_investi_actions + total_investi_oca + total_investi_cca
+          "
+          [color]="'var(--cds-alias-status-info)'"
+          [size]="'small'"
+          [type]="'currency'"
+          [title]="'Actifs investis'"
+          [primary]="false"
+        ></app-kpi-badge-01>
+
+        <!-- Reste à investir -->
+        @let ratio = fund()?.ratioReglementaire || 0.8; @let rest_to_invest =
+        total_actif * ratio - (total_investi_actions + total_investi_oca +
+        total_investi_cca);
+
+        <app-kpi-badge-01
+          [value]="rest_to_invest < 0 ? 0 : rest_to_invest"
+          [color]="
+            rest_to_invest > 0
+              ? 'var(--cds-alias-status-danger)'
+              : 'var(--cds-alias-status-success)'
+          "
+          [size]="'small'"
+          [type]="'currency'"
+          [title]="'Reste à investir'"
+          [primary]="false"
+        ></app-kpi-badge-01>
+      </div>
+
+      <!-- Divider -->
+      <cds-divider
+        class="htitled-divider"
+        title="Périodes de souscription"
+      ></cds-divider>
+
+      <!-- Périodes de souscription -->
+      <div cds-layout="horizontal align:horizontal m-t:lg m-b:lg gap:xlg">
+        @for (periode of periodes_souscription; track periode.id) {
+        <div cds-layout="horizontal align:center gap:none">
+          <div
+            [class]="'label' + (isExpired(periode.dateFin) ? ' expired' : '')"
+          >
+            {{ periode.dateDebut | date : "dd/MM/yyyy" }}
+          </div>
+          <cds-icon
+            size="sm"
+            style="margin: 0 -7px 0 0"
+            shape="arrow"
+            direction="right"
+          ></cds-icon>
+          <div
+            cds-layout="m-l:sm"
+            [class]="'label' + (isExpired(periode.dateFin) ? ' expired' : '')"
+          >
+            {{ periode.dateFin | date : "dd/MM/yyyy" }}
+          </div>
+        </div>
+        }
+      </div>
+
+      <!-- Divider -->
+      <cds-divider class="htitled-divider" title="Documents"></cds-divider>
+
+      <!-- Documents -->
+      <div cds-layout="horizontal align:justify m-t:lg gap:sm">
+        @for (c of restricted_conformites; track $index) {
+        <div style="padding-right: 2em; display: flex">
+          <cds-icon
+            shape="file"
+            solid=""
+            size="18"
+            [status]="c.document === null ? 'danger' : 'success'"
+          ></cds-icon>
+
+          @if (c.document !== null) {
+          <a
+            style="min-width: 100px"
+            [href]="c.document.chemin"
+            target="_blank"
+            >{{ c.conformite.documentType.libelle }}</a
+          >
+          } @else {
+          <span>{{ c.conformite.documentType.libelle }}</span>
+          }
+        </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

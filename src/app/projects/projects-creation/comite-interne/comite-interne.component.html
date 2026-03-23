@@ -1,0 +1,103 @@
+<!-- Financing Switch -->
+<div cds-layout="m-y:md">
+  <financing-switch
+    (financementChanged)="financementChanged($event)"
+    [prospection]="prospection()"
+    [message]="
+      ' Veuillez spécifier le plan de financement pour gêrer le comité interne'
+    "
+  ></financing-switch>
+</div>
+
+<!-- Loading -->
+@if (loading()) {
+<div class="progress-block">
+  <label for="demoProgressBar">Téléchargement </label>
+  <clr-progress-bar id="progressBar" clrLoop></clr-progress-bar>
+</div>
+}
+
+<!-- Details -->
+<div cds-layout="m-y:lg">
+  <form clrForm class="details clr-form-compact" clrLabelSize="2">
+    <clr-control-container>
+      <label for="promoteur"
+        ><cds-icon shape="user" size="md" status="info"></cds-icon>
+        Promoteur:</label
+      >
+      <span>{{ prospection()?.promoteur?.nom }}</span>
+    </clr-control-container>
+    <clr-control-container>
+      <label for="activite"
+        ><cds-icon shape="factory" size="md" status="info"></cds-icon> Activité
+        :</label
+      >
+      <span>{{ prospection()?.activite }}</span>
+    </clr-control-container>
+    <clr-control-container>
+      <label for="act"
+        ><cds-icon shape="employee" size="md" status="info"></cds-icon> Activité
+        du promoteur:</label
+      >
+      <span>{{ prospection()?.promoteur?.poste }}</span>
+    </clr-control-container>
+    <clr-control-container>
+      <label for="fonds"
+        ><cds-icon shape="coin-bag" size="md" status="info"></cds-icon> Fonds
+        présélectionnés:</label
+      >
+
+      @for(p of participations; track $index) {
+      <label class="label" style="height: 28px">{{
+        p.fonds.denomination
+      }}</label>
+      }
+    </clr-control-container>
+  </form>
+</div>
+
+<!-- Tabs -->
+<clr-tabs>
+  <!-- Details -->
+  <clr-tab>
+    <button clrTabLink id="link1">
+      <cds-icon shape="details" solid></cds-icon> Détails des comités internes
+    </button>
+    <clr-tab-content id="content1" *clrIfActive="true">
+      <comite-interne-form
+        [prospection]="prospection()"
+        [financement]="selectedFinancement"
+      ></comite-interne-form>
+    </clr-tab-content>
+  </clr-tab>
+
+  <!-- Generation -->
+  <clr-tab>
+    <button clrTabLink>
+      <cds-icon shape="digital-signature"></cds-icon> Génétation des PVs et
+      Notes
+    </button>
+    <clr-tab-content *clrIfActive>
+      <comite-interne-document-generation
+        [prospection]="prospection()"
+      ></comite-interne-document-generation>
+    </clr-tab-content>
+  </clr-tab>
+
+  <!-- Upload -->
+  <clr-tab>
+    <button clrTabLink>
+      <cds-icon shape="upload"></cds-icon> Téléchargement des documents
+    </button>
+    <clr-tab-content *clrIfActive>
+      @for(conformite of conformite_documentaires; track $index) {
+      <document-upload
+        [compliance]="{ document: undefined, conformite: conformite }"
+        [data]="prospection()"
+        [task_row]="9"
+        [phase_row]="2"
+      ></document-upload>
+      }
+    </clr-tab-content>
+  </clr-tab>
+</clr-tabs>

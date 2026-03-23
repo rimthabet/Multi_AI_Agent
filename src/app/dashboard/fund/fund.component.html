@@ -1,0 +1,263 @@
+<!-- Loading Spinner -->
+<div
+  class="modal-backdrop"
+  aria-hidden="true"
+  [style.display]="
+    loadingFonds ||
+    loadingSouscription ||
+    loadingComiteInv ||
+    loadingComiteStrg ||
+    loadingSecteur ||
+    loadingListFunds
+      ? 'block'
+      : 'none'
+  "
+  (click)="
+    loadingFonds = false;
+    loadingSouscription = false;
+    loadingComiteInv = false;
+    loadingComiteStrg = false;
+    loadingSecteur = false;
+    loadingListFunds = false
+  "
+>
+  <span
+    class="spinner"
+    style="
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    "
+    >Loading...</span
+  >
+</div>
+<!-- Header Banner -->
+<div class="projet-home-header">
+  <span onkeypress="" class="title"
+    >{{ fundData?.fonds.denomination }}
+    <cds-icon
+      shape="pencil"
+      size="xl"
+      style="cursor: pointer"
+      [title]="'Cliquer pour aller à la page d\'édition'"
+      (click)="goToEdition()"
+      onkeypress=""
+    ></cds-icon>
+  </span>
+
+  <span class="web"
+    ><cds-icon shape="world" size="md"></cds-icon>
+    {{ fundData?.fonds.webSite ?? "" }}
+  </span>
+
+  <span class="activite">
+    {{ fundData?.fonds.formeLegale?.libelle }}
+    {{ fundData?.fonds.nature?.libelle?.toLowerCase() }} créé le
+    {{ fundData?.fonds.dateLancement | date : "dd/MM/yyyy" }}
+    avec un montant projeté de
+    {{ fundData?.fonds.montant | number : "1.2-2" }}
+    tnd sur {{ fundData?.fonds.duree }}ans et ayant le visa CMF numéro :
+    {{ fundData?.fonds.numVisaCMF }}</span
+  >
+</div>
+
+<!-- Header actions -->
+<div cds-layout="horizontal align:stretch">
+  <div cds-layout="horizontal align:left m-y:md">
+    <cds-icon
+      shape="stop"
+      size="md"
+      solid=""
+      [style.color]="fundData?.fonds?.etat?.couleur"
+    ></cds-icon>
+    Fonds : {{ fundData?.fonds?.etat?.libelle }}
+  </div>
+  <div cds-layout="horizontal align:right">
+    <clr-dropdown cds-layout="m-y:md">
+      <button clrDropdownTrigger aria-label="Dropdown fonds switcher">
+        Veuillez choisir un fonds
+        <cds-icon shape="angle" direction="down"></cds-icon>
+      </button>
+      <clr-dropdown-menu *clrIfOpen>
+        @for(f of fonds; track f) {
+        <div class="dropdown-item" clrDropdownItem (click)="selectFonds(f)">
+          {{ f.denomination }}
+        </div>
+        }
+      </clr-dropdown-menu>
+    </clr-dropdown>
+    <cds-divider orientation="vertical" style="margin: 0 1em"></cds-divider>
+    <cds-button cds-layout="m-y:xs" (click)="genererPDF()">
+      <cds-icon
+        status="info"
+        solid
+        class="clr-i-pdf-file"
+        style="cursor: pointer"
+        shape="pdf-file"
+        size="md"
+      ></cds-icon>
+      Générer la fiche du fonds
+    </cds-button>
+  </div>
+</div>
+
+<cds-divider
+  class="htitled-divider centered"
+  title="Details du fonds"
+></cds-divider>
+
+<div cds-layout="grid gap:sm">
+  <!--Details du fonds-->
+  <div class="card" cds-layout="col@lg:4 col@md:6 cols@sm:12">
+    <div class="card-block">
+      <div
+        class="card-text"
+        cds-layout="p-t:none align:stretch"
+        style="height: 260px; overflow-y: hidden"
+      >
+        <fund-details
+          #fundDetailsComponent
+          [fonds]="fundData?.fonds"
+          [totalActif]="totalActif"
+        ></fund-details>
+      </div>
+    </div>
+  </div>
+
+  <!--Montants souscrits et libérés-->
+  <div class="card" cds-layout="col@lg:5 col@md:6 cols@sm:12">
+    <div class="card-block">
+      <div class="card-text" cds-layout="horizontal align:center" #chartDiv>
+        <bar-chart-02
+          [souscriptions]="souscriptions"
+          [width]="chartWidth ?? 550"
+        ></bar-chart-02>
+      </div>
+    </div>
+  </div>
+
+  <!--Documents juridiques-->
+  <div class="card" cds-layout="col@lg:3 col@md:6 cols@sm:12">
+    <div class="card-block">
+      <div
+        class="card-text"
+        cds-layout="p-t:none align:stretch"
+        style="height: 260px; overflow-y: hidden"
+      >
+        <fund-docs [fonds]="fundData"></fund-docs>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Capitaux levés par nature de souscripteur -->
+<cds-divider
+  class="htitled-divider"
+  cds-layout="m-y:lg"
+  title="Capitaux levés par nature de souscripteur"
+></cds-divider>
+
+<!-- Detention % gauges -->
+<app-horizontal-scroller>
+  @for (e of allEtablissements; track e) {
+  <ng-template #itemTemplate>
+    <ngx-gauge
+      type="semi"
+      cap="butt"
+      [thick]="10"
+      [size]="160"
+      [min]="0"
+      [max]="100"
+      [label]="e.libelle.toUpperCase() + '(S)'"
+      [value]="getRatio(e.montant, totalMontantSouscription)"
+      [append]="'%'"
+      [backgroundColor]="getCodeFromColor('--cds-alias-status-disabled-tint')"
+      [foregroundColor]="getCodeFromColor('--cds-alias-status-info-shade')"
+    >
+    </ngx-gauge>
+  </ng-template>
+  }
+</app-horizontal-scroller>
+
+<!-- Souscripteurs -->
+<cds-divider
+  class="htitled-divider"
+  cds-layout="m-y:lg"
+  title="Souscripteurs"
+></cds-divider>
+
+<!-- Souscripteurs grid -->
+<div class="panel" cds-layout="p:sm m-t:md">
+  <fund-subscriber-subscriptions-grid
+    [subscribers]="subscribers"
+    [souscriptions]="souscriptions"
+    [totalMontantSouscription]="totalMontantSouscription"
+  ></fund-subscriber-subscriptions-grid>
+</div>
+
+<!-- Participations du fonds -->
+<cds-divider
+  class="htitled-divider"
+  cds-layout="m-y:lg"
+  title="Participations du fonds"
+></cds-divider>
+
+<!-- Participations du fonds ethiquette -->
+<funds-projects-sectors [secteurs]="secteursData"></funds-projects-sectors>
+
+<!-- Secteurs d'activités -->
+<cds-divider
+  class="htitled-divider"
+  cds-layout="m-y:lg"
+  title="Secteurs d'activités"
+></cds-divider>
+
+<!-- Secteurs d'activités chart -->
+<div class="card">
+  <div class="card-block">
+    <div class="card-text" #chartDiv2>
+      <app-bar-chart-03
+        [secteurs]="chartData"
+        [height]="320"
+      ></app-bar-chart-03>
+    </div>
+  </div>
+</div>
+
+<cds-divider
+  class="htitled-divider centered"
+  cds-layout="m-t:lg"
+  title="Derniers comités"
+></cds-divider>
+
+<div cds-layout="grid gap:sm">
+  <!--Details du fonds-->
+  <div class="card" cds-layout="col@lg:6 col@md:6 col@sm:12">
+    <div class="card-block">
+      <div
+        class="card-text"
+        cds-layout="p-t:none align:stretch"
+        style="height: 260px"
+      >
+        <funds-comite-investment
+          [comitesInvestissement]="comitesInvestissement"
+        ></funds-comite-investment>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" cds-layout="col@lg:6 col@md:6 col@sm:12">
+    <div class="card-block">
+      <div
+        class="card-text"
+        cds-layout="p-t:none align:stretch"
+        style="height: 260px"
+      >
+        <funds-comite-strategic
+          [comitesStrategie]="comitesStrategie"
+        ></funds-comite-strategic>
+      </div>
+    </div>
+  </div>
+</div>

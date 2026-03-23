@@ -1,0 +1,20 @@
+<div cds-layout="vertical align:stretch gap:md">
+  <!-- INVESTMENTS -->
+  <cds-divider cds-layout="m-t:lg " class="htitled-divider" title="Répartition des investissements"></cds-divider>
+  <investment-schema [scif]="scif()" [(totalInvestissement)]="totalInvestissement"
+    [(loading)]="loading"></investment-schema>
+
+
+  <!-- FINANCEMENTS -->
+  <cds-divider cds-layout="m-t:lg " class="htitled-divider" title="Répartition des financements"></cds-divider>
+  <financing-schema [scif]="scif()" [(totalFinancing)]="totalFinancing" [(loading)]="loading"
+    [financement]="financement()"></financing-schema>
+
+
+  <!-- EXPENSES -->
+  <cds-divider cds-layout="m-t:lg " class="htitled-divider" title="Répartition des autres dépenses"></cds-divider>
+
+  <other-financing-schema [scif]="scif()" [(totalOtherFinancing)]="totalOtherFinancing"
+    [(loading)]="loading"></other-financing-schema>
+
+</div>

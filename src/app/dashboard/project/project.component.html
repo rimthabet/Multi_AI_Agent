@@ -1,0 +1,152 @@
+<div
+  class="modal-backdrop"
+  aria-hidden="true"
+  [style.display]="loading ? 'block' : 'none'"
+  (click)="loading = false"
+>
+  <span
+    class="spinner"
+    style="
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    "
+    >Loading...</span
+  >
+</div>
+
+<!-- Header Banner -->
+<div
+  class="projet-home-header cds-layout cds-layout--horizontal cds-layout--align:space-between"
+>
+  <span onkeypress="" class="title"
+    >{{ data?.projet.nom }}
+    <cds-icon
+      shape="pencil"
+      size="xl"
+      style="cursor: pointer"
+      [title]="'Cliquer pour aller à la page d\'édition'"
+      (click)="goToFiche()"
+      onkeypress=""
+    ></cds-icon>
+  </span>
+
+  <span class="web"
+    ><cds-icon shape="world" size="md"></cds-icon> {{ data?.web }}
+  </span>
+  <span class="activite">{{ data?.activite }} </span>
+</div>
+
+<!--Header actions-->
+<div cds-layout="horizontal align:stretch">
+  <div cds-layout="horizontal align:left m-y:md">
+    <cds-icon
+      shape="stop"
+      size="md"
+      solid=""
+      [style.color]="data?.projet?.etatAvancement?.couleur"
+    ></cds-icon>
+    Projet : {{ data?.projet?.etatAvancement?.libelle }}
+  </div>
+  <div cds-layout="horizontal align:right">
+    <clr-dropdown cds-layout="m-y:md">
+      <button clrDropdownTrigger aria-label="Dropdown projets switcher">
+        Veuillez choisir un projet
+        <cds-icon shape="angle" direction="down"></cds-icon>
+      </button>
+      <clr-dropdown-menu *clrIfOpen>
+        @for(p of projets; track p) {
+        <div class="dropdown-item" clrDropdownItem (click)="loadProjet(p.id)">
+          {{ p.nom }}
+        </div>
+        }
+      </clr-dropdown-menu>
+    </clr-dropdown>
+    <cds-divider orientation="vertical" style="margin: 0 1em"></cds-divider>
+    <cds-button cds-layout="m-y:xs" (click)="genererPDF(data?.projet?.id)">
+      <cds-icon
+        status="info"
+        solid
+        class="clr-i-pdf-file"
+        style="cursor: pointer"
+        shape="pdf-file"
+        size="md"
+      ></cds-icon>
+      Générer la fiche du projet
+    </cds-button>
+  </div>
+</div>
+
+<!--About the project-->
+<cds-divider
+  cds-layout="m-b:lg"
+  class="htitled-divider centered"
+  title="À propos du projet"
+></cds-divider>
+
+<div class="card">
+  <div class="card-block">
+    <div class="card-text" cds-layout="p-t:none align:stretch">
+      <div style="text-align: justify" [title]="data?.description">
+        {{ data?.description }}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--Tabs-->
+<div cds-layout="m-y:md">
+  <clr-tabs>
+    <clr-tab>
+      <button clrTabLink title="Dashboard">
+        <cds-icon shape="dashboard" size="md"></cds-icon> Dashboard
+      </button>
+      <clr-tab-content *clrIfActive="true">
+        <dashboard [projet]="data" [souscriptions]="souscriptions"> </dashboard>
+      </clr-tab-content>
+    </clr-tab>
+    <clr-tab>
+      <button clrTabLink title="Actionnaires">
+        <cds-icon shape="employee-group" size="md" solid></cds-icon>
+        Actionnaires
+      </button>
+      <clr-tab-content *clrIfActive>
+        <captital-structure-home [projet]="data"></captital-structure-home>
+      </clr-tab-content>
+    </clr-tab>
+    <clr-tab>
+      <button clrTabLink title="Etats financiers / Dupont">
+        <cds-icon shape="tree-view" size="md" solid></cds-icon> Etats financiers
+        / Dupont
+      </button>
+      <clr-tab-content *clrIfActive>
+        <financial-statements-wrapper
+          [prospection]="data?.projet"
+        ></financial-statements-wrapper
+      ></clr-tab-content>
+    </clr-tab>
+    <clr-tab>
+      <button clrTabLink title="Business plans">
+        <cds-icon shape="slider" size="md" solid></cds-icon> Business plans
+      </button>
+      <clr-tab-content *clrIfActive>
+        <business-plan-wrapper
+          [prospection]="data?.projet"
+        ></business-plan-wrapper>
+      </clr-tab-content>
+    </clr-tab>
+    <clr-tab>
+      <button clrTabLink title="Schémas d'investissement et de financement">
+        <cds-icon shape="wallet" size="md" solid></cds-icon> Schémas
+        d'investissement et de financement
+      </button>
+      <clr-tab-content *clrIfActive>
+        <fin-inv-schemas-wrapper
+          [projet]="data"
+          [(loading)]="loading"
+        ></fin-inv-schemas-wrapper>
+      </clr-tab-content>
+    </clr-tab>
+  </clr-tabs>
+</div>

@@ -1,0 +1,152 @@
+<!-- Header -->
+<span cds-text="title">
+  <cds-icon shape="slider" status="info" size="lg"></cds-icon> Gestion des états
+  d'avancements des projets</span
+>
+
+<!-- Data grid -->
+<clr-datagrid
+  [(clrDgSingleSelected)]="selectedItem"
+  [clrDgLoading]="loading"
+  style="height: calc(100vh - 140px)"
+>
+  <clr-dg-action-bar>
+    <!-- Actions -->
+    <div class="btn-group">
+      <cds-button
+        action="outline"
+        status="primary"
+        (click)="openAddModal()"
+        onKeyPress=""
+      >
+        <cds-icon shape="plus" size="md"></cds-icon> Ajouter
+      </cds-button>
+    </div>
+    <div class="btn-group">
+      <cds-button
+        action="outline"
+        status="warning"
+        [disabled]="!selectedItem?.id"
+        (click)="toggleShowEdit(selectedItem)"
+        onkeypress=""
+      >
+        <cds-icon shape="note" size="md"></cds-icon> Modifier
+      </cds-button>
+    </div>
+    <div class="btn-group">
+      <cds-button
+        action="outline"
+        status="danger"
+        (click)="deleteEtat()"
+        [disabled]="!selectedItem?.id"
+        (onKeyPress)="deleteEtat()"
+        onkeypress=""
+      >
+        <cds-icon shape="trash" size="md"></cds-icon> Supprimer
+      </cds-button>
+    </div>
+    <!-- Divider -->
+    <cds-divider
+      cds-layout="m-t:lg m-b:sm"
+      class="htitled-divider"
+      title="Etats d'avancements"
+    ></cds-divider>
+  </clr-dg-action-bar>
+  <clr-dg-column [clrDgField]="'libelle'">État d'avancement</clr-dg-column>
+  <clr-dg-column [clrDgField]="'couleur'">Couleur</clr-dg-column>
+  <clr-dg-row *clrDgItems="let etat of etats" [clrDgItem]="etat">
+    <clr-dg-cell>{{ etat.libelle }}</clr-dg-cell>
+    <clr-dg-cell
+      ><cds-icon
+        solid
+        shape="stop"
+        size="sm"
+        [style]="{ color: etat.couleur }"
+      ></cds-icon>
+      {{ etat.couleur }}</clr-dg-cell
+    >
+  </clr-dg-row>
+  <clr-dg-footer>{{ etats.length }} états d'avancements</clr-dg-footer>
+</clr-datagrid>
+
+<!-- Modal funds status CRUD -->
+<clr-modal #modal [(clrModalOpen)]="openModal" [clrModalSize]="'md'">
+  <!-- Header -->
+  <div class="modal-title">
+    <cds-icon status="info" shape="slider" size="lg"></cds-icon> États des
+    projets
+  </div>
+  <!-- Body -->
+  <div class="modal-body">
+    <!-- Form -->
+    <form
+      clrForm
+      [formGroup]="statusForm!"
+      clrLabelSize="2"
+      cds-layout="m-y:lg"
+    >
+      <cds-form-group layout="horizontal" [formGroup]="statusForm">
+        <cds-input-group control-width="shrink">
+          <label>État:</label>
+          <cds-input>
+            <label></label>
+            <input
+              placeholder="Etat d'avancement"
+              type="text"
+              formControlName="libelle"
+              name="libelle"
+              size="40"
+              required=""
+            />
+          </cds-input>
+        </cds-input-group>
+
+        <cds-input-group control-width="shrink">
+          <label>Couleur:</label>
+          <cds-input>
+            <label></label>
+            <input
+              placeholder="Code couleur"
+              type="text"
+              size="35"
+              formControlName="couleur"
+              required=""
+            />
+          </cds-input>
+          <cds-input>
+            <label></label>
+            <input
+              type="color"
+              style="min-width: 40px"
+              formControlName="couleur_assist"
+            />
+          </cds-input>
+          <cds-control-message
+            >Vous pouvez utiliser les codes couleurs sur le site web
+            <a href="https://clarity.design/documentation/color" target="_blank"
+              >clarity Design
+            </a></cds-control-message
+          >
+        </cds-input-group>
+      </cds-form-group>
+    </form>
+  </div>
+  <!-- Footer -->
+  <div class="modal-footer">
+    <!-- Buttons -->
+    <cds-button
+      action="outline"
+      (click)="openModal = false"
+      onKeyPress="openModal = false"
+      >Annuler</cds-button
+    >
+    <cds-button
+      status="primary"
+      (click)="saveStatus()"
+      [disabled]="statusForm.invalid"
+      onkeypress=""
+    >
+      Sauvegarder
+    </cds-button>
+  </div>
+</clr-modal>

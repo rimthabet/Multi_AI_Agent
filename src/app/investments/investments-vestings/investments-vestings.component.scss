@@ -1,0 +1,78 @@
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    padding-left: 0 !important;
+}
+
+form {
+    padding: 0 !important;
+}
+
+
+.table {
+    border-collapse: separate;
+    border: 0.05rem solid #ccc;
+    border-color: var(--clr-table-border-color, #ccc);
+    border-width: var(--clr-table-borderwidth, .05rem);
+    border-radius: 0.15rem;
+    border-radius: var(--clr-table-border-radius, .15rem);
+    background-color: var(--clr-table-bgcolor, #fff);
+    margin: 1.2rem 0 0;
+    max-width: 100%;
+    width: 100%;
+    text-transform: uppercase !important;
+}
+
+td.pf-scope {
+    max-width: .5em;
+    padding: 0 !important;
+    border: none !important;
+}
+
+.center {
+    vertical-align: middle;
+}
+
+th,
+td {
+    vertical-align: middle;
+    border-left: 1px solid var(--clr-table-border-color);
+    background-color: transparent;
+}
+
+td {
+    border-bottom: 1px solid var(--clr-table-border-color);
+}
+
+tfoot th {
+    height: 40px;
+    font-size: 130%;
+    font-weight: 400;
+    background: var(--cds-alias-status-info-tint);
+}
+
+label {
+    white-space: nowrap;
+}
+
+a {
+
+    font-variant: small-caps;
+
+    cds-icon {
+        visibility: hidden;
+    }
+
+    &:hover {
+        cds-icon {
+            visibility: visible;
+        }
+    }
+}
+
+a {
+    text-decoration: none;
+}

@@ -1,0 +1,144 @@
+<!-- Header -->
+<span cds-text="title">
+  <cds-icon shape="align-bottom" solid="" size="lg" status="info"></cds-icon>
+  Comparaison entre schémas d’investissement et réalisations</span
+>
+
+<!-- Search project -->
+<div cds-layout="horizontal align:left gap:md m-y:xl">
+  <clr-dropdown>
+    <cds-button size="md" action="outline" clrDropdownTrigger>
+      {{ selectedProjet?.nom }}
+      <cds-icon shape="angle" status="info" direction="down"></cds-icon>
+    </cds-button>
+
+    <clr-dropdown-menu *clrIfOpen>
+      @for (p of projets; track p.id) {
+      <div clrDropdownItem (click)="setProjet(p)" onkeypress="">
+        {{ p.nom | uppercase }}
+      </div>
+      }
+    </clr-dropdown-menu>
+  </clr-dropdown>
+
+  <!-- Project name -->
+  <div
+    class="project-name {{ selectedProjet ? 'active' : '' }}"
+    style="margin-top: 0px !important"
+  >
+    {{ selectedProjet ? selectedProjet.nom : "Nom du projet ..." }}
+    <cds-icon
+      onkeypress=""
+      shape="dashboard"
+      size="lg"
+      title="Cliquer pour consulter la fiche projet"
+      style="cursor: pointer"
+      (click)="goToFiche()"
+    ></cds-icon>
+  </div>
+</div>
+
+<!-- Tabs -->
+<clr-tabs>
+  <clr-tab *ngFor="let si of schemaInvestissements; let i = index">
+    <button clrTabLink (click)="selectedShematInvest(i)" [title]="si.libelle">
+      {{ si.libelle }}
+      <span
+        class="badge badge-info"
+        style="padding: 0.7em; margin-bottom: 0.5em; font-size: 14px"
+      >
+        {{ si.dateSchema | date : "dd-MM-YYYY" }}</span
+      >
+    </button>
+    <!-- Tab content -->
+    <clr-tab-content *clrIfActive="i == selectedTab">
+      <clr-datagrid
+        style="max-height: calc(100vh - 250px); padding-top: 0.8em"
+        [clrDgLoading]="loading"
+      >
+        <clr-dg-column>Investissements</clr-dg-column>
+        <clr-dg-column>Montant des investissements prévus </clr-dg-column>
+        <clr-dg-column>Montant des investissements réalisés </clr-dg-column>
+        <clr-dg-column>Ecarts</clr-dg-column>
+        <clr-dg-column>Taux de réalisation</clr-dg-column>
+        <clr-dg-column style="min-width: 300px">Observations</clr-dg-column>
+
+        <clr-dg-row
+          *clrDgItems="let inv of investissements; let i = index"
+          [clrDgItem]="inv"
+        >
+          <clr-dg-cell>{{ inv.libelle }}</clr-dg-cell>
+          <clr-dg-cell class="digit text-right">{{
+            inv.montant | currency : "tnd" : "symbol" : "1.0-0"
+          }}</clr-dg-cell>
+          <clr-dg-cell class="right digit"
+            ><app-editable-field
+              [field]="'montantRealise'"
+              [data]="inv"
+              [type]="'int'"
+              [currency]="'tnd'"
+              (updateEvent)="updateInvestissement($event)"
+            ></app-editable-field
+          ></clr-dg-cell>
+          <clr-dg-cell class="right digit">
+            {{
+              (inv.montantRealise
+                ? inv.montant - inv.montantRealise
+                : inv.montant
+              ) | currency : "tnd" : "symbol" : "1.0-0"
+            }}</clr-dg-cell
+          >
+          <clr-dg-cell class="right digit">
+            {{
+              (inv.montantRealise ? inv.montantRealise / inv.montant : 0)
+                | percent : "1.2-2"
+            }}</clr-dg-cell
+          >
+          <clr-dg-cell style="min-width: 300px"
+            ><app-editable-field
+              [field]="'observations'"
+              [data]="inv"
+              [type]="'text'"
+              [currency]="'tnd'"
+              (updateEvent)="updateInvestissement($event)"
+            ></app-editable-field
+          ></clr-dg-cell>
+        </clr-dg-row>
+
+        <clr-dg-row>
+          <clr-dg-cell></clr-dg-cell>
+          <clr-dg-cell></clr-dg-cell>
+          <clr-dg-cell></clr-dg-cell>
+          <clr-dg-cell></clr-dg-cell>
+          <clr-dg-cell> </clr-dg-cell>
+          <clr-dg-cell style="min-width: 300px"></clr-dg-cell>
+        </clr-dg-row>
+
+        <clr-dg-row>
+          <clr-dg-cell class="total">Totaux</clr-dg-cell>
+          <clr-dg-cell class="digit text-right total">{{
+            totalMontant() | currency : "tnd" : "symbol" : "1.0-0"
+          }}</clr-dg-cell>
+          <clr-dg-cell class="right digit total">
+            {{
+              totalMontantRealise() | currency : "tnd" : "symbol" : "1.0-0"
+            }}</clr-dg-cell
+          >
+          <clr-dg-cell class="right digit total">
+            {{
+              totalEcart() | currency : "tnd" : "symbol" : "1.0-0"
+            }}</clr-dg-cell
+          >
+          <clr-dg-cell class="right digit total">
+            {{ totalPecart() | percent : "1.2-2" }}</clr-dg-cell
+          >
+          <clr-dg-cell class="total" style="min-width: 300px"></clr-dg-cell>
+        </clr-dg-row>
+
+        <clr-dg-footer>
+          {{ investissements!.length }} Lignes d'investissement
+        </clr-dg-footer>
+      </clr-datagrid>
+    </clr-tab-content>
+  </clr-tab>
+</clr-tabs>

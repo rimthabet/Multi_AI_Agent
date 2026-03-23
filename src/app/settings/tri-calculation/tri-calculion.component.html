@@ -1,0 +1,99 @@
+<!-- Header -->
+<span cds-text="title">
+  <cds-icon shape="tags" status="info" size="lg"></cds-icon> Paramètres de
+  calcule du TRI<sup
+    role="tooltip"
+    aria-haspopup="true"
+    class="tooltip tooltip-lg tooltip-bottom-right"
+  >
+    <cds-icon shape="info-circle" size="24"></cds-icon>
+    <span class="tooltip-content">
+      Veuillez choisir les paramètres à mettre à disposition pour calculer le
+      taux de rendement interne - TRI. Tous les paramètres proviennent des
+      business plans.</span
+    >
+  </sup></span
+>
+
+<!-- Data grid -->
+<clr-datagrid
+  [(clrDgSelected)]="selectedItems"
+  [clrDgLoading]="loading"
+  style="height: calc(100vh - 140px)"
+>
+  <clr-dg-action-bar>
+    <!-- Actions -->
+    <div class="btn-group">
+      <cds-button
+        action="outline"
+        status="primary"
+        (click)="saveParametresTri()"
+        onkeypress=""
+      >
+        <cds-icon shape="floppy" size="md"></cds-icon> Sauvegarder
+      </cds-button>
+    </div>
+    <!-- Divider -->
+    <cds-divider
+      cds-layout="m-t:lg m-b:sm"
+      class="htitled-divider"
+      title="Paramètres de calcule du TRI"
+    ></cds-divider>
+
+    <!-- Selected items -->
+    <div cds-layout="horizontal align:horizontal-stretch">
+      <div cds-layout="horizontal align:left">
+        @for(item of selectedItems; track item.id){
+        <div class="selected-item">
+          <span class="label label-blue">
+            {{ item.code }}<span>:</span>{{ item.libelle }}
+            <span
+              ><cds-icon
+                [style.cursor]="'pointer'"
+                onkeypress=""
+                shape="close"
+                size="sm"
+                status="danger"
+                (click)="removeSelected(item)"
+              ></cds-icon
+            ></span>
+          </span>
+        </div>
+        }
+      </div>
+    </div>
+  </clr-dg-action-bar>
+  <!-- Data grid columns -->
+  <clr-dg-column style="max-width: 150px">Code</clr-dg-column>
+  <clr-dg-column [clrDgField]="'libelle'">Libellé</clr-dg-column>
+  <clr-dg-column>Formule</clr-dg-column>
+  <clr-dg-column style="max-width: 180px"
+    >Par défaut (TRI Capital) ?</clr-dg-column
+  >
+
+  <!-- Data grid rows -->
+  <clr-dg-row *clrDgItems="let bp of items" [clrDgItem]="bp">
+    <clr-dg-cell style="max-width: 150px">{{ bp.code }}</clr-dg-cell>
+    <clr-dg-cell>{{ bp.libelle }}</clr-dg-cell>
+    <clr-dg-cell>{{ bp.formula }}</clr-dg-cell>
+    <clr-dg-cell style="max-width: 180px; text-align: center">
+      @if(bp.defautTriCapital == true){
+      <span class="info"
+        ><cds-icon shape="check" status="info" size="18"></cds-icon> Par
+        défaut</span
+      >
+      }
+    </clr-dg-cell>
+
+    <clr-dg-action-overflow>
+      @if(selectedItems.includes(bp)){
+      <button class="action-item" (click)="setDefault(bp)" onkeypress="">
+        Définir par défaut
+      </button>
+      }
+    </clr-dg-action-overflow>
+  </clr-dg-row>
+
+  <!-- Data grid footer -->
+  <clr-dg-footer>{{ items.length }} Business Plans</clr-dg-footer>
+</clr-datagrid>

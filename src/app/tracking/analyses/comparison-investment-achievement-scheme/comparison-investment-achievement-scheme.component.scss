@@ -1,0 +1,12 @@
+.total{
+    font-weight: 700;
+    background-color: var(--cds-alias-status-neutral-tint) ;
+  }
+  .project-name {
+    &:hover {
+      cds-icon {
+        visibility: visible;
+        margin-left: 1em;
+      }
+    }
+  }

@@ -1,0 +1,35 @@
+<clr-modal [clrModalOpen]="opened()">
+    <!-- Modal header -->
+    <h3 class="modal-title">
+        <cds-icon shape="wallet" solid size="lg" status="info"></cds-icon> Ajouter un
+        investissement
+    </h3>
+
+    <!-- Modal body -->
+    <div class="modal-body">
+        <form clrForm [formGroup]="investissementSaveForm!" clrLabelSize="3">
+            <clr-input-container>
+                <label for="libelle" class="clr-required-mark">Libellé :</label>
+                <input clrInput type="text" formControlName="libelle" name="libelle" />
+            </clr-input-container>
+            <clr-number-input-container>
+                <label for="montant" class="clr-required-mark">Montant :</label>
+                <input clrNumberInput type="number" formControlName="montant" name="montant" />
+                <clr-control-helper>Exprimez en tnd :
+                    <span style="font-size: 110%; font-weight: 500">{{ investissementSaveForm.get('montant')?.value |
+                        number : "1.2-2" }} <sup>tnd</sup></span>
+                </clr-control-helper>
+            </clr-number-input-container>
+        </form>
+    </div>
+
+    <!-- Modal footer -->
+    <div class="modal-footer">
+        <cds-button action="outline" (click)="hideModal()">
+            Annuler
+        </cds-button>
+        <cds-button (click)="saveInvestissement()" [disabled]="investissementSaveForm.invalid">
+            <cds-icon shape="floppy"></cds-icon> Sauvegarder
+        </cds-button>
+    </div>
+</clr-modal>

@@ -1,0 +1,61 @@
+<!-- Shortcuts Modal -->
+<clr-modal
+  [(clrModalOpen)]="openShortcuts"
+  [clrModalSize]="'md'"
+  [clrModalStaticBackdrop]="false"
+  [style.height]="'fit-content'"
+>
+  <!-- Modal Header -->
+  <div class="modal-title">
+    <cds-icon shape="link" size="md" solid status="info"></cds-icon>
+    Raccourcis
+  </div>
+
+  <!-- Modal Body -->
+  <div class="modal-body">
+    <!-- Table -->
+    <table class="table table-vertical">
+      <tbody>
+        <tr>
+          <td cds-layout="align: center">Ctrl + A</td>
+          <td>À propos</td>
+        </tr>
+
+        <tr>
+          <td cds-layout="align: center">Ctrl + M</td>
+          <td>Tableau de bord</td>
+        </tr>
+
+        <tr>
+          <td cds-layout="align: center">Ctrl + F</td>
+          <td>Fiche des fonds</td>
+        </tr>
+
+        <tr>
+          <td cds-layout="align: center">Ctrl + P</td>
+          <td>Fiche des projets</td>
+        </tr>
+
+        <tr>
+          <td cds-layout="align: center">Ctrl + I</td>
+          <td>Changer mot de passe</td>
+        </tr>
+
+        <tr>
+          <td cds-layout="align: center">Ctrl + K</td>
+          <td>Changer de langue</td>
+        </tr>
+
+        <tr>
+          <td cds-layout="align: center">Ctrl + E</td>
+          <td>Donnez votre avis</td>
+        </tr>
+
+        <tr>
+          <td cds-layout="align: center">Ctrl + L</td>
+          <td>Changer le thème (light/dark)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</clr-modal>

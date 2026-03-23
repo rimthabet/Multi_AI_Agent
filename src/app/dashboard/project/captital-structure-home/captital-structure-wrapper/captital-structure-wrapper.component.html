@@ -1,0 +1,20 @@
+<div cds-layout="grid gap:md">
+  <!-- Shareholders Grid -->
+  <div cds-layout="col@sm:12 col@md:6 col@lg:6" style="width: 100%">
+    <shareholders-grid
+      #actionnaireGridComponent
+      [actionnaires]="actionnaires"
+      [loading]="loading"
+      [valeurAction]="valeurAction"
+    ></shareholders-grid>
+  </div>
+
+  <!-- Bar Chart -->
+  <div cds-layout="col@sm:12 col@md:6 col@lg:6">
+    <app-bar-chart-07
+      #barChartComponent
+      [actionnaires]="actionnaires"
+      [valeurAction]="valeurAction"
+    ></app-bar-chart-07>
+  </div>
+</div>

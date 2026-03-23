@@ -1,0 +1,80 @@
+<!-- Fiche signalétique -->
+<!-- <div
+  class="large-text-snippet"
+  cds-text="monospace"
+  style="--border-color: var(--cds-alias-status-info); margin-bottom: 1em"
+>
+  <span
+    class="big-text"
+    style="--fore-color: var(--cds-alias-status-info); font-variant: small-caps"
+    cds-text="title"
+    >{{ totalActif() | currency : "tnd " : "symbol" : "1.0-0" }}
+  </span>
+  <span class="small-text">Total Actif</span>
+</div> -->
+
+<!-- <div class="kpi" cds-layout="horizontal gap:md align:stretch">
+  <span class="name"><cds-icon shape="gavel"></cds-icon> Forme légale: </span>
+  <span class="value" cds-layout="align:right" style="text-align: right">
+    {{ fonds()?.formeLegale?.libelle }}</span
+  >
+</div> -->
+
+<app-kpi-badge-01
+  [value]="totalActif()"
+  [type]="'currency'"
+  [title]="'Total Actif'"
+  [size]="'large'"
+  [color]="'var(--cds-alias-status-info)'"
+></app-kpi-badge-01>
+
+<!-- Montant projeté -->
+<div class="kpi" cds-layout="horizontal gap:md m-t:xl align:stretch">
+  <span class="name"
+    ><cds-icon shape="dollar"></cds-icon> Montant projeté:</span
+  >
+  <span class="value" cds-layout="align:right" style="text-align: right">
+    {{ fonds()?.montant | currency : "tnd" : "symbol" : "1.0-0" }}</span
+  >
+</div>
+<!-- Durée -->
+<div class="kpi" cds-layout="horizontal gap:md align:stretch">
+  <span class="name"><cds-icon shape="clock"></cds-icon> Durée: </span>
+  <span class="value" cds-layout="align:right" style="text-align: right">
+    {{ fonds()?.duree }} année(s)</span
+  >
+</div>
+
+<!-- Banque dépositaire -->
+<div class="kpi" cds-layout="horizontal gap:md align:stretch">
+  <span class="name"
+    ><cds-icon shape="bank"></cds-icon> Banque dépositaire:
+  </span>
+  <span class="value" cds-layout="align:right" style="text-align: right">
+    {{ fonds()?.banque?.libelle }}</span
+  >
+</div>
+
+<!-- Nature -->
+<div class="kpi" cds-layout="horizontal gap:md align:stretch">
+  <span class="name"><cds-icon shape="tag"></cds-icon> Nature: </span>
+  <span class="value" cds-layout="align:right" style="text-align: right">
+    {{ fonds()?.nature?.libelle }}</span
+  >
+</div>
+
+<!-- Commissaire(s) aux comptes -->
+<div class="kpi" cds-layout="horizontal gap:md align:stretch">
+  <span class="name"
+    ><cds-icon shape="employee"></cds-icon> Commissaire(s) aux comptes:</span
+  >
+  <div class="value" style="text-align: right">
+    <span *ngFor="let m of mandats" class="label">
+      {{ m.cac.libelle }}
+      <span class="badge"
+        >{{ m.anneeD }}<cds-icon shape="capacitor"></cds-icon> &nbsp;
+        {{ m.anneeF }}</span
+      >
+    </span>
+  </div>
+</div>

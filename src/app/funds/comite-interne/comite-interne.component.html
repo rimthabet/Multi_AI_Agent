@@ -1,0 +1,136 @@
+<!-- Header -->
+<span cds-text="title">
+  <cds-icon
+    shape="employee-group"
+    size="lg"
+    status="info"
+    cds-layout="m-b:sm"
+  ></cds-icon>
+  Comités internes des fonds</span
+>
+
+<!-- Divider -->
+<cds-divider
+  cds-layout="m-t:lg "
+  class="htitled-divider"
+  title="Inventaire des comités internes par fonds"
+></cds-divider>
+
+<!-- Search fonds -->
+<div cds-layout="horizontal align:left gap:md m-t:xl">
+<clr-combobox-container style="margin-top: 0.7em !important">
+  <clr-combobox
+    [(ngModel)]="selectedFonds"
+    name="fondsName"
+    (ngModelChange)="switchTheFund($event)"
+  >
+
+    <!-- Affichage du fonds sélectionné -->
+    <ng-container *clrOptionSelected="let selected">
+      <cds-icon
+        shape="filter-grid"
+        role="img"
+        aria-label="fonds list"
+      ></cds-icon>
+      {{ selected?.denomination }}
+    </ng-container>
+
+    <!-- Options -->
+    <clr-options>
+      <clr-option
+        *clrOptionItems="let f of fonds; field: 'denomination'"
+        [clrValue]="f"
+      >
+        <cds-icon
+          shape="filter-grid"
+          role="img"
+          aria-label="fonds list"
+        ></cds-icon>
+        {{ f.denomination }}
+      </clr-option>
+    </clr-options>
+
+  </clr-combobox>
+
+</clr-combobox-container>
+
+
+  <div
+    class="fund-name {{ selectedFonds ? 'active' : '' }}"
+    style="margin-top: 0px !important"
+  >
+    {{ selectedFonds ? selectedFonds.denomination : "Nom du projet ..." }}
+    <cds-icon
+      onkeypress=""
+      shape="dashboard"
+      size="lg"
+      title="Cliquer pour consulter la fiche projet"
+      style="cursor: pointer"
+      (click)="goToFiche()"
+    ></cds-icon>
+  </div>
+</div>
+
+<!-- Data grid -->
+<clr-datagrid
+  style="clear: both; height: calc(100vh - 220px)"
+  [clrDgLoading]="loading"
+>
+  <!-- Columns -->
+  <clr-dg-column [clrDgField]="'dateComite'" [style.maxWidth]="'200px'"
+    >Date du comité</clr-dg-column
+  >
+  <clr-dg-column [clrDgField]="'financement.projet.nom'"
+    >Nom du projet</clr-dg-column
+  >
+  <clr-dg-column>Décision</clr-dg-column>
+  <clr-dg-column>Points à approfondir</clr-dg-column>
+  <clr-dg-column>Date du prochain comité</clr-dg-column>
+
+  <!-- Rows -->
+  <clr-dg-row
+    *clrDgItems="let comite of comites; let i = index"
+    [clrDgItem]="comite"
+    [clrDgSelectable]="i == 0"
+  >
+    <clr-dg-cell [style.maxWidth]="'200px'">{{
+      comite.dateComite | date : "dd/MM/yyyy"
+    }}</clr-dg-cell>
+    <clr-dg-cell class="text-left" [style.textTransform]="'uppercase'">
+      <a
+        class="show-hide-icon"
+        style="margin-top: auto; color: var(--cds-alias-status-info)"
+        [routerLink]="['/dashboard/projects/', comite?.financement?.projet?.id]"
+      >
+        {{ comite?.financement?.projet?.nom }}
+        <cds-icon shape="link" size="sm"></cds-icon>
+      </a>
+    </clr-dg-cell>
+    <clr-dg-cell
+      [style]="{
+        letterSpacing: '2px',
+        color:
+          comite.decision == 0
+            ? 'var(--clr-color-success-500)'
+            : comite.decision == 1
+            ? 'var(--clr-color-danger-500)'
+            : 'var(--clr-color-action-500)'
+      }"
+    >
+      @if(comite.decision == 0){
+      <cds-icon shape="success-standard" size="md" status="success"></cds-icon>
+      } @if(comite.decision == 1){
+      <cds-icon shape="ban" size="md" status="danger"></cds-icon>
+      } @if(comite.decision == 2){
+      <cds-icon shape="eye" size="md" status="info" solid></cds-icon>
+      }
+      {{ decisionText(comite.decision) }}
+    </clr-dg-cell>
+
+    <clr-dg-cell>{{ comite.points }}</clr-dg-cell>
+    <clr-dg-cell>{{ comite.nextDateComite | date }}</clr-dg-cell>
+  </clr-dg-row>
+
+  <!-- Footer -->
+  <clr-dg-footer>{{ comites!.length }} comités</clr-dg-footer>
+</clr-datagrid>

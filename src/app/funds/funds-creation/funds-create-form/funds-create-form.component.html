@@ -1,0 +1,430 @@
+<form clrForm [formGroup]="fundSaveForm!" clrLayout="compact" clrLabelSize="2">
+  <!-- Dénomination -->
+  <clr-input-container>
+    <label for="denomination" class="clr-required-mark">Dénomination:</label>
+    <input
+      clrInput
+      type="text"
+      formControlName="denomination"
+      name="denomination"
+      size="26"
+    />
+  </clr-input-container>
+
+  <!-- Alias -->
+  <clr-input-container>
+    <label for="alias" class="clr-required-mark">Alias:</label>
+    <input
+      clrInput
+      type="text"
+      formControlName="alias"
+      name="alias"
+      size="26"
+    />
+    <clr-control-helper>En majuscules et sans espaces</clr-control-helper>
+  </clr-input-container>
+
+  <!-- Adresse -->
+  <clr-input-container>
+    <label for="adresseFonds" class="clr-required-mark">Adresse:</label>
+    <input
+      clrInput
+      type="text"
+      formControlName="adresseFonds"
+      name="adresseFonds"
+      size="26"
+    />
+  </clr-input-container>
+
+  <!-- Montant projeté -->
+  <clr-number-input-container>
+    <label for="montant" class="clr-required-mark">Montant projeté:</label>
+    <input
+      clrNumberInput
+      type="number"
+      formControlName="montant"
+      name="montant"
+      size="26"
+    />
+    <clr-control-helper
+      >En dinar tunisien:
+      <span style="font-size: 110%; font-weight: 500"
+        >{{
+          fundSaveForm!.controls["montant"].value | currency : "tnd" : "1.2-2"
+        }}
+      </span></clr-control-helper
+    >
+  </clr-number-input-container>
+
+  <!-- Durée -->
+  <clr-number-input-container>
+    <label for="duree" class="clr-required-mark">Durée:</label>
+    <input
+      clrNumberInput
+      type="number"
+      formControlName="duree"
+      name="duree"
+      size="26"
+    />
+    <clr-control-helper>Nombre d'années (Max 10 ans)</clr-control-helper>
+  </clr-number-input-container>
+
+  <!-- Divider -->
+  <cds-divider
+    cds-layout="m-t:xl m-b:md"
+    class="htitled-divider"
+    title="Dates"
+  ></cds-divider>
+
+  <!-- Date d'agrément -->
+  <clr-date-container>
+    <label for="date_agrement" class="clr-required-mark"
+      >Date d'agrément:
+    </label>
+    <input
+      clrDate
+      type="date"
+      formControlName="date_agrement"
+      name="date_agrément"
+      size="23"
+    />
+  </clr-date-container>
+
+  <!-- Date d'obtention du visa CMF -->
+  <clr-date-container>
+    <label for="date_visa_cmf" class="clr-required-mark"
+      >Date d'obtention du visa CMF:
+    </label>
+    <input
+      clrDate
+      type="date"
+      formControlName="date_visa_cmf"
+      name="date_VisaCMF"
+      size="23"
+    />
+  </clr-date-container>
+
+  <!-- Date du lancement -->
+  <clr-date-container>
+    <label for="date_lancement" class="clr-required-mark"
+      >Date du lancement:
+    </label>
+    <input
+      clrDate
+      type="date"
+      formControlName="date_lancement"
+      name="date_lancement"
+      size="23"
+    />
+    <clr-control-helper
+      >Date de la 1<sup>ère</sup> souscription</clr-control-helper
+    >
+  </clr-date-container>
+
+  <!-- Date d'expiration -->
+  <clr-date-container>
+    <label for="date_expiration" class="clr-required-mark"
+      >Date d'expiration:
+    </label>
+    <input
+      clrDate
+      type="date"
+      formControlName="date_expiration"
+      name="date_expiration"
+      size="23"
+    />
+    <clr-control-helper>Date d'expiration du fonds</clr-control-helper>
+  </clr-date-container>
+
+  <!-- Divider -->
+  <cds-divider
+    cds-layout="m-t:xl m-b:md"
+    class="htitled-divider"
+    title="Identité financière"
+  ></cds-divider>
+
+  <!-- N° du visa CMF -->
+  <clr-input-container>
+    <label for="num_visa_cmf" class="clr-required-mark">N° du visa CMF:</label>
+    <input
+      clrInput
+      type="text"
+      formControlName="num_visa_cmf"
+      name="num_visaCMF"
+      size="27"
+    />
+  </clr-input-container>
+
+  <!-- Matricule fiscal -->
+  <clr-input-container>
+    <label for="matriculeFiscal" class="clr-required-mark"
+      >Matricule fiscal:</label
+    >
+    <input
+      clrInput
+      type="text"
+      formControlName="matriculeFiscal"
+      name="matriculeFiscal"
+      size="27"
+    />
+  </clr-input-container>
+
+  <!-- Banque -->
+  <clr-select-container>
+    <label for="banque" class="clr-required-mark">Banque dépositaire:</label>
+    <select
+      clrSelect
+      name="options"
+      formControlName="banque"
+      [compareWith]="equals"
+    >
+      <option [ngValue]="undefined" [attr.data-value]="undefined" size="27">
+        Choisir une banque...
+      </option>
+      @for (banque of banques; track banque) {
+      <option [ngValue]="banque">
+        {{ banque.libelle }}
+      </option>
+      }
+    </select>
+  </clr-select-container>
+
+  <!-- Divider frais -->
+  <cds-divider
+    cds-layout=" m-t:xl m-b:md"
+    class="htitled-divider"
+    title="Frais"
+  ></cds-divider>
+
+  <!-- Frais du dépositaire -->
+  <clr-number-input-container>
+    <label for="frais_depositaire" class="clr-required-mark"
+      >Frais du dépositaire (%):</label
+    >
+    <input
+      clrNumberInput
+      type="number"
+      formControlName="frais_depositaire"
+      name="frais_Depositaire"
+    />
+  </clr-number-input-container>
+
+  <!-- Frais de gestion -->
+  <clr-number-input-container>
+    <label for="frais_gestion" class="clr-required-mark"
+      >Frais de gestion (%):</label
+    >
+    <input
+      clrNumberInput
+      type="number"
+      formControlName="frais_gestion"
+      name="frais_Gestion"
+    />
+  </clr-number-input-container>
+
+  <!-- Divider profile -->
+  <cds-divider
+    cds-layout="m-t:xl m-b:md"
+    class="htitled-divider"
+    title="Profile"
+  ></cds-divider>
+
+  <!-- Forme légale -->
+  <clr-select-container>
+    <label for="forme_legale" class="clr-required-mark">Forme légale:</label>
+    <select
+      clrSelect
+      name="options"
+      formControlName="forme_legale"
+      [compareWith]="equals"
+    >
+      <option [ngValue]="undefined" [attr.data-value]="undefined">
+        Choisir une forme légale...
+      </option>
+      @for (forme_legale of forme_legales; track forme_legale) {
+      <option [ngValue]="forme_legale" [attr.data-value]="forme_legale">
+        {{ forme_legale.libelle }}
+      </option>
+      }
+    </select>
+  </clr-select-container>
+
+  <!-- Nature -->
+  <clr-select-container>
+    <label for="nature" class="clr-required-mark">Nature:</label>
+    <select
+      clrSelect
+      name="options"
+      formControlName="nature"
+      [compareWith]="equals"
+    >
+      <option [ngValue]="undefined" [attr.data-value]="undefined">
+        Choisir une nature...
+      </option>
+      @for (nature of natures; track nature) {
+      <option [ngValue]="nature" [attr.data-value]="nature">
+        {{ nature.libelle }}
+      </option>
+      }
+    </select>
+  </clr-select-container>
+
+  <!-- Cadre d'investissement -->
+  <clr-combobox-container>
+    <label for="cadre_investissement" class="clr-required-mark"
+      >Cadres d'investissement:</label
+    >
+    <clr-combobox
+      formControlName="cadre_investissement"
+      name="policies"
+      clrMulti="true"
+    >
+      <ng-container *clrOptionSelected="let selected">
+        <cds-icon
+          shape="filter-grid"
+          role="img"
+          aria-label="policies list"
+        ></cds-icon>
+        {{ selected?.libelle }}
+      </ng-container>
+      <clr-options>
+        @for (cadre of cadresInvestissement; track cadre) {
+        <clr-option [clrValue]="cadre">
+          {{ cadre.libelle }}
+        </clr-option>
+        }
+      </clr-options>
+    </clr-combobox>
+    <clr-control-helper
+      >Veuillez choisir le(s) cadre(s) d'investissement
+    </clr-control-helper>
+  </clr-combobox-container>
+
+  <!-- Divider ratios règlementaires -->
+  <cds-divider
+    cds-layout="m-t:xl m-b:md"
+    class="htitled-divider"
+    title="Ratios règlementaires"
+  ></cds-divider>
+
+  <!-- Ratio réglementaire -->
+  <clr-number-input-container>
+    <label for="ratio_reglementaire" class="clr-required-mark"
+      >Ratio réglementaire (Fonds):
+    </label>
+    <input
+      clrNumberInput
+      type="number"
+      formControlName="ratio_reglementaire"
+      name="ratio_reglementaire"
+    />
+  </clr-number-input-container>
+
+  <!-- Ratio réglementaire 2 -->
+  <clr-number-input-container>
+    <label for="ratio_reglementaire_2" class="clr-required-mark">
+      {{ getLabelForRatioType(ratioType) }}
+    </label>
+    <input
+      clrNumberInput
+      type="number"
+      formControlName="ratio_reglementaire_2"
+      name="ratio_reglementaire_2"
+    />
+  </clr-number-input-container>
+
+  <!-- Ratio secteur d'activité -->
+  <clr-number-input-container>
+    <label for="ratio_secteur_activite" class="clr-required-mark"
+      >Ratio par secteur d'activité:</label
+    >
+    <input
+      clrNumberInput
+      type="number"
+      formControlName="ratio_secteur_activite"
+      name="ratio_secteur_activite"
+    />
+  </clr-number-input-container>
+
+  <!-- Ratio société -->
+  <clr-number-input-container>
+    <label for="ratio_societe" class="clr-required-mark"
+      >Ratio par société:</label
+    >
+    <input
+      clrNumberInput
+      type="number"
+      formControlName="ratio_societe"
+      name="ratio_societe"
+    />
+  </clr-number-input-container>
+
+  <!-- Ratio quasi fonds propres -->
+  <clr-number-input-container>
+    <label for="ratio_quasi_fond_propre" class="clr-required-mark"
+      >Ratio en Quasi fonds propres:</label
+    >
+    <input
+      clrNumberInput
+      type="number"
+      formControlName="ratio_quasi_fond_propre"
+      name="ratio_quasi_fond_propre"
+    />
+  </clr-number-input-container>
+
+  <!-- Ratio conformité OCA -->
+  <clr-number-input-container>
+    <label for="ratio_conformite_oca" class="clr-required-mark"
+      >Ratio de conformité OCA:</label
+    >
+    <input
+      clrNumberInput
+      type="number"
+      formControlName="ratio_conformite_oca"
+      name="ratio_conformite_oca"
+    />
+  </clr-number-input-container>
+
+  <!-- Ratio investissement sur le marché alternatif -->
+  <clr-number-input-container>
+    <label for="ratio_investissement" class="clr-required-mark"
+      >Ratio investissement sur le marché alternatif:</label
+    >
+    <input
+      clrNumberInput
+      type="number"
+      formControlName="ratio_investissement"
+      name="ratio_investissement"
+    />
+  </clr-number-input-container>
+
+  <!-- Divider limite des souscriptions -->
+  <cds-divider
+    cds-layout="m-t:xl m-b:md"
+    class="htitled-divider"
+    title="Limite des souscriptions"
+  ></cds-divider>
+
+  <!-- Durée -->
+  <clr-number-input-container>
+    <label for="nombre_annees" class="clr-required-mark">Durée:</label>
+    <input
+      clrNumberInput
+      type="number"
+      formControlName="nombre_annees"
+      name="nombre_annees"
+    />
+    <clr-control-helper>Nombre d'années</clr-control-helper>
+  </clr-number-input-container>
+
+  <!-- Boutons -->
+  <div cds-layout="horizontal m-t:lg">
+    <cds-button
+      [disabled]="!fonds() && fundSaveForm!.invalid"
+      (click)="saveFund()"
+    >
+      <cds-icon shape="floppy" size="md"></cds-icon>
+      Sauvegarder
+    </cds-button>
+  </div>
+</form>

@@ -1,0 +1,989 @@
+<!-- Loading Spinner -->
+@if(loading) {
+<div
+  class="modal-backdrop"
+  aria-hidden="true"
+  [style.display]="loading ? 'block' : 'none'"
+  (click)="loading = false"
+>
+  <span
+    class="spinner"
+    style="
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    "
+    >Loading...</span
+  >
+  Loading .... >
+</div>
+} @if (selectedProject) {
+<div
+  onkeypress=""
+  class="modal-backdrop"
+  aria-hidden="true"
+  (click)="
+    selectedFinancement = undefined;
+    selectedProject = undefined;
+    selectedLiberation = undefined
+  "
+></div>
+}
+<div cds-text="title">
+  <cds-icon shape="shield-check" size="lg" solid status="info"></cds-icon>
+  Assurance des projets approuvés
+</div>
+
+<!-- Search fonds -->
+<div cds-layout="horizontal align:left gap:md m-t:xl">
+  <clr-dropdown>
+    <!-- Button trigger -->
+    <cds-button action="outline" clrDropdownTrigger>
+      {{ selectedFonds?.denomination }}
+      <cds-icon shape="angle" status="info" direction="down"></cds-icon>
+    </cds-button>
+
+    <!-- Dropdown menu -->
+    <clr-dropdown-menu *clrIfOpen>
+      @for(f of fonds; track $index) {
+      <div clrDropdownItem (click)="switchTheFund(f)">
+        {{ f.denomination }}
+      </div>
+      }
+    </clr-dropdown-menu>
+  </clr-dropdown>
+
+  <div
+    class="fund-name {{ selectedFonds ? 'active' : '' }}"
+    style="margin-top: 0px !important"
+  >
+    {{ selectedFonds ? selectedFonds.denomination : "Nom du projet ..." }}
+    <cds-icon
+      onkeypress=""
+      shape="dashboard"
+      size="lg"
+      title="Cliquer pour consulter la fiche projet"
+      style="cursor: pointer"
+      (click)="goToFiche()"
+    ></cds-icon>
+  </div>
+</div>
+
+<!-- Fund status -->
+@if (selectedFonds?.etat?.libelle == 'En liquidation' ||
+selectedFonds?.etat?.libelle == 'En pré-liquidation') {
+<div class="badge badge-warning" cds-text="caption" cds-layout="p:sm">
+  Fonds {{ selectedFonds?.etat?.libelle }}
+</div>
+}
+
+<div cds-layout="horizontal gap:md m-y:sm">
+  <div cds-layout="m-t:xl m-b:lg align:stretch">
+    <!-- Divider -->
+    <cds-divider
+      cds-layout="m-t:none"
+      class="htitled-divider"
+      [title]="
+        'Détention du ' + selectedFonds?.denomination + ' dans les projets'
+      "
+    ></cds-divider>
+  </div>
+  <div cds-layout="align:right m-t:sm">
+    <cds-button action="outline">
+      <cds-icon shape="xls-file" size="md"></cds-icon> Export sur Excel
+    </cds-button>
+  </div>
+</div>
+
+<!-- Detention % gauges -->
+<app-horizontal-scroller>
+  @for (p of liberations; track p.projet.id) {
+  <ng-template #itemTemplate>
+    <ngx-gauge
+      type="semi"
+      cap="round"
+      [value]="p?.pfcp?.part"
+      [thick]="7"
+      [size]="150"
+      [min]="0"
+      [max]="100"
+      [append]="'%'"
+      [label]="p?.projet?.nom"
+      [backgroundColor]="getCodeFromColor('--cds-alias-status-disabled-tint')"
+      [foregroundColor]="getCodeFromColor('--cds-alias-status-info-shade')"
+    ></ngx-gauge>
+  </ng-template>
+  }
+</app-horizontal-scroller>
+
+<cds-divider
+  cds-layout="m-t:lg "
+  class="htitled-divider"
+  title="Suivi assuré des projets validés"
+></cds-divider>
+
+<!-- Table -->
+<table class="table table-vetical">
+  <thead>
+    <tr>
+      <th style="border-left: none !important" scope="col" colspan="2">
+        Participations
+      </th>
+      <th scope="col" style="width: 150px">Date <br />de Libération</th>
+      <th scope="col" colspan="4">Libéré (TND)</th>
+      <th scope="col" style="width: 70px">Inéligible?</th>
+      <th scope="col">Acceptation</th>
+      <th scope="col">Pourcentage <br />de garantie</th>
+      <th scope="col">Montant <br />à régler (TND)</th>
+      <th scope="col" style="width: 110px">Réglé?</th>
+    </tr>
+    <tr>
+      <th style="border-left: none !important" scope="col" colspan="3"></th>
+
+      <th scope="col">Actions</th>
+      <th scope="col">OCA</th>
+      <th scope="col">CCA</th>
+      <th scope="col">Total</th>
+      <th scope="col" colspan="5"></th>
+    </tr>
+  </thead>
+
+  @for (p of liberations; track p; let i = $index) {
+  <tr
+    [style.backgroundColor]="
+      'var(--cds-alias-object-interaction-background-disabled)'
+    "
+  >
+    <th
+      scope="row"
+      class="left"
+      [attr.rowspan]="p.rows"
+      [style.borderLeft]="'none !important'"
+    >
+      <span
+        cds-text="subsection"
+        [style.textTransform]="'uppercase'"
+        [style.fontWeight]="'500'"
+        [style.color]="'var(--clr-color-neutral-900)'"
+        [style.letterSpacing]="'1px'"
+      >
+        <a
+          class="show-hide-icon"
+          [routerLink]="['/dashboard/projects/', p.projet.id]"
+        >
+          {{ p.projet.nom }}
+          <cds-icon shape="link" class="link" status="info"></cds-icon>
+        </a>
+      </span>
+    </th>
+    <th colspan="11" scope="row" [style.borderLeft]="'none !important'"></th>
+  </tr>
+  @for (pf of p.flrl; track pf; let j = $index) {
+  <tr>
+    <td
+      class="pf-scope"
+      [style.width]="'10px'"
+      [style.padding]="'0px !important'"
+      [attr.rowspan]="pf.rows"
+      [style.backgroundColor]="colors[j]"
+    ></td>
+    <th
+      colspan="10"
+      scope="row"
+      class="left"
+      [style.fontSize]="'10px'"
+      [style.color]="'var(--clr-color-neutral-600)'"
+    >
+      <cds-icon shape="map" badge="info" size="sm"></cds-icon> Plan de
+      financement du
+      {{ pf.fin.dateDemandeFinancement | date }}
+      @if (pf?.convO?.length > 0) {
+      <span style="margin-right: 3px"
+        >(<clr-signpost>
+          <cds-icon
+            shape="asterisk"
+            class="warning"
+            solid
+            aria-label="Icon Button Trigger"
+            clrSignpostTrigger
+          ></cds-icon
+          ><clr-signpost-content [clrPosition]="'bottom-middle'" *clrIfOpen>
+            <span cds-text="subsection" cds-layout="vertical gap:md"
+              >Conversions des OCA</span
+            >
+
+            <table class="table table-compact">
+              <caption></caption>
+              <thead>
+                <th>Date de l'AGE</th>
+                <th>Montant converti</th>
+                <th>Actions converties</th>
+              </thead>
+              <tbody>
+                @for (c of pf.convO; track c) {
+                <tr>
+                  <th>{{ c.dateAge | date : "dd/MM/yyyy" }}</th>
+                  <td>{{ c.montant | number : "1.2-2" }} <sup>TND</sup></td>
+                  <td>{{ c.nbrActions | number : "1.0-0" }}</td>
+                </tr>
+                }
+              </tbody>
+            </table>
+          </clr-signpost-content></clr-signpost
+        >)</span
+      >
+      } @if (pf.convC?.length > 0) {
+      <span
+        >(<clr-signpost>
+          <cds-icon
+            shape="asterisk"
+            class="info"
+            solid
+            aria-label="Icon Button Trigger"
+            clrSignpostTrigger
+          ></cds-icon
+          ><clr-signpost-content [clrPosition]="'bottom-middle'" *clrIfOpen>
+            <span cds-text="subsection" cds-layout="vertical gap:md"
+              >Conversions du CCA</span
+            >
+
+            <table class="table table-compact">
+              <caption></caption>
+              <thead>
+                <th>Date de l'AGE</th>
+                <th>Montant converti</th>
+                <th>Actions converties</th>
+                <th>Intêret remboursé</th>
+              </thead>
+              <tbody>
+                @for (c of pf.convC; track c) {
+                <tr>
+                  <th>{{ c.dateAge | date : "dd/MM/yyyy" }}</th>
+                  <td>{{ c.montant | number : "1.2-2" }} <sup>TND</sup></td>
+                  <td>{{ c.nbrActions | number : "1.0-0" }}</td>
+                  <td>
+                    {{ c.montantInteretRembourse | number : "1.2-2" }}
+                    <sup>TND</sup>
+                  </td>
+                </tr>
+                }
+              </tbody>
+            </table>
+          </clr-signpost-content></clr-signpost
+        >)</span
+      >
+      }
+    </th>
+  </tr>
+
+  @for (lib of pf.libA; track lib; let k = $index) {
+  <tr>
+    <td>
+      <div
+        cds-layout="horizontal align:tretech gap:md"
+        class="white-space:nowrap"
+      >
+        <span cds-layout="horizontal align:left">
+          {{ lib.dateLiberation | date : "dd/MM/yyyy" }}</span
+        >
+        <span cds-layout="horizontal align:right" class="open-sotugar">
+          @if (lib.ineligible == undefined || lib.ineligible == false) {
+          <cds-icon
+            shape="pop-out"
+            size="sm"
+            (click)="
+              selectedProject = p;
+              selectedFinancement = pf;
+              selectedLiberation = lib;
+              showEdit(true)
+            "
+          ></cds-icon>
+          }
+        </span>
+      </div>
+    </td>
+
+    <td class="digit">
+      {{ lib.montantLiberation | number : "1.0-0" }}
+    </td>
+    <td class="digit">-</td>
+    <td class="digit">-</td>
+    @if (k == 0) {
+    <td
+      class="digit"
+      [attr.rowspan]="pf.libA?.length + pf.libO?.length + pf.libC?.length"
+    >
+      {{ pf.totalLibere | number : "1.0-0" }}
+    </td>
+    }
+    <td cds-layout="horizontal align:right">
+      <clr-toggle-wrapper [style.margin]="'auto'" class="ineligible">
+        <input
+          [disabled]="lib.sotugar"
+          type="checkbox"
+          clrToggle
+          name="options"
+          [checked]="lib.ineligible"
+          (change)="setIneligible(lib, $event)"
+        />
+      </clr-toggle-wrapper>
+    </td>
+    <td>
+      @if (lib.sotugar) { @if (lib.sotugar.acceptee != undefined) { @if
+      (lib.sotugar.acceptee) {
+      <span
+        ><cds-icon
+          shape="success-standard"
+          solid=""
+          size="18"
+          class="success"
+        ></cds-icon>
+        &nbsp; Acceptée</span
+      >
+      } @else {
+      <span
+        ><cds-icon shape="no-access" solid="" size="18" class="failure">
+        </cds-icon
+        >&nbsp; Refusée</span
+      >
+      } } @else {
+      <span> <cds-icon solid="" size="18"> </cds-icon>&nbsp; En cours</span>
+      } }
+    </td>
+    <td>
+      @if (lib.sotugar && lib.sotugar.acceptee != undefined) {
+      {{ lib.sotugar.pourcentageDeGarantie | number : "1.0-0" }}% }
+    </td>
+
+    <td>
+      @if (lib.sotugar && lib.sotugar.acceptee != undefined) {
+      {{ lib.sotugar.montantARegler | number : "1.0-0" }}
+      }
+    </td>
+
+    <td>
+      @if (lib.sotugar?.acceptee) {
+      <div cds-layout="horizontal">
+        <cds-icon
+          title="Cliquer ici pour ajouter ou supprimer l'ordre de virement de règlement"
+          shape="ellipsis-vertical"
+          style="cursor: pointer; margin-top: 0.2em"
+          (click)="setPayee(lib, $event)"
+        ></cds-icon>
+
+        <cds-divider
+          orientation="vertical"
+          style="padding: 0 7px"
+        ></cds-divider>
+        <div cds-layout="horizontal ; align:right ">
+          <clr-toggle-wrapper
+            [style.marginRight]="'0'"
+            [class]="lib.sotugar?.payee ? 'reglee' : ''"
+          >
+            <label></label>
+            <input
+              [disabled]="true"
+              type="checkbox"
+              clrToggle
+              name="payeeA"
+              [checked]="lib.sotugar?.payee"
+            />
+          </clr-toggle-wrapper>
+        </div>
+      </div>
+      }
+    </td>
+  </tr>
+  } @for (lib of pf.libO; track lib; let l = $index) {
+  <tr>
+    <td>
+      <div
+        cds-layout="horizontal align:tretech gap:md"
+        class="white-space:nowrap"
+      >
+        <span cds-layout="horizontal align:left">
+          {{ lib.dateLiberation | date : "dd/MM/yyyy" }}</span
+        >
+        <span cds-layout="horizontal align:right" class="open-sotugar">
+          @if (lib.ineligible == undefined || lib.ineligible == false) {
+          <cds-icon
+            shape="pop-out"
+            size="sm"
+            (click)="
+              selectedProject = p;
+              selectedFinancement = pf;
+              selectedLiberation = lib;
+              showEdit(true)
+            "
+          ></cds-icon>
+          }
+        </span>
+      </div>
+    </td>
+
+    <td class="digit">-</td>
+    <td class="digit">
+      {{ lib.montantLiberation | number : "1.0-0" }}
+    </td>
+    <td class="digit">-</td>
+    @if (l == 0 && pf.libA == null) {
+    <td
+      class="digit"
+      [attr.rowspan]="pf.libA?.length + pf.libO?.length + pf.libC?.length"
+    >
+      {{ pf.totalLibere | number : "1.0-0" }}
+    </td>
+    }
+    <td cds-layout="horizontal align:right">
+      <clr-toggle-wrapper [style.margin]="'auto'" class="ineligible">
+        <input
+          [disabled]="lib.sotugar"
+          type="checkbox"
+          clrToggle
+          name="options"
+          [checked]="lib.ineligible"
+          (change)="setIneligible(lib, $event)"
+        />
+      </clr-toggle-wrapper>
+    </td>
+    <td>
+      @if (lib.sotugar) { @if (lib.sotugar.acceptee != undefined) { @if
+      (lib.sotugar.acceptee) {
+      <span
+        ><cds-icon
+          shape="success-standard"
+          solid=""
+          size="18"
+          class="success"
+        ></cds-icon>
+        &nbsp; Acceptée</span
+      >
+      } @else {
+      <span
+        ><cds-icon shape="no-access" solid="" size="18" class="failure">
+        </cds-icon
+        >&nbsp; Refusée</span
+      >
+      } } @else {
+      <span> <cds-icon solid="" size="18"> </cds-icon>&nbsp; En cours</span>
+      } }
+    </td>
+    <td>
+      @if (lib?.sotugar && lib?.sotugar?.acceptee != undefined) {
+      {{ lib.sotugar.pourcentageDeGarantie | number : "1.0-0" }}% }
+    </td>
+    <td>
+      @if (lib.sotugar && lib.sotugar.acceptee != undefined) {
+      {{ lib.sotugar.montantARegler | number : "1.0-0" }}
+      }
+    </td>
+
+    <td>
+      @if (lib.sotugar?.acceptee) {
+      <div cds-layout="horizontal">
+        <cds-icon
+          title="Cliquer ici pour ajouter ou supprimer l'ordre de virement de règlement"
+          shape="ellipsis-vertical"
+          style="cursor: pointer; margin-top: 0.2em"
+          (click)="setPayee(lib, $event)"
+        ></cds-icon>
+
+        <cds-divider
+          orientation="vertical"
+          style="padding: 0 7px"
+        ></cds-divider>
+        <div cds-layout="horizontal ; align:right ">
+          <clr-toggle-wrapper
+            [style.marginRight]="'0'"
+            [class]="lib.sotugar?.payee ? 'reglee' : ''"
+          >
+            <label></label>
+            <input
+              [disabled]="true"
+              type="checkbox"
+              clrToggle
+              name="payee0"
+              [checked]="lib.sotugar?.payee"
+            />
+          </clr-toggle-wrapper>
+        </div>
+      </div>
+      }
+    </td>
+  </tr>
+  } @for (lib of pf.libC; track lib; let m = $index) {
+  <tr>
+    <td>
+      <div cds-layout="horizontal align:tretech gap:md">
+        <span cds-layout="horizontal align:left">
+          {{ lib.dateLiberation | date : "dd/MM/yyyy" }}</span
+        >
+      </div>
+    </td>
+
+    <td class="digit">-</td>
+    <td class="digit">-</td>
+    <td class="digit">
+      {{ lib.montantLiberation | number : "1.0-0" }}
+    </td>
+    @if (m == 0 && pf.libA == null && pf.libO == null) {
+    <td
+      class="digit"
+      [attr.rowspan]="pf.libA?.length + pf.libO?.length + pf.libC?.length"
+    >
+      {{ pf.totalLibere | number : "1.0-0" }}
+    </td>
+    }
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  } } }
+</table>
+
+<!-- Info conversions -->
+<div cds-layout="vertical gap:sm m-y:md">
+  <div cds-text="body">
+    (<cds-icon shape="asterisk" class="warning" solid></cds-icon>) : Le plan de
+    financement a vu des conversions des OCAs en actions ordinaires (cliquer sur
+    l'icone pour voir la liste des conversions)
+  </div>
+  <div cds-text="body">
+    (<cds-icon shape="asterisk" class="info" solid></cds-icon>) : Le plan de
+    financement a vu des conversions du CCA en actions ordinaires (cliquer sur
+    l'icone pour voir la liste des conversions)
+  </div>
+</div>
+
+<!-- Side panel -->
+<clr-side-panel
+  [(clrSidePanelOpen)]="editSidePanelOpened"
+  [clrSidePanelStaticBackdrop]="false"
+  [clrSidePanelSkipAnimation]="false"
+  [clrSidePanelBackdrop]="true"
+  [clrSidePanelSize]="'md'"
+  (clrSidePanelOpenChange)="closeSidePanel()"
+>
+  <div class="side-panel-title">
+    <span
+      style="
+        text-transform: uppercase;
+        font-size: x-large;
+        color: var(--cds-alias-status-info);
+      "
+    >
+      <cds-icon
+        shape="factory"
+        size="md"
+        status="info"
+        cds-layout="m-b:sm"
+      ></cds-icon>
+      {{ selectedProject?.projet?.nom }}
+    </span>
+  </div>
+
+  <div class="side-panel-body" cds-layout="p-y:lg">
+    <!-- Title -->
+    <span cds-text="section inline">
+      <cds-icon shape="map" badge="info" size="18"></cds-icon>
+      Plan de financement du
+      <b
+        [style.color]="'var(--cds-alias-utility-gray-shade)'"
+        [style.fontWeight]="'500'"
+      >
+        {{
+          selectedLiberation?.souscription?.financement?.dateDemandeFinancement
+            | date : "dd/MM/yyyy"
+        }}
+      </b>
+    </span>
+
+    <div cds-layout="vertical gap:md p-x:none p-y:xl">
+      <!-- Divider -->
+      <cds-divider
+        orientation="horizontal"
+        class="htitled-divider"
+        title="Documents collectés pour cet investissement"
+      ></cds-divider>
+
+      <!-- Documents -->
+      @for (conformite of selectedFinancement?.conformite; track $index) { @if
+      (conformite?.exist) {
+      <a
+        [href]="parseDocPathFromConformite(conformite)"
+        target="_blank"
+        [style.paddingLeft]="'0.5em'"
+      >
+        <cds-icon shape="pdf-file" size="18"></cds-icon>
+        {{ conformite.docType.libelle }}
+      </a>
+      } @if (!conformite?.exist) {
+      <span
+        [style.paddingLeft]="'0.5em'"
+        [style.color]="'var(--cds-alias-utility-red)'"
+        [style.letterSpacing]="'1px'"
+        [style.fontWeight]="'300'"
+        aria-label="Document absent"
+        role="tooltip"
+        aria-haspopup="true"
+        class="tooltip tooltip-md"
+      >
+        <cds-icon
+          shape="no-access"
+          solid=""
+          size="18"
+          [style.opacity]="0.7"
+        ></cds-icon>
+        {{ conformite?.docType?.libelle }}
+      </span>
+      } }
+
+      <cds-divider
+        cds-layout="m-t:xl"
+        orientation="horizontal"
+        class="htitled-divider"
+        [title]="
+          'Bulletin de souscription en (' + selectedLiberation?.type + ')'
+        "
+      ></cds-divider>
+
+      <!-- Bulletin de souscription -->
+      @if (selectedLiberation?.souscription?.documents != null) {
+      <a
+        [href]="parseDocPath(selectedLiberation?.souscription?.documents)"
+        target="_blank"
+      >
+        <cds-icon shape="pdf-file" size="18"></cds-icon>
+        Bulletin de souscription
+      </a>
+      } @if (selectedLiberation?.souscription?.documents == null) {
+      <span
+        [style.color]="'var(--cds-alias-utility-red)'"
+        [style.letterSpacing]="'1px'"
+        [style.fontWeight]="'300'"
+        aria-label="Document absent"
+        role="tooltip"
+        aria-haspopup="true"
+        class="tooltip tooltip-md"
+      >
+        <cds-icon
+          shape="no-access"
+          solid=""
+          size="18"
+          [style.opacity]="0.7"
+        ></cds-icon>
+        Bulletin de souscription
+        <span class="tooltip-content">
+          Il faut télécharger le bulletin de souscription au niveau
+          Investissement > Souscriptions des fonds > Souscription
+          {{ selectedLiberation?.type }} !
+        </span>
+      </span>
+      }
+
+      <cds-divider
+        cds-layout="m-t:xl"
+        orientation="horizontal"
+        class="htitled-divider"
+        [title]="'Libération (' + selectedLiberation?.type + ')'"
+      ></cds-divider>
+
+      <!-- Libération -->
+      @if (selectedLiberation?.documents != null) {
+      <a [href]="parseDocPath(selectedLiberation.documents)" target="_blank">
+        <cds-icon shape="pdf-file" size="18"></cds-icon>
+        Ordre de virement/Chèque
+      </a>
+      } @if (selectedLiberation?.documents == null) {
+      <span
+        [style.color]="'var(--cds-alias-utility-red)'"
+        [style.letterSpacing]="'1px'"
+        [style.fontWeight]="'300'"
+        aria-label="Document absent"
+        role="tooltip"
+        aria-haspopup="true"
+        class="tooltip tooltip-md"
+      >
+        <cds-icon
+          shape="no-access"
+          solid=""
+          size="18"
+          [style.opacity]="0.7"
+        ></cds-icon>
+        Ordre de virement/Chèque
+        <span class="tooltip-content">
+          Il faut télécharger l'ordre de virement ou le chèque au niveau
+          Investissement > Souscriptions des fonds > Souscription
+          {{ selectedLiberation?.type }} > Libérations !
+        </span>
+      </span>
+      }
+
+      <cds-divider
+        cds-layout="m-t:xl"
+        orientation="horizontal"
+        class="htitled-divider"
+        title="Envoi de la demande de garantie"
+      ></cds-divider>
+
+      <form clrForm [formGroup]="dateSaveForm!" [clrLabelSize]="5">
+        <clr-date-container>
+          <label for="dateEnvoiDemande" class="clr-required-mark">
+            Date :
+          </label>
+          <input
+            clrDate
+            formControlName="dateEnvoiDemande"
+            name="dateEnvoiDemande"
+            type="date"
+            size="12"
+          />
+        </clr-date-container>
+      </form>
+
+      <div>
+        <cds-button
+          action="outline"
+          size="sm"
+          [style.paddingLeft]="'0.5em'"
+          (click)="initiateSotugar(selectedLiberation)"
+        >
+          <cds-icon shape="floppy"></cds-icon>
+          Sauvegarder
+        </cds-button>
+
+        <cds-button
+          [disabled]="!selectedLiberation?.sotugar"
+          status="danger"
+          action="outline"
+          size="sm"
+          [style.paddingLeft]="'0.5em'"
+          (click)="deleteSotugar()"
+        >
+          <cds-icon shape="trash"></cds-icon>
+          Supprimer la Sotugar
+        </cds-button>
+      </div>
+
+      <cds-divider
+        cds-layout="m-t:xl"
+        orientation="horizontal"
+        class="htitled-divider"
+        title="Documents utiles d'assurance"
+      ></cds-divider>
+
+      <!-- Documents Utiles d'Assurance -->
+      @if (selectedLiberation?.sotugar != undefined) { @if
+      (selectedLiberation?.type == 'Actions') { @for(conformite of
+      sotugar_conformite_actions_documentaire; track $index) {
+      <document-upload
+        #sotugarActionDocUpload
+        [compliance]="{ conformite: conformite }"
+        [data]="selectedLiberation?.sotugar"
+        [phase_row]="4"
+        [task_row]="1"
+        (documentUploadedEvent)="
+          refreshLiberationSotugar(selectedLiberation, 'action')
+        "
+      >
+      </document-upload>
+      } } @if (selectedLiberation?.type == 'OCA') { @for(conformite of
+      sotugar_conformite_oca_documentaire; track $index) {
+      <document-upload
+        #sotugarOCADocUpload
+        [compliance]="{ conformite: conformite }"
+        [data]="selectedLiberation?.sotugar"
+        [phase_row]="4"
+        [task_row]="2"
+        (documentUploadedEvent)="
+          refreshLiberationSotugar(selectedLiberation, 'oca')
+        "
+      >
+      </document-upload>
+      } } } @if (selectedLiberation?.sotugar != undefined) {
+      <h4>
+        <cds-icon shape="shield-check" size="md" solid></cds-icon>
+        Déclaration Sotugar
+        <cds-icon
+          [style.marginBottom]="'.3em'"
+          [style.marginLeft]="'1em'"
+          [style.cursor]="'pointer'"
+          shape="pop-out"
+          size="lg"
+          (click)="showDeclaration()"
+        >
+        </cds-icon>
+      </h4>
+      }
+    </div>
+  </div>
+</clr-side-panel>
+
+<!-- MODAL DE DECLARATION SOTUGAR -->
+<clr-modal [clrModalSize]="'md'" [(clrModalOpen)]="opened">
+  <h3 class="modal-title">
+    <cds-icon shape="shield-check" size="lg" status="info" solid></cds-icon>
+    Déclaration SOTUGAR
+  </h3>
+  <div class="modal-body sotugar">
+    <cds-divider
+      orientation="horizontal"
+      cds-layout="m-t:xs m-b:lg"
+    ></cds-divider>
+
+    <form clrForm [formGroup]="detailsSaveForm!" clrLabelSize="6">
+      <clr-date-container>
+        <label for="dateDecision" class="clr-required-mark"
+          ><cds-icon shape="calendar" status="info" solid></cds-icon>
+          Date de décision
+        </label>
+        <input
+          clrDate
+          type="date"
+          formControlName="dateDecision"
+          name="dateDecision"
+          style="width: 195px"
+        />
+      </clr-date-container>
+      <clr-select-container>
+        <label for="acceptee" class="clr-required-mark"
+          ><cds-icon shape="digital-signature" solid status="info"></cds-icon>
+          Décision</label
+        >
+        <select
+          clrSelect
+          name="options"
+          formControlName="acceptee"
+          style="width: 220px !important"
+        >
+          @for(decision of decisions; track $index) {
+          <option [value]="decision.value">
+            {{ decision?.label }}
+          </option>
+          }
+        </select>
+      </clr-select-container>
+
+      <clr-control-container>
+        <label
+          ><cds-icon shape="dollar-bill" solid status="info"></cds-icon> Montant
+          à garantir</label
+        >
+        <label>{{
+          selectedLiberation?.montantLiberation
+            | currency : "tnd" : "symbol" : "1.0-0"
+        }}</label>
+      </clr-control-container>
+      <clr-number-input-container>
+        <label for="pourcentageDeGarantie" class="clr-required-mark"
+          ><cds-icon shape="resource-pool" solid status="info"></cds-icon>
+          Pourcentage de garantie</label
+        >
+        <input
+          clrNumberInput
+          type="number"
+          formControlName="pourcentageDeGarantie"
+          name="pourcentageDeGarantie"
+          style="width: 170px"
+        />
+      </clr-number-input-container>
+      <clr-number-input-container>
+        <label for="pourcentageDeContribution" class="clr-required-mark"
+          ><cds-icon shape="resource-pool" solid status="info"></cds-icon>
+          Pourcentage de contribution</label
+        >
+        <input
+          clrNumberInput
+          type="number"
+          formControlName="pourcentageDeContribution"
+          name="pourcentageDeContribution"
+          style="width: 170px"
+        />
+      </clr-number-input-container>
+      <clr-control-container>
+        <label
+          ><cds-icon shape="coin-bag" solid status="info"></cds-icon> Montant à
+          régler</label
+        >
+
+        <label>
+          {{
+            (detailsSaveForm.controls["pourcentageDeContribution"].value /
+              100) *
+              selectedLiberation?.montantLiberation
+              | currency : "tnd" : "symbol" : "1.0-0"
+          }}
+        </label>
+      </clr-control-container>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <cds-button action="outline" (click)="opened = false">Annuler</cds-button>
+    <cds-button
+      status="primary"
+      [disabled]="detailsSaveForm.invalid"
+      (click)="saveDeclaration(selectedLiberation)"
+    >
+      <cds-icon shape="floppy"></cds-icon> Sauvegarder
+    </cds-button>
+  </div>
+</clr-modal>
+
+<!-- MODAL DE Upload Docs SOTUGAR -->
+<clr-modal
+  [clrModalSize]="'md'"
+  [(clrModalOpen)]="showUploadRegSotugar"
+  (clrModalOpenChange)="refreshPayee($event)"
+>
+  <h3 class="modal-title">
+    <cds-icon shape="upload" size="lg" solid=""></cds-icon> Télécharger l'ordre
+    de virement ou bien le chèque
+  </h3>
+  <div class="modal-body">
+    @if (selectedLiberation?.sotugar?.payee) {
+    <div
+      class="alert alert-warning"
+      role="alert"
+      style="margin-top: 1.5em; margin-bottom: -1em"
+    >
+      <div class="alert-items">
+        <div class="alert-item static">
+          <div class="alert-icon-wrapper">
+            <cds-icon
+              class="alert-icon"
+              shape="exclamation-triangle"
+            ></cds-icon>
+          </div>
+          <span class="alert-text"
+            >La suppression du document force un état "non réglée" à la
+            SOTUGAR!</span
+          >
+        </div>
+      </div>
+    </div>
+    } @if (selectedLiberation?.type == 'Actions') { @for(conformite of
+    reg_sotugar_conformite_actions_documentaire; track $index) {
+    <document-upload
+      #uploadSotugarPaiementDocument
+      [compliance]="{ conformite: conformite }"
+      [data]="selectedLiberation?.sotugar"
+      [phase_row]="4"
+      [task_row]="1"
+      (documentUploadedEvent)="patchSotugar($event)"
+    ></document-upload>
+    } } @if (selectedLiberation?.type == 'OCA') { @for(conformite of
+    reg_sotugar_conformite_oca_documentaire; track $index) {
+    <document-upload
+      #uploadSotugarPaiementDocument
+      [compliance]="{ conformite: conformite }"
+      [data]="selectedLiberation?.sotugar"
+      [phase_row]="4"
+      [task_row]="2"
+      (documentUploadedEvent)="patchSotugar($event)"
+    ></document-upload>
+    } }
+  </div>
+</clr-modal>

@@ -1,0 +1,106 @@
+<!-- Header -->
+<span cds-text="title">
+  <cds-icon
+    shape="announcement"
+    status="info"
+    size="lg"
+    cds-layout="m-b:xs"
+  ></cds-icon>
+  Gestion des types d'élection</span
+>
+<!-- Data grid -->
+<clr-datagrid
+  [(clrDgSingleSelected)]="selectedItem"
+  [clrDgLoading]="loading"
+  style="height: calc(100vh - 155px); margin-top: 1em"
+>
+  <clr-dg-action-bar>
+    <!-- Actions -->
+    <div class="btn-group">
+      <cds-button
+        action="outline"
+        status="primary"
+        (click)="openAddModal()"
+        onKeyPress=""
+      >
+        <cds-icon shape="plus" size="md"></cds-icon> Ajouter
+      </cds-button>
+    </div>
+    <div class="btn-group">
+      <cds-button
+        action="outline"
+        status="warning"
+        [disabled]="!selectedItem?.id"
+        (click)="toggleShowEdit(selectedItem)"
+        onkeypress=""
+      >
+        <cds-icon shape="note" size="md"></cds-icon> Modifier
+      </cds-button>
+    </div>
+    <div class="btn-group">
+      <cds-button
+        action="outline"
+        status="danger"
+        (click)="deleteVoteType()"
+        [disabled]="!selectedItem?.id"
+        onkeypress=""
+      >
+        <cds-icon shape="trash" size="md"></cds-icon> Supprimer
+      </cds-button>
+    </div>
+    <!-- Divider -->
+    <cds-divider
+      cds-layout="m-t:lg m-b:sm"
+      class="htitled-divider"
+      title="Types de vote"
+    ></cds-divider>
+  </clr-dg-action-bar>
+  <clr-dg-column [clrDgField]="'libelle'">Type de vote</clr-dg-column>
+  <clr-dg-row *clrDgItems="let voteType of voteTypes" [clrDgItem]="voteType">
+    <clr-dg-cell>{{ voteType.libelle }}</clr-dg-cell>
+  </clr-dg-row>
+  <clr-dg-footer>{{ voteTypes.length }} Types de vote</clr-dg-footer>
+</clr-datagrid>
+
+<!-- Modal method CRUD -->
+<clr-modal #modal [(clrModalOpen)]="openModal" [clrModalSize]="'md'">
+  <!-- Header -->
+  <div class="modal-title">
+    <cds-icon status="info" shape="announcement" size="lg" solid=""></cds-icon>
+    Gestion des types de vote
+  </div>
+  <!-- Body -->
+  <div class="modal-body">
+    <!-- Form -->
+    <form clrForm [formGroup]="voteTypeForm!" clrLabelSize="2">
+      <clr-input-container>
+        <label>Libellé:</label>
+        <input
+          clrInput
+          placeholder="Libellé du type de vote"
+          type="text"
+          formControlName="libelle"
+          style="width: 375px"
+        />
+      </clr-input-container>
+    </form>
+  </div>
+  <!-- Footer -->
+  <div class="modal-footer">
+    <!-- Buttons -->
+    <cds-button
+      action="outline"
+      (click)="openModal = false"
+      onKeyPress="openModal = false"
+      >Annuler</cds-button
+    >
+    <cds-button
+      status="primary"
+      (click)="saveVoteType()"
+      [disabled]="voteTypeForm.invalid"
+      onkeypress=""
+    >
+      Sauvegarder
+    </cds-button>
+  </div>
+</clr-modal>

@@ -1,0 +1,8 @@
+::ng-deep .stack-view .stack-view-key {
+    max-width: 25% !important;
+    --cds-global-space-7: 0 !important;
+}
+
+::ng-deep .stack-view .stack-block-content {
+    width: 75% !important
+}

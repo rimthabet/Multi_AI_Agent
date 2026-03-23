@@ -1,0 +1,213 @@
+<div cds-layout="vertical align:stretch gap:sm">
+  <!-- Première ligne -->
+  <div cds-layout="grid cols@lg:6 cols@md:6 cols@sm:12 gap:sm p:none ">
+    <div
+      cds-layout="col@lg:3 col@md:6 cols@sm:12"
+      class="large-text-snippet thin"
+      cds-text="monospace"
+      style="
+        --border-color: var(--TOTAL);
+        --bg-color: var(--cds-alias-object-interaction-neutral-secondary-hover);
+        --fore-color: var(--TOTAL);
+      "
+    >
+      <div cds-layout="vertical align:space-between gap:xs">
+        <span
+          class="big-text"
+          style="--fore-color: var(--TOTAL); font-variant: small-caps"
+          cds-text="title"
+          >{{ fonds()?.length | number : "2.0-0" }}
+        </span>
+        <span class="small-text"># Fonds</span>
+      </div>
+    </div>
+
+    <div
+      cds-layout="col@lg:5 col@md:6 cols@sm:12"
+      class="large-text-snippet thin"
+      style="
+        --border-color: var(--TOTAL);
+        --bg-color: var(--cds-alias-object-interaction-neutral-secondary-hover);
+        --fore-color: var(--TOTAL);
+      "
+    >
+      <div
+        class="big-text"
+        style="--fore-color: var(--TOTAL); font-variant: small-caps"
+        cds-text="title"
+        cds-layout="horizontal align:space-between p:xxs m:none"
+      >
+        {{ this.activeProjects()?.length | number : "2.0-0" }}
+
+        <clr-signpost
+          cds-layout="m-l:sm"
+          style="font-family: Arial !important"
+          cds-layout="align:right"
+        >
+          <span
+            class="btn btn-link"
+            style="font-size: 9px; font-weight: 100; margin-right: 0.5em"
+            clrSignpostTrigger
+          >
+            Détails <cds-icon shape="pop-out" name="info"></cds-icon>
+          </span>
+          <clr-signpost-content [clrPosition]="'bottom-left'" *clrIfOpen>
+            @for (etat of activeProjectsByEtatWithDetails() | keyvalue; track
+            etat.key) {
+
+            <div style="line-height: 2em">
+              <cds-icon
+                shape="circle"
+                solid=""
+                [style.color]="etat.value.color"
+              ></cds-icon>
+              <span class="label"
+                >{{ etat.value.etatName }}
+                <span class="badge">{{ etat.value.count }}</span></span
+              >
+            </div>
+            }
+          </clr-signpost-content>
+        </clr-signpost>
+      </div>
+      <span class="small-text" style="font-size: 80% !important"
+        >Projets sous gestion</span
+      >
+    </div>
+
+    <div
+      cds-layout="col@lg:4 col@md:6 cols@sm:12"
+      class="large-text-snippet thin"
+      style="
+        --border-color: var(--cds-alias-object-interaction-danger-click);
+        --bg-color: var(--cds-alias-object-interaction-neutral-secondary-hover);
+        --fore-color: var(--cds-alias-object-interaction-danger-click);
+      "
+    >
+      <span
+        class="big-text"
+        style="
+          --fore-color: var(--cds-alias-object-interaction-danger-click);
+          font-variant: small-caps;
+        "
+        cds-text="title"
+        cds-layout="horizontal align:space-between p:xxs m:none"
+        >{{ this.canceledProjects()?.length | number : "2.0-0" }}
+
+        <clr-signpost
+          cds-layout="m-l:sm"
+          style="font-family: Arial !important"
+          cds-layout="align:right"
+        >
+          <span
+            class="btn btn-link"
+            style="font-size: 9px; font-weight: 100; margin-right: 0.5em"
+            clrSignpostTrigger
+          >
+            Détails <cds-icon shape="pop-out" name="info"></cds-icon>
+          </span>
+          <clr-signpost-content [clrPosition]="'bottom-left'" *clrIfOpen>
+            @for (etat of inactiveProjectsByEtatWithDetails() | keyvalue; track
+            etat.key) {
+
+            <div style="line-height: 2em">
+              <cds-icon
+                shape="circle"
+                solid=""
+                [style.color]="etat.value.color"
+              ></cds-icon>
+              <span class="label"
+                >{{ etat.value.etatName }}
+                <span class="badge">{{ etat.value.count }}</span></span
+              >
+            </div>
+            }
+          </clr-signpost-content>
+        </clr-signpost>
+      </span>
+      <span class="small-text" style="font-size: 80% !important"
+        >Projets n.acceptés</span
+      >
+    </div>
+
+    <!-- Deuxième ligne -->
+
+    <div
+      class="large-text-snippet thin"
+      cds-text="monospace"
+      style="
+        --border-color: var(--TOTAL);
+        --bg-color: var(--cds-alias-object-interaction-neutral-secondary-hover);
+        --fore-color: var(--TOTAL);
+      "
+    >
+      <div cds-layout="vertical gap:sm">
+        <span
+          class="big-text"
+          style="--fore-color: var(--TOTAL); font-variant: small-caps"
+          cds-text="title"
+          >{{ subscriptions()?.length }}
+        </span>
+        <span class="small-text"># Souscriptions</span>
+      </div>
+    </div>
+
+    <div
+      class="large-text-snippet thin"
+      cds-text="monospace"
+      style="
+        --border-color: var(--TOTAL);
+        --bg-color: var(--cds-alias-object-interaction-neutral-secondary-hover);
+        --fore-color: var(--TOTAL);
+      "
+    >
+      <div cds-layout="vertical gap:sm">
+        <span
+          class="big-text"
+          style="--fore-color: var(--TOTAL); font-variant: small-caps"
+          cds-text="title"
+          >{{ secteurs() }}
+        </span>
+        <span class="small-text"># Secteurs</span>
+      </div>
+    </div>
+    <div
+      class="large-text-snippet thin"
+      cds-text="monospace"
+      style="
+        --border-color: var(--TOTAL);
+        --bg-color: var(--cds-alias-object-interaction-neutral-secondary-hover);
+        --fore-color: var(--TOTAL);
+      "
+    >
+      <div cds-layout="vertical gap:sm">
+        <span
+          class="big-text"
+          style="--fore-color: var(--TOTAL); font-variant: small-caps"
+          cds-text="title"
+          >{{ subscribers() }}
+        </span>
+        <span class="small-text"># Souscripteurs</span>
+      </div>
+    </div>
+    <div
+      class="large-text-snippet thin"
+      cds-text="monospace"
+      style="
+        --border-color: var(--TOTAL);
+        --bg-color: var(--cds-alias-object-interaction-neutral-secondary-hover);
+        --fore-color: var(--TOTAL);
+      "
+    >
+      <div cds-layout="vertical gap:sm">
+        <span
+          class="big-text"
+          style="--fore-color: var(--TOTAL); font-variant: small-caps"
+          cds-text="title"
+          >{{ promoteurs() }}
+        </span>
+        <span class="small-text"># Promoteurs</span>
+      </div>
+    </div>
+  </div>
+</div>

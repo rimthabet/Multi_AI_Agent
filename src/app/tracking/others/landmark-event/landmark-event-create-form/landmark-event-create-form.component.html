@@ -1,0 +1,40 @@
+<!-- Form Fait Marquant -->
+<form clrForm [formGroup]="faitMarquantSaveForm" clrLabelSize="2">
+    <clr-date-container>
+        <label for="date_f" class="clr-required-mark">Date du fait marquant:</label>
+        <input clrDate type="date" formControlName="dateFM" name="dateFM" />
+    </clr-date-container>
+
+    <clr-textarea-container>
+        <label for="commentaires" class="clr-required-mark">Ordre du jour:</label>
+        <textarea clrTextarea cols="75" rows="7" id="commentaires" formControlName="commentaires"
+            [placeholder]="'Saisissez l\'ordre du jour du comité...'"></textarea>
+        <clr-control-helper>
+            Vous pouvez utiliser la synthaxe
+            <a href="https://www.markdownguide.org/" target="_blank">Markdown</a> pour
+            formater votre fait marquant</clr-control-helper>
+    </clr-textarea-container>
+
+
+    <!-- Buttons -->
+    <div cds-layout="horizontal m-t:lg">
+        <div class="btn-group">
+            <cds-button (click)="saveFaitMarquant()" [disabled]="faitMarquantSaveForm.invalid">
+                <cds-icon shape="add-text" size="md"></cds-icon> Sauvegarder le fait marquant
+            </cds-button>
+        </div>
+        <div class="btn-group">
+            <cds-button [disabled]="!savedFaitMarquant">
+                <cds-icon shape="details" size="md"></cds-icon> Générer le PV du fait marquant
+            </cds-button>
+        </div>
+    </div>
+</form>
+
+<!-- Documents -->
+@if(create){
+@for(conformite of conformite_documentaires; track $index) {
+<document-upload #documents [compliance]="{ document: undefined, conformite: conformite }" [data]="savedFaitMarquant"
+    [task_row]="5" [phase_row]="5"></document-upload>
+}
+}

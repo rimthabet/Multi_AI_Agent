@@ -1,0 +1,403 @@
+<!-- Loading Spinner -->
+<div
+  class="modal-backdrop"
+  aria-hidden="true"
+  [style.display]="loading ? 'block' : 'none'"
+  (click)="loading = false"
+>
+  <span
+    class="spinner"
+    style="
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    "
+    >Loading...</span
+  >
+</div>
+
+<!-- Header -->
+<div cds-layout="horizontal gap:none p:none align:stretch">
+  <span cds-text="headline" style="z-index: 1">
+    <cds-icon
+      shape="building"
+      size="lg"
+      status="info"
+      cds-layout="m-b:sm"
+    ></cds-icon>
+    Projets sous gestion
+  </span>
+
+  <!-- Layout toggle -->
+  <div class="btn-group" cds-layout="horizontal align:right p:none">
+    <div class="radio btn">
+      <input
+        type="radio"
+        name="display-mode"
+        id="display-mode-grid"
+        value="grid"
+        [ngModel]="layout"
+        (click)="layout = 'grid'"
+      />
+      <label for="display-mode-grid">
+        <cds-icon shape="grid-view"></cds-icon>
+      </label>
+    </div>
+    <div class="radio btn">
+      <input
+        type="radio"
+        name="display-mode"
+        id="display-mode-table"
+        value="table"
+        [ngModel]="layout"
+        (click)="layout = 'table'"
+      />
+      <label for="display-mode-table">
+        <cds-icon shape="bars"></cds-icon>
+      </label>
+    </div>
+  </div>
+</div>
+
+<!-- Search and filters -->
+<div cds-layout="horizontal gap:sm p-y:sm align:left">
+  <!-- Search -->
+  <cds-form-group style="margin: 0" [formGroup]="searchPatternForm">
+    <cds-search>
+      <label cds-layout="display:screen-reader-only"
+        >Recherche des projets</label
+      >
+      <input
+        type="search"
+        placeholder="Recherche des projets"
+        formControlName="pattern"
+        name="pattern"
+      />
+    </cds-search>
+  </cds-form-group>
+
+  <!-- Filters -->
+  <span cds-layout="p-t:xxs">
+    Filtrer <cds-icon shape="filter"></cds-icon> :
+  </span>
+
+  <!-- Projects in Investment Button -->
+
+  <clr-dropdown>
+    <button class="btn btn-sm btn-outline" clrDropdownTrigger>
+      État du projet
+      <cds-icon shape="angle" direction="down"></cds-icon>
+    </button>
+
+    <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
+      @for(e of etats; track e) {
+      <div clrDropdownItem (click)="filterEtat(e)">
+        <cds-icon
+          shape="stop"
+          [style]="{ color: e.couleur + '!important' }"
+          solid
+        ></cds-icon>
+        {{ e.libelle }}
+      </div>
+      }
+
+      <div class="dropdown-divider" role="separator" aria-hidden="true"></div>
+
+      @for(e of etats_rejets; track e) {
+      <div clrDropdownItem (click)="filterEtat(e)">
+        <cds-icon
+          shape="stop"
+          [style]="{ color: e.couleur + '!important' }"
+          solid
+        ></cds-icon>
+        {{ e.libelle }}
+      </div>
+      }
+    </clr-dropdown-menu>
+  </clr-dropdown>
+
+  <cds-divider orientation="vertical"></cds-divider>
+
+  <clr-dropdown>
+    <button class="btn btn-sm btn-outline" clrDropdownTrigger>
+      Fonds investisseur
+      <cds-icon shape="angle" direction="down"></cds-icon>
+    </button>
+    <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
+      @for(f of fonds; track f) {
+      <div clrDropdownItem (click)="filterFonds(f)">
+        {{ f.denomination }}
+      </div>
+      }
+    </clr-dropdown-menu>
+  </clr-dropdown>
+
+  <span>({{ filteredProjets.length | number : "1.0-0" }} projets) </span>
+
+  <cds-divider orientation="vertical"></cds-divider>
+
+  <cds-button routerLink="/tracking/projects" size="sm">
+    Projets en investissement <cds-icon shape="link"></cds-icon>
+  </cds-button>
+
+  <div cds-layout="horizontal gap:xxs p:none align:right">
+    @for(filter of statsArray; track filter[0]) {
+    <clr-tooltip style="--clr-tooltip-background-color: {{ filter[1].color }}">
+      <div
+        class="badge"
+        [style.borderRadius]="'5px'"
+        [style.fontSize]="'16px'"
+        [style.padding]="'15px 10px !important'"
+        [style.background-color]="filter[1].color"
+        clrTooltipTrigger
+      >
+        {{ filter[1].count }}
+      </div>
+      <clr-tooltip-content [clrPosition]="'top-left'" [clrSize]="'sm'">
+        {{ filter[1].label }}
+      </clr-tooltip-content>
+    </clr-tooltip>
+
+    }
+  </div>
+</div>
+
+<!-- Filters Patterns -->
+<div cds-layout="horizontal gap:xxs" class="filters-panel">
+  @for(filter of filteredEtats; track filter) {
+  <span class="label">
+    <cds-icon
+      shape="stop"
+      [style]="{ color: filter.couleur, marginLeft: '-5px' }"
+      solid=""
+    ></cds-icon>
+    {{ filter.libelle }}
+    <span class="badge" (click)="cancelFilterEtat(filter)">X</span>
+  </span>
+  }
+  <cds-divider
+    orientation="vertical"
+    [style]="{ marginRight: '7px' }"
+  ></cds-divider>
+
+  @if(filteredFonds){
+  <span
+    class="label"
+    style="background-color: var(--cds-alias-status-info-tint)"
+  >
+    <cds-icon
+      shape="coin-bag"
+      solid
+      [style]="{ marginLeft: '-5px' }"
+    ></cds-icon>
+    {{ filteredFonds.denomination }}
+    <span class="badge" (click)="cancelFilterFonds()">X</span>
+  </span>
+  }
+</div>
+
+<!-- Inventory -->
+<cds-divider
+  class="htitled-divider"
+  title="Inventaire des projets gérés"
+  style="margin-top: 1em"
+></cds-divider>
+
+<!-- Grid Layout -->
+@if(layout === 'grid') { @for (p of filteredProjets; track $index) {
+
+<project-card
+  [project]="p"
+  (openEtatChangePopup)="displayEtatChangeModal($event)"
+  (deleteEventEmitter)="deleteProjet($event)"
+></project-card>
+
+<!-- Inventory -->
+<cds-divider
+  class="htitled-divider"
+  title="Inventaire des projets gérés"
+  style="margin-top: 1.5em"
+></cds-divider>
+
+} } @else {
+<clr-datagrid style="max-height: calc(100vh - 265px); margin-top: 10px">
+  <clr-dg-column [clrDgField]="'projet.nom'">Projet</clr-dg-column>
+  <clr-dg-column [clrDgField]="'projet.promoteur.nom'"
+    ><ng-container *clrDgHideableColumn="{ hidden: false }"
+      >Promoteur</ng-container
+    ></clr-dg-column
+  >
+  <clr-dg-column [clrDgField]="'projet.activite'"
+    ><ng-container *clrDgHideableColumn="{ hidden: false }"
+      >Activité</ng-container
+    ></clr-dg-column
+  >
+  <clr-dg-column
+    ><ng-container *clrDgHideableColumn="{ hidden: true }"
+      >Secteur</ng-container
+    ></clr-dg-column
+  >
+  <clr-dg-column [clrDgField]="'projet.natureInvestissement.libelle'"
+    ><ng-container *clrDgHideableColumn="{ hidden: false }"
+      >Critère(s) de présélection</ng-container
+    ></clr-dg-column
+  >
+  <clr-dg-column [clrDgField]="'projet.natureInvestissement.libelle'"
+    ><ng-container *clrDgHideableColumn="{ hidden: true }"
+      >Nature Investissement</ng-container
+    ></clr-dg-column
+  >
+  <clr-dg-column [clrDgField]="'projet.statutActuel'">État</clr-dg-column>
+  <clr-dg-column [clrDgField]="'projet.capitalSocial'"
+    >Capital social &nbsp;<small>(tnd)</small></clr-dg-column
+  >
+
+  <clr-dg-row *clrDgItems="let record of filteredProjets">
+    <clr-dg-action-overflow>
+      <button
+        class="action-item"
+        (click)="displayEtatChangeModal(record.projet)"
+      >
+        <cds-icon shape="pop-out"></cds-icon> Modifier l'état d'avancement
+      </button>
+      <button
+        class="action-item"
+        [routerLink]="['/projets/modification-projet/', record.projet?.id]"
+      >
+        <cds-icon shape="form"></cds-icon> Editer le projet
+      </button>
+      <button class="action-item" (click)="deleteProjet(record.projet)">
+        <cds-icon shape="trash"></cds-icon> Supprimer le projet
+      </button>
+      <button
+        class="action-item"
+        [routerLink]="['/projets/projet-home/', record.projet.id]"
+      >
+        <cds-icon shape="eye"></cds-icon> Fiche projet
+      </button>
+    </clr-dg-action-overflow>
+
+    <clr-dg-cell>
+      <span style="font-size: 90%" class="info">
+        {{ record.projet?.nom?.toUpperCase() }}</span
+      ></clr-dg-cell
+    >
+    <clr-dg-cell>{{ record.projet.promoteur?.nom }}</clr-dg-cell>
+    <clr-dg-cell>{{ record.projet.activite }}</clr-dg-cell>
+    <clr-dg-cell>{{ record.projet.secteurs[0]?.libelle }}</clr-dg-cell>
+    <clr-dg-cell>
+      @for(c of record.projet.criteresPreselection; track c) {
+      <div>{{ c.libelle }}</div>
+      }
+    </clr-dg-cell>
+    <clr-dg-cell>{{ record.projet.natureInvestissement?.libelle }}</clr-dg-cell>
+    <clr-dg-cell [style.fontSize]="'85%'">
+      <div cds-layout="horizontal align:stretch" style="white-space: nowrap">
+        <span
+          ><cds-icon
+            shape="stop"
+            solid=""
+            [style]="{
+              color: record.projet?.etatAvancement?.couleur,
+              marginLeft: '-10px'
+            }"
+          ></cds-icon>
+          {{ record.projet?.etatAvancement?.libelle }}</span
+        >
+        <div cds-layout="align:right" style="text-align: right">
+          <cds-icon
+            shape="pop-out"
+            class="info"
+            (click)="displayEtatChangeModal(record.projet)"
+          ></cds-icon>
+        </div>
+      </div>
+    </clr-dg-cell>
+    <clr-dg-cell class="right digit">{{
+      record.projet.capitalSocial | number : "1.0-0"
+    }}</clr-dg-cell>
+  </clr-dg-row>
+
+  <clr-dg-footer>{{ filteredProjets.length }} projets</clr-dg-footer>
+</clr-datagrid>
+}
+
+<!-- Etat change modal -->
+<clr-modal
+  [clrModalSize]="'md'"
+  [(clrModalOpen)]="etatChangeModalOpened"
+  class="custom-modal-height"
+>
+  <h3 class="modal-title">
+    <cds-icon shape="note" size="lg" solid="" status="info"></cds-icon> Modifier
+    l'état d'avancement
+  </h3>
+
+  <div class="modal-body" cds-layout="gap:md p-t:none p-b:xl">
+    <form [formGroup]="etatForm" clrForm clrLabelSize="4">
+      <clr-control-container>
+        <label class="clr-control-label">Projet:</label>
+        <div
+          class="clr-control-label"
+          [style.whiteSpace]="'nowrap'"
+          [style.color]="'var(--cds-alias-status-info)'"
+          [style.fontSize]="'125%'"
+          [style.fontWeight]="200"
+          [innerHTML]="selectedProject?.nom"
+        ></div>
+      </clr-control-container>
+
+      <clr-combobox-container>
+        <label>État d'avancement:</label>
+        <clr-combobox formControlName="etat" name="policies">
+          <ng-container *clrOptionSelected="let selected">
+            <cds-icon
+              shape="filter-grid"
+              role="img"
+              aria-label="policies list"
+            ></cds-icon>
+            {{ selected?.libelle }}
+          </ng-container>
+          <clr-options>
+            <clr-option
+              *clrOptionItems="let etat of etats; field: 'libelle'"
+              [clrValue]="etat"
+            >
+              <cds-icon
+                shape="stop"
+                [style]="{ color: etat.couleur + '!important' }"
+                solid
+              ></cds-icon>
+              {{ etat.libelle }}
+            </clr-option>
+            <clr-option
+              *clrOptionItems="let etat of etats_rejets; field: 'libelle'"
+              [clrValue]="etat"
+            >
+              <cds-icon
+                shape="stop"
+                [style]="{ color: etat.couleur + '!important' }"
+                solid
+              ></cds-icon>
+              {{ etat.libelle }}
+            </clr-option>
+          </clr-options>
+        </clr-combobox>
+      </clr-combobox-container>
+    </form>
+  </div>
+
+  <div class="modal-footer" cds-layout="horizontal gap:sm">
+    <button class="btn btn-outline" (click)="etatChangeModalOpened = false">
+      Annuler
+    </button>
+    <button
+      class="btn btn-primary"
+      [disabled]="etatForm.invalid"
+      (click)="updateEtat()"
+    >
+      <cds-icon shape="floppy"></cds-icon> Sauvegarder
+    </button>
+  </div>
+</clr-modal>

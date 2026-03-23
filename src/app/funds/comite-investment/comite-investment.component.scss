@@ -1,0 +1,43 @@
+.badges-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  white-space: nowrap !important;
+  margin-top: 5px;
+
+}
+
+.badge {
+  padding: 2px 5px;
+  background-color: var(--clr-color-action-50);
+  color: var(--clr-color-action-700);
+  border-radius: 5px;
+  font-size: 10px;
+}
+
+.cell-content {
+  display: flex;
+  flex-direction: column;
+  font-variant: small-caps;
+}
+
+.badge-value {
+  font-size: 11px;
+  color: var(--clr-color-neutral-600);
+}
+
+
+.calculate-total {
+  font-size: 15px;
+  font-weight: medium;
+}
+
+
+a {
+  text-decoration: none;
+}
+
+
+:host ::ng-deep clr-combobox .clr-combobox-input {
+  min-width: 300px !important;
+}

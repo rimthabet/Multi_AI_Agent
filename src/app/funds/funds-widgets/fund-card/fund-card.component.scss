@@ -1,0 +1,17 @@
+
+
+.label {
+
+    border-radius: 5px;
+
+    &.expired {
+        background-color: var(--cds-alias-status-disabled-tint) !important;
+    }
+}
+
+.fund_status {
+    font-weight: 500;
+    letter-spacing: 1px;
+    font-variant: small-caps;
+    font-size: 110%;
+}

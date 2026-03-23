@@ -1,0 +1,64 @@
+<!-- Stats -->
+<div cds-layout="horizontal align:stretch gap:sm ">
+  <app-kpi-badge-01
+    [title]="'# Souscripteurs'"
+    [value]="subscribers()?.length"
+    [size]="'large'"
+    [type]="'number'"
+    [color]="'var(--cds-alias-viz-sequential-blue-600)'"
+    [primary]="true"
+  ></app-kpi-badge-01>
+
+  <app-kpi-badge-01
+    [title]="'# Souscriptions'"
+    [value]="souscriptions()?.souscriptions?.length"
+    [size]="'large'"
+    [type]="'number'"
+    [color]="'var(--cds-alias-status-info-shade)'"
+    [primary]="true"
+  ></app-kpi-badge-01>
+</div>
+
+<!-- Souscriptions  datagrid-->
+<clr-datagrid style="max-height: 280px">
+  <clr-dg-column [clrDgField]="'subscriber.libelle'"
+    ><cds-icon shape="bank"></cds-icon> &nbsp; Souscripteur</clr-dg-column
+  >
+  <clr-dg-column
+    ><cds-icon shape="world"></cds-icon> &nbsp; Nationalité</clr-dg-column
+  >
+  <clr-dg-column [clrDgField]="'montant'"
+    ><cds-icon shape="coin-bag"></cds-icon> &nbsp; Actif</clr-dg-column
+  >
+  <clr-dg-column> &nbsp; %</clr-dg-column>
+
+  <clr-dg-row *clrDgItems="let s of subscribers() ?? []" [clrDgItem]="s">
+    <clr-dg-cell>{{ s.subscriber.libelle }}</clr-dg-cell>
+    <clr-dg-cell>
+      @if (s.subscriber.nationalite !== 'TUNISIENNE') {
+      <cds-icon shape="world" solid size="md" status="info"></cds-icon>
+      } @else {
+      <span class="fi fi-tn" style="font-size: 16px"></span>
+      }
+
+      <span style="padding-left: 1em">
+        {{ s.subscriber.nationalite }}
+      </span>
+    </clr-dg-cell>
+    <clr-dg-cell
+      [style.textAlign]="'right'"
+      [style.whiteSpace]="'nowrap'"
+      [style.color]="'var(--cds-alias-status-info)'"
+    >
+      {{ s.montant | number : "1.2-2" }} <sup>tnd</sup>
+    </clr-dg-cell>
+    <clr-dg-cell>
+      <clr-progress-bar
+        [clrValue]="s.montant"
+        [clrMax]="totalMontantSouscription()"
+        clrLabeled
+        [clrDisplayval]="getRatio(s.montant, totalMontantSouscription()) + '%'"
+      ></clr-progress-bar>
+    </clr-dg-cell>
+  </clr-dg-row>
+</clr-datagrid>

@@ -1,0 +1,71 @@
+<!-- Header -->
+<span cds-text="title">
+  <cds-icon shape="employee-group" solid="" size="lg" status="info"></cds-icon>
+  Gestion de la structure de capital par projet</span
+>
+
+<!-- Divider -->
+<cds-divider
+  cds-layout="m-t:lg m-b:sm"
+  class="htitled-divider"
+  title="Évolution historiques de la structure du capital"
+  style="padding-bottom: 10px"
+></cds-divider>
+
+<!-- Search fonds -->
+<div cds-layout="horizontal align:left gap:md">
+  <clr-dropdown>
+    <cds-button action="outline" clrDropdownTrigger>
+      {{ selectedProjet?.nom || "Sélectionner un projet" }}
+      <cds-icon shape="angle" status="info" direction="down"></cds-icon>
+    </cds-button>
+
+    <clr-dropdown-menu *clrIfOpen>
+      @for(p of projets; track p.id) {      
+      <div
+        clrDropdownItem
+        (click)="setProjet(p)"
+        onkeypress=""
+      >
+        {{ p.nom | uppercase }}
+      </div>
+    }
+    </clr-dropdown-menu>
+  </clr-dropdown>
+
+  <div
+    class="project-name {{ selectedProjet ? 'active' : '' }}"
+    [style.marginTop]="'0px !important'"
+  >
+    {{ selectedProjet ? selectedProjet.nom : "Nom du projet ..." }}
+    <cds-icon
+      onkeypress=""
+      shape="dashboard"
+      size="lg"
+      title="Cliquer pour consulter la fiche projet"
+      style="cursor: pointer"
+      (click)="goToFiche()"
+    ></cds-icon>
+  </div>
+</div>
+
+<!-- Project name -->
+
+<!-- Financing switch -->
+<financing-switch
+  (financementChanged)="financementChanged($event)"
+  [message]="
+    ' Veuillez spécifier le plan de financement pour gérer la structure du capital du projet'
+  "
+  [prospection]="selectedProjet"
+></financing-switch>
+
+<!-- Non fundraising structure -->
+<non-fundraising-structure
+  [actionnaires]="actionnaires_hl"
+  [financement]="financement"
+  [valorisationAction]="valorisationAction"
+  [valeurAction]="valeurAction"
+  [loading]="loading"
+  (refreshEvent)="loadActionnaires(); loadNominals()"
+></non-fundraising-structure>

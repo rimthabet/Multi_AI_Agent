@@ -1,0 +1,9 @@
+cds-icon {
+    cursor: pointer;
+  }
+  
+  :host-context(.custom-feedback-modal) .modal-dialog {
+    width: 500px !important; /* Adjust as needed */
+    max-width: 90vw;
+  }
+  

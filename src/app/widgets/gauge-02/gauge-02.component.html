@@ -1,0 +1,28 @@
+<div cds-layout="horizontal gap:md">
+
+    <ngx-gauge [size]="140" type="full" [thick]="10" [value]="format(value1())" cap="round" append="%"
+        [backgroundColor]="getCodeFromColor('--cds-alias-status-disabled-tint')"
+        [foregroundColor]="getCodeFromColor('--cds-alias-status-info-shade')"></ngx-gauge>
+
+    <div cds-layout="vertical m-t:lg">
+        <div class="title" [innerHTML]="title()"></div>
+        <div cds-layout="m-t:md">
+            <span style="font-variant: small-caps">{{ title2() }} : </span>
+            <span class="gauge-volume" [innerHTML]="value2()"></span>
+            <sup style="font-size: 90%; margin-left: .5em; margin-top: 1em">tnd</sup>
+        </div>
+        <div cds-layout="horizontal gap:xs">
+            <span style="font-variant: small-caps">{{ title3() }} : </span>
+            <span class="gauge-volume" [innerHTML]="value3()"></span>
+        </div>
+
+        @if(value4()!=undefined){
+        <div style="margin-top: -5px !important">
+            <span style="font-variant: small-caps">{{ title4() }} : </span>
+            <span class="gauge-volume" [innerHTML]="value4()"></span>
+            <sup style="font-size: 90%; margin-left: .5em; margin-top: 1em">tnd</sup>
+        </div>
+
+        }
+    </div>
+</div>

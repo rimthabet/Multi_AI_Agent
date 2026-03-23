@@ -1,0 +1,243 @@
+<!-- Header -->
+<span cds-text="title">
+  <cds-icon
+    shape="tree-view"
+    status="info"
+    size="lg"
+    cds-layout="m-b:xs"
+  ></cds-icon>
+  Gestion des Items d'un État Financier</span
+>
+
+<cds-divider
+  class="htitled-divider"
+  title="Formulaire d'ajout et de modification"
+  cds-layout="m-t:lg m-b:sm"
+></cds-divider>
+
+<!-- Form -->
+<form clrForm [formGroup]="itemForm!" clrLabelSize="2">
+  <div class="fieldset">
+    <!-- Warning -->
+    <div class="alert alert-warning" role="alert" *ngIf="showWarningMessage">
+      <div class="alert-items">
+        <div class="alert-item static">
+          <div class="alert-icon-wrapper">
+            <cds-icon
+              class="alert-icon"
+              shape="exclamation-triangle"
+            ></cds-icon>
+          </div>
+          <div class="alert-text">
+            Attention : Item
+            <strong style="color: red">{{
+              selectedItem.code + " - " + selectedItem.libelle
+            }}</strong>
+            est sélectionné, vous risquez de le modifier !
+            <br />
+            Cliquez sur le bouton "Réinitialiser" pour réinitialiser le
+            formulaire.
+          </div>
+        </div>
+      </div>
+      <cds-button
+        action="flat-inline"
+        type="button"
+        aria-label="Close"
+        (click)="showWarningMessage = false"
+      >
+        <cds-icon aria-hidden="true" shape="close"></cds-icon>
+      </cds-button>
+    </div>
+
+    <!-- Fields -->
+    <div>
+      <clr-input-container>
+        <label class="clr-required-mark"> Code</label>
+        <input
+          clrInput
+          placeholder="Code de l'Item"
+          type="text"
+          formControlName="code"
+          name="code"
+          size="30"
+          required=""
+        />
+      </clr-input-container>
+
+      <clr-input-container>
+        <label class="clr-required-mark"> Libellé</label>
+        <input
+          clrInput
+          placeholder="Libellé de l'Item"
+          type="text"
+          formControlName="libelle"
+          name="libelle"
+          [style.width]="'530px'"
+          required=""
+        />
+      </clr-input-container>
+
+      <clr-select-container>
+        <label> Item parent</label>
+        <select
+          clrSelect
+          name="parent"
+          formControlName="parent"
+          (change)="setCode()"
+          [style.width]="'530px'"
+        >
+          <option *ngFor="let item of items" [ngValue]="item">
+            {{ item.code + " : " + item.libelle }}
+          </option>
+        </select>
+        <clr-control-helper
+          >Ce champs ne sert qu'à vous aider à coder les
+          Items</clr-control-helper
+        >
+      </clr-select-container>
+      <clr-radio-container clrInline>
+        <label class="clr-required-mark">Source des données </label>
+        <clr-radio-wrapper>
+          <input
+            type="radio"
+            clrRadio
+            name="data_source"
+            required
+            value="input"
+            formControlName="data_source"
+          />
+          <label>Données à saisir</label>
+        </clr-radio-wrapper>
+        <clr-radio-wrapper>
+          <input
+            type="radio"
+            clrRadio
+            name="data_source"
+            required
+            value="formula"
+            formControlName="data_source"
+          />
+          <label>Données à calculer</label>
+        </clr-radio-wrapper>
+        <clr-control-helper
+          >Pour les données à calculer, il faut saisir la formule de
+          calcule</clr-control-helper
+        >
+      </clr-radio-container>
+
+      <clr-textarea-container>
+        <label
+          [class]="
+            itemForm.get('data_source')?.value === 'formula'
+              ? 'clr-required-mark'
+              : ''
+          "
+        >
+          Formule
+        </label>
+        <textarea
+          clrTextarea
+          name="formula"
+          cols="55"
+          rows="1"
+          formControlName="formula"
+        ></textarea>
+        <clr-control-helper>x+y*(t+z)/m </clr-control-helper>
+      </clr-textarea-container>
+
+      <clr-radio-container clrInline>
+        <label class="clr-required-mark">Type d'affichage </label>
+        <clr-radio-wrapper>
+          <input
+            type="radio"
+            clrRadio
+            name="type"
+            required
+            value="int"
+            formControlName="type"
+          />
+          <label>Entier</label>
+        </clr-radio-wrapper>
+        <clr-radio-wrapper>
+          <input
+            type="radio"
+            clrRadio
+            name="type"
+            required
+            value="decimal"
+            formControlName="type"
+          />
+          <label>Décimal</label>
+        </clr-radio-wrapper>
+        <clr-radio-wrapper>
+          <input
+            type="radio"
+            clrRadio
+            name="type"
+            required
+            value="percent"
+            formControlName="type"
+          />
+          <label>Pourcentage</label>
+        </clr-radio-wrapper>
+      </clr-radio-container>
+    </div>
+
+    <!-- Buttons -->
+    <div cds-layout="horizontal align:left gap:md m-t:xl m-b:xl">
+      <cds-button
+        type="submit"
+        [disabled]="itemForm.invalid"
+        (click)="saveItem()"
+      >
+        <cds-icon shape="floppy" size="md"></cds-icon> Sauvegarder
+      </cds-button>
+      <cds-button
+        action="outline"
+        (click)="
+          itemForm.reset(); showWarningMessage = false; selectedItem = undefined
+        "
+      >
+        <cds-icon shape="refresh" size="md"></cds-icon> Réinitialiser
+      </cds-button>
+    </div>
+  </div>
+</form>
+
+<cds-divider
+  class="htitled-divider"
+  title="Inventaire de tous les items financiers"
+  cds-layout="m-b:sm"
+></cds-divider>
+
+<!-- Tabs -->
+<clr-tabs>
+  @for (item of fin_statements; track $index) {
+  <clr-tab>
+    <button
+      clrTabLink
+      [title]="item.libelle"
+      [clrTabLinkInOverflow]="$index > 6"
+    >
+      {{ item.libelle }}
+    </button>
+
+    <clr-tab-content *clrIfActive="$index == selectedTab">
+      <div
+        style="
+          padding: 1em;
+          background-color: var(--cds-alias-status-neutral-tint);
+        "
+      >
+        <items-tree-view
+          [item]="item"
+          [data]="items"
+          (itemDeletedEvent)="loadData()"
+          (itemSelectedEvent)="selectItem($event)"
+        ></items-tree-view>
+      </div>
+    </clr-tab-content>
+  </clr-tab>
+  }
+</clr-tabs>

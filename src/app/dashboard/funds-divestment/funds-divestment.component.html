@@ -1,0 +1,59 @@
+@for (group of funds(); track $index; let last = $last) {
+<div cds-layout="m-t:sm">
+  <div cds-layout="horizontal gap:sm">
+    <div cds-text="title" style="
+        color: var(--cds-alias-status-info);
+        font-weight: 600;
+        letter-spacing: 1px;
+      ">
+      {{ group.denomination }}
+    </div>
+    <sup class="label" cds-layout="p-r:xs">
+      <small class="badge badge-warning" style="font-weight: 900; font-family: monospace">
+        {{ group.sorties.length }} </small>sortie{{ group.sorties.length > 1 ? "s" : "" }}</sup>
+  </div>
+
+  @for (fund of group.sorties; track $index; let last = $last) {
+  <div cds-layout="vertical align:stretch gap:sm m-b:lg m-y:lg">
+    <!-- Projet -->
+    <span cds-text="subsection" style="
+        color: var(--cds-alias-object-interaction-info-hover);
+        font-weight: 600;
+        letter-spacing: 1px;
+      ">
+      {{ fund.financement?.projet?.nom }}
+    </span>
+
+    <!-- Date du comité -->
+    <span cds-text="caption">
+      <span style="
+          color: var(--cds-alias-status-neutral);
+          font-weight: 600;
+          letter-spacing: 1px;
+        " cds-text="caption">{{ fund.dateComiteAutorisantSortie | date : "dd/MM/yyyy" }}</span>
+    </span>
+
+    <!-- Description -->
+    <p cds-text="body" cds-layout="m-t:xs" style="text-align: justify">
+      Le nombre d’actions cédées est de
+      <strong>{{ fund.actionsCedees | number : "1.0-0" }}</strong>, et la sortie réalisée est de type
+      <strong>{{ fund.typeSortieRealisee?.libelle?.toLowerCase() }}</strong>, tandis que le protocole de cession a été
+      signé le
+      <strong>{{
+        fund.dateSignatureProtocoleCession | date : "dd/MM/yyyy"
+        }}</strong>.
+      <br />
+      Le prix de vente par action s’élève à
+      <strong>{{
+        fund.prixVenteAction | currency : "tnd" : "symbol" : "1.2-2"
+        }}</strong>, ce qui représente un montant total de vente de
+      <strong>{{
+        fund.prixTotalVente | currency : "tnd" : "symbol" : "1.2-2"
+        }}</strong>.
+    </p>
+  </div>
+  } @if (!last) {
+  <cds-divider cds-layout="m-y:lg"></cds-divider>
+  }
+</div>
+}

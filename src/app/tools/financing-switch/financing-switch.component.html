@@ -1,0 +1,60 @@
+<form clrForm clrLayout="horizontal" clrLabelSize="3" [formGroup]="financementForm!">
+  <clr-alert [clrAlertClosable]="false" [clrAlertType]="'info'" [clrAlertIcon]="'warning-standard'">
+    <clr-alert-item>
+      <div class="alert-text">
+        {{ message() }}
+        <clr-select-container>
+          <label style="font-size: 16px; font-weight: 900">Plan de financement à la date du:</label>
+          <select clrSelect name="financement" style="font-size: large" formControlName="financement">
+            <option>Veuillez choisir une date</option>
+            @for(fin of financements; track $index) {
+            <option [ngValue]="fin" [attr.data-value]="fin">
+              {{ fin?.dateDemandeFinancement | date : "dd/MM/yyyy" }}
+            </option>
+            }
+          </select>
+        </clr-select-container>
+
+        <div class="kpi-section">
+          <span>
+            ACTIONS :
+            <span style="
+                margin-right: 3px !important;
+                font-size: 1.5em;
+                color: var(--cds-alias-status-info-shade);
+              ">
+              {{
+              financementForm.controls["financement"].value
+              ?.financementActions | number : "1.0-0"
+              }}</span>
+            <sup>tnd</sup></span>
+
+          <span>
+            OCA :
+            <span style="
+                margin-right: 3px !important;
+                font-size: 1.5em;
+                color: var(--cds-alias-status-info-shade);
+              ">
+              {{
+              financementForm.controls["financement"].value?.financementOCA
+              | number : "1.0-0"
+              }}</span>
+            <sup>tnd</sup></span>
+          <span>
+            CCA :
+            <span style="
+                margin-right: 3px !important;
+                font-size: 1.5em;
+                color: var(--cds-alias-status-info-shade);
+              ">
+              {{
+              financementForm.controls["financement"].value?.financementCCA
+              | number : "1.0-0"
+              }}</span>
+            <sup>tnd</sup></span>
+        </div>
+      </div>
+    </clr-alert-item>
+  </clr-alert>
+</form>

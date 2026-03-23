@@ -1,0 +1,104 @@
+<!-- Alert -->
+<div class="alert alert-info" role="alert" style="margin: 1em 1.5em 1em 0">
+    <div class="alert-items">
+      <div class="alert-item static">
+        <div class="alert-icon-wrapper">
+          <cds-icon class="alert-icon" shape="exclamation-triangle"></cds-icon>
+        </div>
+        <span class="alert-text"
+          >Les périodes doivent être saisies de façon ASCENDANTE</span
+        >
+      </div>
+    </div>
+  </div>
+  
+  <!-- CURRENT PERIODS -->
+  
+  <h4 cds-layout="m-t:lg">
+    <cds-icon shape="view-list" size="md"></cds-icon> Liste des périodes définies
+    de souscription
+  </h4>
+  
+  @for (p of periodeList; track p; let index = $index) {
+  <div cds-layout="horizontal align-stretch m-t:lg m-b:lg p-l:md">
+    <strong>
+      <cds-icon
+        shape="calendar"
+        size="md"
+        status="info"
+        style="margin-right: 0.3em"
+      ></cds-icon>
+      @if (index == 0) {
+      <span cds-layout="m-r:xs">1<sup>ère</sup></span>
+      } @else {
+      <span cds-layout="m-r:xs">{{ index + 1 }}<sup>ème</sup></span>
+      }
+      <span cds-layout="m-r:xs"> Période :</span>
+    </strong>
+    entre le &nbsp;
+    <span class="label">{{ p.dateDebut | date : "dd/MM/yyyy" }}</span>
+    et le &nbsp;
+    <span class="label">{{ p.dateFin | date : "dd/MM/yyyy" }}</span>
+  
+    <cds-button
+      size="sm"
+      status="danger"
+      action="flat-inline"
+      (click)="deletePeriode(p.id)"
+    >
+      <cds-icon shape="trash" size="sm"></cds-icon> Supprimer
+    </cds-button>
+  </div>
+  }
+  
+  <!-- Divider add periods -->
+  
+  <h4 cds-layout="m-t:lg">
+    <cds-icon shape="view-list" size="md"></cds-icon> Ajout d'autres périodes de
+    souscription
+  </h4>
+  
+  <!-- Form add periods -->
+  <form
+    clrForm
+    [formGroup]="subscriptionForm"
+    clrLayout="horizontal"
+    clrLabelSize="1"
+    cds-layout="p-l:md"
+  >
+    <div cds-layout="horizontal align-stretch">
+      <clr-date-container style="white-space: nowrap">
+        <label for="periode1" class="clr-required-mark">Du:</label>
+        <input
+          type="date"
+          clrDate
+          required
+          formControlName="periode1"
+          name="periode1"
+        />
+      </clr-date-container>
+  
+      <clr-date-container style="white-space: nowrap">
+        <label for="periode2" class="clr-required-mark">Au:</label>
+        <input
+          type="date"
+          clrDate
+          required
+          formControlName="periode2"
+          name="periode2"
+        />
+      </clr-date-container>
+    </div>
+  
+    <!-- Button -->
+    <div cds-layout="horizontal m-t:xl">
+      <cds-button
+        status="primary"
+        (click)="addPeriode()"
+        [disabled]="subscriptionForm.invalid"
+      >
+        <cds-icon shape="plus" size="md"></cds-icon> Ajouter une période
+      </cds-button>
+    </div>
+  </form>
+  

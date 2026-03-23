@@ -1,0 +1,60 @@
+<!-- Header -->
+<div class="info" style="font-size: 1.5em" cds-layout="m-t:lg m-b:sm">
+  <cds-icon shape="announcement" solid size="md"></cds-icon> Prospection
+</div>
+
+<cds-divider
+  class="htitled-divider centered"
+  title="Gestion des prospections"
+></cds-divider>
+
+<!-- Tabs -->
+<clr-tabs [clrLayout]="'vertical'" class="right-bordered">
+  <!-- Prospection -->
+  <clr-tab>
+    <button clrTabLink id="link1">
+      <cds-icon shape="details"></cds-icon> Détails
+      <small class="badge">1</small>
+    </button>
+    <clr-tab-content id="content1" *clrIfActive="true">
+      <prospection-create-form-v2
+        #prospectionForm
+        [(prospection)]="prospection"
+        [(loading)]="loading"
+      ></prospection-create-form-v2>
+    </clr-tab-content>
+  </clr-tab>
+
+  <!-- Documents -->
+  <clr-tab>
+    <button clrTabLink [disabled]="!prospection()">
+      <cds-icon shape="library"></cds-icon> Documents
+      <small class="badge">2</small>
+    </button>
+    <clr-tab-content *clrIfActive>
+      @for(conformite of conformite_documentaires; track $index) {
+      <document-upload
+        #docUpload
+        [compliance]="{ conformite: conformite }"
+        [data]="prospection()"
+        [task_row]="4"
+        [phase_row]="2"
+      ></document-upload>
+      }
+    </clr-tab-content>
+  </clr-tab>
+
+  <!-- Autres données -->
+  <clr-tab>
+    <button clrTabLink [disabled]="!prospection()">
+      <cds-icon shape="details"></cds-icon> Autres données
+      <small class="badge">3</small>
+    </button>
+    <clr-tab-content *clrIfActive>
+      <project-public-data
+        [prospection]="prospection()"
+        [(loading)]="loading"
+      ></project-public-data>
+    </clr-tab-content>
+  </clr-tab>
+</clr-tabs>

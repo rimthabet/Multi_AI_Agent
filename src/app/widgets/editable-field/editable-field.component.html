@@ -1,0 +1,37 @@
+<!-- view mode -->
+@if (!isEditing) {
+<div (click)="startEdit()" class="editable-view" onKeyPress="">
+  @if(type() == 'decimal') {
+  <ng-container>
+    {{ (data()?.[field()] ? data()?.[field()] : 0) | number : "1.2-2" }}
+  </ng-container>
+  } @if(type() == 'int') {
+  <ng-container>
+    {{ (data()?.[field()] ? data()?.[field()] : 0) | number : "1.0-0" }}
+  </ng-container>
+  } @if(type() == 'percent') {
+  <ng-container>
+    {{ (data()?.[field()] ? data()?.[field()] : 0) | number : "1.2-2" }}%
+  </ng-container>
+  } @if(type() == 'text') {
+  <ng-container>
+    {{ data()?.[field()] }}
+  </ng-container>
+  } @if(type() != 'text') {
+  <span> &nbsp;{{ currency() }} </span>
+  }
+  <cds-icon shape="pencil" solid="" size="10" class="info"></cds-icon>
+</div>
+}
+<!-- edit mode-->
+@if (isEditing) {
+<div class="editable-edit">
+  @if(type() != 'text') {
+  <input type="number" [formControl]="control" (keydown.enter)="onEnter()" (keydown.escape)="onEscape()" (blur)="save()"
+    #inputRef />
+  } @if(type() == 'text') {
+  <textarea cols="30" rows="2" [formControl]="control" (keydown.enter)="onEnter()" (keydown.escape)="onEscape()"
+    (blur)="save()" #textareaRef></textarea>
+  }
+</div>
+}

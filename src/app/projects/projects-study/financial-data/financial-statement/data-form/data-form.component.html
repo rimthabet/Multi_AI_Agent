@@ -1,0 +1,42 @@
+@if(item()?.input && !readonly()) {
+    <!-- View Mode -->
+    @if(!isEditing) {
+      <div (click)="startEdit()" class="editable-view" [style.cursor]="'pointer'">
+        @if(item()?.type === 'decimal') {
+          {{ isValidNumber(value) ? (value | number : "1.2-2") : '-' }}
+        }
+        @if(item()?.type === 'int') {
+          {{ isValidNumber(value) ? (value | number : "1.0-0") : '-' }}
+        }
+        @if(item()?.type === 'percent') {
+          {{ isValidNumber(value) ? (value | number : "1.2-2") : '-' }}%
+        }
+        <cds-icon shape="pencil" solid size="10" class="info"></cds-icon>
+      </div>
+    }
+  
+    <!-- Edit Mode -->
+    @if(isEditing) {
+      <div class="editable-edit">
+        <input
+          type="number"
+          [formControl]="control"
+          (keydown.enter)="saveEdit()"
+          (keydown.escape)="cancelEdit()"
+          (blur)="saveEdit()"
+          #editInput
+        />
+      </div>
+    }
+  }
+  
+  @if((readonly() || !item()?.input) && item()?.type === 'decimal') {
+    <span>{{ isValidNumber(value) ? (value | number : "1.2-2") : '-' }}</span>
+  }
+  @if((readonly() || !item()?.input) && item()?.type === 'int') {
+    <span>{{ isValidNumber(value) ? (value | number : "1.0-0") : '-' }}</span>
+  }
+  @if((readonly() || !item()?.input) && item()?.type === 'percent') {
+    <span>{{ isValidNumber(value) ? (value | number : "1.2-2") : '-' }}%</span>
+  }
+  

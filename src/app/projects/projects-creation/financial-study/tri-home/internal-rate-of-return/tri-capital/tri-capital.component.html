@@ -1,0 +1,162 @@
+<!-- Bloc formulaire et gauge -->
+<div cds-layout="horizontal align:stretch gap:md m-y:md">
+  <!-- Bloc formulaire -->
+  <div cds-layout="vertical">
+    <h3>Veuillez entrer vos données:</h3>
+    <form
+      clrForm
+      [formGroup]="saveForm!"
+      class="clr-form-compact"
+      clrLabelSize="5"
+    >
+      <clr-select-container>
+        <label for="parametreTri" class="clr-required-mark">
+          <cds-icon shape="tags" solid status="info"></cds-icon> Base de calcul:
+        </label>
+        <select
+          clrSelect
+          name="parametreTri"
+          formControlName="parametreTri"
+          [compareWith]="equals"
+        >
+          @for(p of parametresTri; track p.id) {
+          <option [ngValue]="p" [attr.data-value]="p.id">
+            {{ p.libelle }}
+          </option>
+          }
+        </select>
+      </clr-select-container>
+
+      <clr-number-input-container>
+        <label for="resultat" class="clr-required-mark">
+          <cds-icon shape="calculator" solid status="info"></cds-icon> Multiple
+          de {{ saveForm.controls["parametreTri"].value?.libelle }}:
+        </label>
+        <input
+          clrNumberInput
+          type="number"
+          formControlName="resultat"
+          name="resultat"
+        />
+      </clr-number-input-container>
+
+      <clr-number-input-container>
+        <label for="bpRealisation" class="clr-required-mark">
+          <cds-icon
+            shape="resource-pool"
+            status="info"
+            badge="info"
+            solid
+          ></cds-icon>
+          % de réalisation BP:
+        </label>
+        <input
+          clrNumberInput
+          type="number"
+          formControlName="bpRealisation"
+          name="bpRealisation"
+        />
+      </clr-number-input-container>
+
+      <clr-select-container>
+        <label for="bp" class="clr-required-mark">
+          <cds-icon shape="bullseye" solid status="info"></cds-icon> Business
+          Plan:
+        </label>
+        <select clrSelect name="bp" formControlName="bp" [compareWith]="equals">
+          <option value="-1">Choisir un business plan...</option>
+          @for(bp of businessPlans(); track bp) {
+          <option [ngValue]="bp">
+            {{ bp?.label }}
+          </option>
+          }
+        </select>
+      </clr-select-container>
+    </form>
+  </div>
+
+  <!-- Bloc gauge -->
+  <div cds-layout="vertical align:center p:lg" class="panel">
+    <gauge-02
+      [title]="'Pourcentage de détention du FCPR dans le capital'"
+      [value1]="participation()?.part * 100"
+      [value2]="format(participation()?.montantActions)"
+      [value3]="formatInt(participation()?.actions)"
+    >
+    </gauge-02>
+  </div>
+</div>
+
+<!-- Bloc table -->
+<div cds-layout="m-y:md">
+  <table class="table table-vertical">
+    <caption>
+      <div cds-layout="horizontal m-b:sm">
+        <cds-button onkeypress="" (click)="calculateKPIs()" action="outline">
+          <cds-icon shape="calculator" solid status="info"></cds-icon> Calculer
+          le Taux de Rendement Interne - TRI
+        </cds-button>
+      </div>
+    </caption>
+
+    <tbody>
+      <tr>
+        <th></th>
+        @for(r of triData; track r.year){
+        <td style="text-align: right">
+          {{ r.year }}
+        </td>
+        }
+      </tr>
+
+      <tr>
+        <th>
+          {{ saveForm.controls["parametreTri"].value?.libelle }} <sup>TND</sup>
+          <div class="comment">Données du BP : {{ selectedBP?.label }}</div>
+        </th>
+        @for(r of triData; track r.year){
+        <td class="text-right">
+          {{ r.value | number : "1.0-0" }}
+        </td>
+        }
+      </tr>
+
+      <tr>
+        <th>Flux de trésorerie net <sup>TND</sup></th>
+        <td class="text-right">
+          {{ -1 * participation()?.montantActions | number : "1.0-0" }}
+        </td>
+        <td class="text-right" colspan="3"></td>
+        <td class="text-right">{{ fluxTresorerie | number : "1.0-0" }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Stats -->
+<div cds-layout="horizontal align:stretch m-t:lg gap:xxl">
+  <app-kpi-badge-01
+    [title]="'Valeur de sortie'"
+    [value]="valeurSortie"
+    [type]="'currency'"
+    [size]="'large'"
+    [color]="'var(--cds-alias-status-info)'"
+  >
+  </app-kpi-badge-01>
+
+  <app-kpi-badge-01
+    [title]="'TRI Capital'"
+    [value]="triCapital"
+    [type]="'ratio'"
+    [size]="'large'"
+    [color]="'var(--cds-alias-status-success)'"
+  >
+  </app-kpi-badge-01>
+</div>
+
+<!-- Bloc bouton -->
+<div cds-layout="horizontal m-y:lg">
+  <cds-button (click)="saveTri()">
+    <cds-icon shape="floppy"></cds-icon> Sauvegarder
+  </cds-button>
+</div>

@@ -1,0 +1,123 @@
+<div
+  class="modal-backdrop"
+  aria-hidden="true"
+  [style.display]="loading ? 'block' : 'none'"
+  (dblclick)="loading = false"
+>
+  <span
+    class="spinner"
+    style="
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    "
+    >Loading...</span
+  >
+</div>
+
+<!-- Header -->
+<span cds-text="title">
+  <cds-icon shape="note" size="lg" status="info" cds-layout="m-b:sm"></cds-icon>
+  Modification de fonds</span
+>
+
+<div cds-layout="m-t:lg" class="fund-name {{ selectedFonds ? 'active' : '' }}">
+  {{ selectedFonds ? selectedFonds.denomination : "Dénomination du fonds ..." }}
+  <cds-icon
+    shape="dashboard"
+    status="info"
+    size="lg"
+    title="Cliquer pour consulter la fiche fonds"
+    style="cursor: pointer"
+    (click)="goToFiche()"
+  ></cds-icon>
+</div>
+
+<!-- Tabs -->
+<div cds-layout="m-t:md m-b:md">
+  <clr-tabs>
+    <clr-tab>
+      <button clrTabLink id="link1">
+        <cds-icon shape="bars" status="info"></cds-icon>
+        Détails
+      </button>
+      <clr-tab-content id="content1" *clrIfActive="true">
+        <funds-create-form-v2
+          [(fonds)]="selectedFonds"
+          [(loading)]="loading"
+        ></funds-create-form-v2>
+      </clr-tab-content>
+    </clr-tab>
+    <clr-tab>
+      <button clrTabLink>
+        <cds-icon shape="gavel" status="info"></cds-icon>
+        Commissaire(s) aux comptes
+      </button>
+      <clr-tab-content *clrIfActive>
+        <funds-statutory-auditors-form
+          [fonds]="selectedFonds"
+        ></funds-statutory-auditors-form>
+      </clr-tab-content>
+    </clr-tab>
+    <clr-tab>
+      <button clrTabLink>
+        <cds-icon shape="calendar" status="info"></cds-icon> Périodes de
+        souscription
+      </button>
+      <clr-tab-content *clrIfActive>
+        <funds-subcription-create-form
+          [fonds]="selectedFonds"
+        ></funds-subcription-create-form>
+      </clr-tab-content>
+    </clr-tab>
+    <clr-tab>
+      <button clrTabLink>
+        <cds-icon shape="library" status="info"></cds-icon> Documents
+      </button>
+
+      <clr-tab-content *clrIfActive>
+        @for (conformite of conformite_documentaires; track $index) {
+        <document-upload
+          [data]="selectedFonds"
+          [compliance]="conformite"
+          [task_row]="1"
+          [phase_row]="1"
+        ></document-upload>
+        }
+      </clr-tab-content>
+    </clr-tab>
+    <clr-tab>
+      <button clrTabLink>
+        <cds-icon shape="digital-signature"></cds-icon> Approbation
+      </button>
+      <clr-tab-content *clrIfActive>
+        @if(selectedFonds?.statutValeur != 2) {
+        <div class="approval-area">
+          <cds-button action="outline" (click)="validerFonds()">
+            <cds-icon
+              shape="digital-signature"
+              badge="success"
+              size="90"
+            ></cds-icon>
+            Approuver le fonds
+          </cds-button>
+        </div>
+        } @else {
+        <div class="statut-info {{ selectedFonds?.statut }}">
+          Le fonds <span>{{ selectedFonds?.denomination }}</span> est
+          <span [class]="selectedFonds?.statut">{{
+            selectedFonds?.statut
+          }}</span>
+        </div>
+        } @if(selectedFonds?.statutValeur == 2 || selectedFonds?.statutValeur ==
+        3) {
+        <cds-button action="outline" cds-layout="m-t:md">
+          <cds-icon shape="lock" size="md"></cds-icon> Changer la décision de
+          l'approbation <cds-icon shape="note" size="md"></cds-icon>
+        </cds-button>
+        }
+      </clr-tab-content></clr-tab
+    >
+  </clr-tabs>
+</div>

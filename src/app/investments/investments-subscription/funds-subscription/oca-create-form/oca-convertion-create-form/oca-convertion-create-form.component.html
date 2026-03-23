@@ -1,0 +1,52 @@
+<!-- Form  conversion OCA -->
+<form clrForm [formGroup]="conversionSaveForm!" clrLayout="horizontal" clrLabelSize="5">
+  <clr-date-container>
+    <label for="dateDeConversion" class="clr-required-mark"><cds-icon shape="calendar" status="info" solid></cds-icon>
+      Date de l'AGE:
+    </label>
+    <input clrDate type="date" formControlName="dateDeConversion" name="dateDeConversion" />
+  </clr-date-container>
+
+  <clr-number-input-container>
+    <label for="montant" class="clr-required-mark"><cds-icon shape="dollar-bill" status="info" solid></cds-icon> Montant
+      de
+      souscription:</label>
+    <input clrNumberInput readonly type="number" formControlName="montant" name="montant" min="0" step="0.01" />
+    <clr-control-helper>{{
+      conversionSaveForm.controls["montant"].value != 0
+      ? (conversionSaveForm.controls["montant"].value
+      | currency : "tnd" : "symbol" : "1.2-2")
+      : ""
+      }}
+    </clr-control-helper>
+  </clr-number-input-container>
+
+  <clr-number-input-container>
+    <label for="nbrActions" class="clr-required-mark"><cds-icon shape="hashtag" status="info" solid></cds-icon> Actions
+      converties:</label>
+    <input clrNumberInput type="number" formControlName="nbrActions" name="nbrActions" min="0" step="1" />
+    <clr-control-helper>{{
+      conversionSaveForm.controls["nbrActions"].value != undefined
+      ? (conversionSaveForm.controls["nbrActions"].value
+      | number : "1.0-0") + " ACTIONS"
+      : ""
+      }}
+    </clr-control-helper>
+  </clr-number-input-container>
+</form>
+
+<!-- Buttons  conversion OCA -->
+<div cds-layout="horizontal p-t:lg  align:right">
+  <div class="btn-group">
+    <cds-button status="primary" [disabled]="conversionSaveForm.invalid" (click)="saveConversion()">
+      <cds-icon shape="floppy" size="md" solid></cds-icon> Convertir
+    </cds-button>
+  </div>
+
+  <div>
+    <cds-button status="danger" [disabled]="conversionSaveForm.invalid" (click)="deleteConversion()">
+      <cds-icon shape="trash" size="md" status="danger" solid></cds-icon>
+      Supprimer
+    </cds-button>
+  </div>
+</div>

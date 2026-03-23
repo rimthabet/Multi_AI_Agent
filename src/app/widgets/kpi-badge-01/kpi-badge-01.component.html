@@ -1,0 +1,66 @@
+<div
+  cds-text="monospace subsection"
+  class="badge-01"
+  [title]="title()"
+  [style]="{
+    '--foreColor': color(),
+    '--clr-primary': primary() ? 'solid' : 'dashed',
+    '--font-family': type() == 'text' ? 'inherit' : 'Stardos Stencil'
+  }"
+>
+  <div cds-layout="horizontal gap:xs wrap:none">
+    <span
+      [title]="value()"
+      cds-layout="align:left"
+      style="
+        font-variant: small-caps;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+      "
+      [style.fontSize]="
+        size() == 'small' ? '1em' : size() == 'medium' ? '1.5em' : '2em'
+      "
+    >
+      @if(type() == 'ratio') {
+      {{ value() | percent : "1.0-0" }}
+      } @if(type() == 'currency') {
+      {{ value() | currency : "symbol" : "tnd" : "1.0-0" }}
+      } @if(type() == 'number') {
+      {{ value() | number : "1.0-0" }}
+      } @if(type() == 'text') {
+      {{ value() }}
+      }
+    </span>
+
+    @if(description() != null) {
+    <span
+      cds-layout="align:right m-t:xxs"
+      [title]="description()"
+      style="
+        font-variant: small-caps;
+        overflow-x: hidden;
+        overflow-y: visible;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        letter-spacing: 1px;
+        line-height: normal;
+      "
+      >{{ description() }}</span
+    >
+    }
+  </div>
+
+  @if(type() == 'ratio') {
+  <div>
+    <clr-progress-bar
+      style="width: 75px; height: 2px; margin-left: 0; height: 7px; --clr-progress-default-color: {{
+        color()
+      }}"
+      [clrColor]="color()"
+      [clrValue]="value() * 100"
+      [clrMax]="100"
+    ></clr-progress-bar>
+  </div>
+  }
+</div>

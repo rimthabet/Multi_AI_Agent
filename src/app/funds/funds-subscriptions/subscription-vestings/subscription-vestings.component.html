@@ -1,0 +1,188 @@
+<!-- KPIs Badges -->
+<div cds-layout="horizontal align:stretch m-t:lg m-b:none gap:xl">
+  <!-- Actifs sous gestion -->
+  <app-kpi-badge-01
+    [value]="
+      subscription_record()?.souscription.dateSouscription | date : 'dd/MM/yyyy'
+    "
+    [type]="'text'"
+    [title]="'Date de souscription'"
+    [style.minWidth]="'150px'"
+  ></app-kpi-badge-01>
+
+  <!-- Actifs investis -->
+  <app-kpi-badge-01
+    [value]="
+      subscription_record()?.souscription.montantSouscription
+        | currency : 'tnd' : 'symbol' : '1.0-0'
+    "
+    [type]="'text'"
+    [title]="'Montant souscrit'"
+    [style.minWidth]="'150px'"
+  ></app-kpi-badge-01>
+
+  <!-- Actifs investis -->
+  <app-kpi-badge-01
+    [value]="subscription_record()?.montantLibere"
+    [type]="'currency'"
+    [title]="'Montant libéré'"
+    [style.minWidth]="'150px'"
+  ></app-kpi-badge-01>
+</div>
+
+<!-- Document Upload -->
+<div cds-layout="vertical align:stretch m-t:none gap:md">
+  <document-upload
+    [compliance]="{ conformite: prospection_conformite_documentaire()?.[0] }"
+    [data]="subscription_record()?.souscription"
+    [task_row]="2"
+    [phase_row]="1"
+    (documentUploadedEvent)="reloadSubscription()"
+  >
+  </document-upload>
+  @if (!subscription_record()?.souscription?.documents ||
+  subscription_record()?.souscription?.documents?.length == 0) {
+  <div class="failure">
+    <cds-icon shape="no-access" solid size="18" status="danger"></cds-icon>
+    Document manquant!
+  </div>
+  }
+</div>
+
+<!-- Vestings Data Grid -->
+<cds-divider
+  class="htitled-divider centered"
+  cds-layout="m-t:md"
+  title="Inventaire des Libérations"
+></cds-divider>
+
+<!-- Vestings Data Grid -->
+<clr-datagrid [clrDgLoading]="loading()">
+  <clr-dg-action-bar>
+    <cds-button
+      action="outline"
+      status="primary"
+      (click)="showNewVestingForm()"
+    >
+      <cds-icon shape="plus"></cds-icon> Ajouter une Libération
+    </cds-button>
+  </clr-dg-action-bar>
+
+  <clr-dg-column [style.width]="'110px'" [style.minWidth]="'110px'"
+    >Date</clr-dg-column
+  >
+  <clr-dg-column [style.width]="'180px'" [style.minWidth]="'180px'"
+    >Montant libéré <sup>tnd</sup></clr-dg-column
+  >
+  <clr-dg-column>Ordre de virement</clr-dg-column>
+  <clr-dg-column [style.width]="'200px'"
+    ><cds-icon shape="upload"></cds-icon
+  ></clr-dg-column>
+  <clr-dg-column
+    [style.width]="'60px'"
+    [style.minWidth]="'60px'"
+  ></clr-dg-column>
+  <clr-dg-column
+    [style.width]="'60px'"
+    [style.minWidth]="'60px'"
+  ></clr-dg-column>
+
+  <clr-dg-row
+    *clrDgItems="let liberation of subscription_record()?.liberations"
+    [clrDgItem]="liberation"
+  >
+    <clr-dg-cell [style.width]="'110px'" [style.minWidth]="'110px'">{{
+      liberation.dateLiberation | date : "dd/MM/yyyy"
+    }}</clr-dg-cell>
+    <clr-dg-cell
+      [style.width]="'180px'"
+      [style.minWidth]="'180px'"
+      class="text-right"
+      >{{ liberation.montantLiberation | number : "1.0-0" }}</clr-dg-cell
+    >
+    <clr-dg-cell>
+      @for (lcd of liberation_conformite_documentaire() ;track $index) { @let
+      docCheck = checkDocumentCompliance(liberation, lcd); @if (docCheck.status
+      === 'success') {
+
+      <a [href]="docCheck.url" target="_blank" cds-layout="align:left">
+        <cds-icon
+          shape="success-standard"
+          solid
+          status="success"
+          size="18"
+        ></cds-icon>
+        {{ docCheck.message }}
+      </a>
+
+      } @else if (docCheck.status === 'failure') {
+      <span class="failure">
+        <cds-icon shape="no-access" solid size="18" class="failure"></cds-icon>
+        {{ docCheck.message }}
+      </span>
+      } }
+    </clr-dg-cell>
+    <clr-dg-cell [style.width]="'200px'" [style.minWidth]="'200px'">
+      <document-upload
+        [mode]="'modal'"
+        [button_style]="'icon'"
+        [compliance]="{ conformite: liberation_conformite_documentaire()?.[0] }"
+        [data]="liberation"
+        [task_row]="3"
+        [phase_row]="1"
+        (documentUploadedEvent)="reloadSubscription()"
+      >
+      </document-upload>
+    </clr-dg-cell>
+    <clr-dg-cell [style.width]="'60px'" [style.minWidth]="'60px'">
+      <cds-button
+        action="flat-inline"
+        status="danger"
+        (click)="deleteVesting(liberation.id)"
+        title="Supprimer la libération"
+      >
+        <cds-icon shape="trash" status="danger" size="md"></cds-icon>
+      </cds-button>
+    </clr-dg-cell>
+    <clr-dg-cell [style.width]="'60px'" [style.minWidth]="'60px'">
+      <cds-button
+        action="flat-inline"
+        status="primary"
+        (click)="showEditVestingForm(liberation)"
+        title="Modifier la libération"
+      >
+        <cds-icon shape="note" size="md"></cds-icon>
+      </cds-button>
+    </clr-dg-cell>
+  </clr-dg-row>
+</clr-datagrid>
+
+<!-- Add Vesting Modal -->
+<clr-modal
+  #fundsVestings_form_modal
+  [(clrModalOpen)]="showVestingForm"
+  [clrModalSize]="'md'"
+  [clrModalStaticBackdrop]="false"
+>
+  <!-- Header -->
+  <div class="modal-title">
+    <cds-icon shape="layers" size="lg" status="info"></cds-icon>
+    @if(selectedVesting?.id) { Modifier une libération }
+    @if(!selectedVesting?.id) { Ajouter une libération }
+  </div>
+
+  <!-- Body -->
+  <div class="modal-body" cds-layout="p-t:xxs">
+    <!-- Form -->
+    <vesting-form
+      #fundsVestings_form
+      [(vesting)]="selectedVesting"
+      [(loading)]="loading"
+      [subscription_record]="subscription_record()"
+      [liberation_conformite_documentaire]="
+        liberation_conformite_documentaire()
+      "
+      (refreshEvent)="showVestingForm = false; reloadSubscription()"
+    ></vesting-form>
+  </div>
+</clr-modal>

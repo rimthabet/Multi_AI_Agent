@@ -1,0 +1,157 @@
+<!-- Ratios table -->
+<table class="table" style="width: 100%">
+  <!-- Ratios table caption -->
+  <caption>
+    <div cds-layout="horizontal">
+      <div cds-text="section" cds-layout="align:left p-t:sm">
+        <cds-icon shape="history" size="24" status="info"></cds-icon>
+        Engagements/investissements par année
+      </div>
+
+      <div cds-layout="align:right" style="text-align: right">
+        <cds-button
+          action="outline"
+          status="primary"
+          (click)="exportRatioFondsToExcel()"
+          onKeyPress=""
+        >
+          <cds-icon shape="xls-file" status="info" size="md"></cds-icon> Générer
+          un rapport
+        </cds-button>
+      </div>
+    </div>
+    @if (loading()) {
+    <clr-progress-bar
+      id="progressBar"
+      clrLoop
+      [style.height]="'2px'"
+    ></clr-progress-bar>
+    }
+  </caption>
+
+  <!-- Ratios table head -->
+  <thead>
+    <tr>
+      <th style="border-left: none !important" scope="col">
+        Année de libération
+      </th>
+      <th scope="col">Montant libéré du fonds</th>
+      <th scope="col">
+        Ratio règlementaire ({{ type() === "souscripteur" ? nomType : type() }})
+      </th>
+      <th scope="col">Engagement du FCPR</th>
+      <th scope="col">Date Limite</th>
+      <th scope="col">Cumul des investissements libérés avant date limite</th>
+    </tr>
+  </thead>
+
+  <!-- Ratios table body -->
+  <tbody>
+    @for (i of investissements() || []; track $index) { @if(i.liberations != 0){
+    <tr [class]="i.annee > yearOfReference ? 'extra' : ''">
+      <td>{{ i.annee }}</td>
+      <td class="right digit">
+        {{ i.liberations | currency : "tnd" : "symbol" : "1.2-2" }}
+      </td>
+      <td class="digit">
+        {{ ratio | percent : "1.2-2" }}
+      </td>
+      <td class="right digit">
+        {{ i.liberations * ratio | currency : "tnd" : "symbol" : "1.2-2" }}
+      </td>
+      <td>{{ i.date }}</td>
+      <td class="right digit">
+        {{ i.investissements | currency : "tnd" : "symbol" : "1.2-2" }}
+      </td>
+    </tr>
+    } }
+  </tbody>
+
+  <!-- Ratios table footer -->
+  <tfoot>
+    <tr>
+      <th scope="row">Total</th>
+      <th scope="row" class="right digit">
+        {{ total_libere | currency : "tnd" : "symbol" : "1.2-2" }}
+      </th>
+      <th scope="row"></th>
+      <th scope="row" class="right digit">
+        {{ total_engage | currency : "tnd" : "symbol" : "1.2-2" }}
+      </th>
+      <th scope="row"></th>
+      <th scope="row" class="right digit">
+        {{ total_investi | currency : "tnd" : "symbol" : "1.2-2" }}
+      </th>
+    </tr>
+  </tfoot>
+</table>
+
+<!-- Conformité table -->
+<table class="table" style="width: 100%">
+  <caption>
+    <div cds-text="section" cds-layout=" horizontal align:left p-y:sm">
+      <cds-icon shape="gavel" size="24" status="info"></cds-icon>
+      Conformité règlementaire par année
+    </div>
+
+    @if (loading()) {
+    <clr-progress-bar
+      id="progressBar"
+      clrLoop
+      [style.height]="'2px'"
+    ></clr-progress-bar>
+    }
+  </caption>
+  <!-- Conformité table head -->
+  <thead>
+    <tr>
+      <th scope="col">Date limite</th>
+      <th scope="col" class="right">Engagement du FCPR</th>
+      <th scope="col" class="right">Restant à libérer avant la date limite</th>
+      <th scope="col" class="right">
+        Dépassement à considérer pour l'année de la date limite
+      </th>
+    </tr>
+  </thead>
+
+  <!-- Conformité table body -->
+  <tbody>
+    @for (i of investissements() || []; track $index; let last = $last) {
+    @if(i.liberations * ratio != 0){
+    <tr [class]="i.annee > yearOfReference ? 'extra' : ''">
+      <td>31/12/{{ i.annee + fonds()?.fonds?.nombreAnnees }}</td>
+      <td class="right digit">
+        {{ i.liberations * ratio | currency : "tnd" : "symbol" : "1.2-2" }}
+      </td>
+      <td
+        [class]="
+          last && i.restantALiberer > 0 ? 'right digit failure' : 'right digit'
+        "
+      >
+        {{ i.restantALiberer | currency : "tnd" : "symbol" : "1.2-2" }}
+      </td>
+      <td class="right digit success">
+        {{ i.depassement | currency : "tnd" : "symbol" : "1.2-2" }}
+      </td>
+    </tr>
+    } }
+  </tbody>
+
+  <!-- Conformité table footer -->
+  <tfoot>
+    <th colspan="4" scope="row"></th>
+  </tfoot>
+</table>
+
+<!-- Warning -->
+<div cds-layout="horizontal align:left gap:xxs m-t:lg">
+  <cds-icon
+    shape="stop"
+    solid=""
+    style="color: var(--cds-alias-status-danger)"
+  ></cds-icon>
+  <span cds-text="caption" cds-layout="p-t:xxs">
+    Année(s) d'extention due(s) à des ventes d'actions et/ou des rembourcements
+    CCA et/ou OCA par le fonds.</span
+  >
+</div>

@@ -1,0 +1,46 @@
+th,
+td {
+    &:first-of-type {
+        text-align: left;
+    }
+
+    &:not:first-of-type {
+        text-align: right;
+    }
+
+    line-height: 2em !important;
+}
+
+td {
+
+    font-size: 110% !important;
+
+    &:first-of-type {
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        font-weight: 600;
+    }
+
+}
+
+th {
+    font-size: 90%;
+    border-bottom-style: none;
+}
+
+thead th {
+    border-bottom: 2px double var(--clr-table-border-color) !important;
+}
+
+tfoot th {
+    height: 40px;
+    font-size: 130%;
+    font-weight: 400;
+    background: var(--cds-alias-status-info);
+    color: var(--cds-alias-status-neutral-tint);
+    line-height: 1.3em !important;
+}
+
+a {
+    text-decoration: none;
+}

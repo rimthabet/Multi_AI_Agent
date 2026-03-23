@@ -1,0 +1,176 @@
+<clr-stack-view cds-layout="m-y:xl">
+  <clr-stack-header>Plan(s) de financement</clr-stack-header>
+
+  @for (plan of financingPlans; track $index) {
+  <clr-stack-block [clrStackViewLevel]="1">
+    <clr-stack-label
+      >{{ plan?.dateDemandeFinancement | date : "dd/MM/yyyy" }}
+    </clr-stack-label>
+    <clr-stack-content>
+      <div cds-layout="horizontal align:space-between gap:sm">
+        <div class="label" cds-layout="horizontal" style="min-width: 150px">
+          <span
+            class="digit"
+            cds-layout="align:center"
+            [style.textDecoration]="
+              plan?.financementActions == 0 ? 'line-through' : 'none'
+            "
+            [style.color]="
+              plan?.financementActions == 0
+                ? 'var(--cds-alias-status-danger)'
+                : 'none'
+            "
+          >
+            {{ plan?.financementActions | currency : "symbol" : "" : "1.0-0" }}
+          </span>
+          <div class="badge badge-blue" cds-layout="align:right">ACTIONS</div>
+        </div>
+        <div class="label" cds-layout="horizontal" style="min-width: 150px">
+          <span
+            class="digit"
+            cds-layout="align:center"
+            [style.textDecoration]="
+              plan?.financementOCA == 0 ? 'line-through' : 'none'
+            "
+            [style.color]="
+              plan?.financementOCA == 0
+                ? 'var(--cds-alias-status-danger)'
+                : 'none'
+            "
+          >
+            {{ plan?.financementOCA | currency : "symbol" : "" : "1.0-0" }}
+          </span>
+          <div class="badge badge-light-blue" cds-layout="align:right">OCA</div>
+        </div>
+        <div class="label" cds-layout="horizontal" style="min-width: 150px">
+          <span
+            class="digit"
+            cds-layout="align:center"
+            [style.textDecoration]="
+              plan?.financementCCA == 0 ? 'line-through' : 'none'
+            "
+            [style.color]="
+              plan?.financementCCA == 0
+                ? 'var(--cds-alias-status-danger)'
+                : 'none'
+            "
+          >
+            {{ plan?.financementCCA | currency : "symbol" : "" : "1.0-0" }}
+          </span>
+          <div class="badge badge-purple" cds-layout="align:right">CCA</div>
+        </div>
+
+        <div
+          class="label"
+          cds-layout="horizontal align:right"
+          style="border-radius: 5px"
+        >
+          <span class="digit" cds-layout="align:center"> Décision </span>
+          <div
+            class="badge badge-{{
+              plan?.statut == 'APPROUVE'
+                ? 'success'
+                : plan?.statut == 'EN_ATTENTE'
+                ? 'warning'
+                : 'danger'
+            }}"
+            cds-layout="align:right"
+            style="border-radius: 5px"
+          >
+            {{ plan?.statut }}
+          </div>
+        </div>
+      </div>
+    </clr-stack-content>
+    <clr-stack-block [clrStackViewLevel]="2">
+      <clr-stack-label style="font-size: 120%; letter-spacing: 2px">
+        <cds-icon shape="gavel" size="md" solid=""></cds-icon
+        >Décision</clr-stack-label
+      >
+      <clr-stack-content cds-layout="horizontal align:stretch gap:md p:lg">
+        @if(!plan.active){ @if( plan.statut == 'EN_ATTENTE'){
+
+        <div cds-layout="horizontal gap:md">
+          <cds-button
+            action="outline"
+            status="success"
+            size="sm"
+            cds-layout="m-t:sm"
+            (click)="approveFinancingPlan(plan)"
+          >
+            Approuver le plan <cds-icon shape="thumbs-up" solid=""></cds-icon>
+          </cds-button>
+
+          <cds-button
+            action="outline"
+            status="danger"
+            size="sm"
+            cds-layout="m-t:sm"
+            (click)="refuseFinancingPlan(plan)"
+          >
+            Refuser le plan <cds-icon shape="thumbs-down" solid=""></cds-icon>
+          </cds-button>
+        </div>
+
+        } @else { @if(plan.statut == 'APPROUVE') {
+
+        <div class="panel" cds-layout="p:sm" cds-text="code">
+          Ce plan de financement (REF: {{ plan?.id }}) a été approuvé.
+          Voulez-vous le désapprouver maintenant ?
+          <br />
+          <cds-button
+            action="outline"
+            status="danger"
+            size="sm"
+            cds-layout="m-t:sm"
+            (click)="refuseFinancingPlan(plan)"
+          >
+            Refuser le plan <cds-icon shape="thumbs-down" solid=""></cds-icon>
+          </cds-button>
+        </div>
+        } @else {
+
+        <div class="panel" cds-layout="p:sm" cds-text="code">
+          Ce plan de financement (REF: {{ plan?.id }}) n'est pas encore actif et
+          ne dispose d'aucune particiaption. <br />
+          Il a été refusé la dernière fois. <br />
+          Vous pouvez toujours changer d'avis et l'approuver.
+          <br />
+          <cds-button
+            action="outline"
+            status="success"
+            size="sm"
+            cds-layout="m-t:sm"
+            (click)="approveFinancingPlan(plan)"
+          >
+            Approuver le plan <cds-icon shape="thumbs-up" solid=""></cds-icon>
+          </cds-button>
+        </div>
+        }} }@else { @if( plan.statut == 'APPROUVE') {
+        <div class="panel" cds-layout="p:sm" cds-text="code">
+          Ce plan de financement (REF: {{ plan?.id }}) est actif et dispose de
+          participations.<br />
+          Il est déjà approuvé!
+        </div>
+        } @else {
+        <div class="panel" cds-layout="p:sm" cds-text="code">
+          Ce plan de financement (REF: {{ plan?.id }}) est refusé. Voulez-vous
+          l'approuver ?
+
+          <br />
+          <cds-button
+            action="outline"
+            status="success"
+            size="sm"
+            cds-layout="m-t:sm"
+            (click)="approveFinancingPlan(plan)"
+          >
+            Approuver le plan <cds-icon shape="thumbs-up" solid=""></cds-icon>
+          </cds-button>
+        </div>
+        } }
+      </clr-stack-content>
+    </clr-stack-block>
+  </clr-stack-block>
+  }
+</clr-stack-view>

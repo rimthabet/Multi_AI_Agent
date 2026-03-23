@@ -1,0 +1,170 @@
+<!-- Bloc formulaire et gauge -->
+<div cds-layout="horizontal align:stretch gap:md p-y:xxl">
+  <!-- Bloc formulaire -->
+  <div cds-layout="vertical">
+    <p cds-text="title" cds-layout="m-b:lg">Veuillez entrer vos données</p>
+    <form
+      clrForm
+      [formGroup]="paramsForm!"
+      clrLabelSize="5"
+      class="clr-form-compact"
+    >
+      <clr-number-input-container>
+        <label
+          ><cds-icon shape="calculator" status="info" solid></cds-icon> Taux de
+          Rémunération OCA:</label
+        >
+        <input
+          clrNumberInput
+          type="number"
+          formControlName="tauxRenumeration"
+          name="tauxRenumeration"
+        />
+      </clr-number-input-container>
+
+      <clr-select-container>
+        <label for="businessPlan" class="clr-required-mark">
+          <cds-icon shape="bullseye" solid status="info"></cds-icon> Business
+          Plan
+        </label>
+        <select
+          clrSelect
+          name="businessPlan"
+          formControlName="businessPlan"
+          [compareWith]="equals"
+        >
+          <option [ngValue]="undefined">Choisir un business plan...</option>
+          @for(bp of businessPlans(); track bp) {
+          <option [ngValue]="bp">
+            {{ bp?.label }}
+          </option>
+          }
+        </select>
+        <clr-control-error>
+          Veuillez sélectionner un business plan
+        </clr-control-error>
+      </clr-select-container>
+    </form>
+  </div>
+
+  <!-- Bloc gauge -->
+  <div cds-layout="vertical">
+    <gauge-02
+      [title]="'Pourcentage de détention du FCPR dans le OCA'"
+      [value1]="participation()?.part * 100"
+      [value2]="format(participation()?.montantActions)"
+      [value3]="formatInt(participation()?.actions)"
+      [title4]="'Montant en OCA'"
+      [value4]="formatInt(participation()?.montantOCA)"
+    >
+    </gauge-02>
+  </div>
+</div>
+
+<cds-button
+  (click)="calculateIRR()"
+  [disabled]="paramsForm.invalid"
+  [loadingState]="loading ? 'loading' : 'default'"
+>
+  <cds-icon shape="calculator" solid status="info"></cds-icon> Calculer le Taux
+  de Rendement Interne - TRI
+</cds-button>
+
+<!-- Bloc table -->
+<div cds-layout="m-y:md">
+  <table class="table table-vertical">
+    <tbody>
+      <tr>
+        <th></th>
+        @for(r of irrCalculationData; track r.year){
+        <td style="text-align: right; font-weight: 700">
+          {{ r.year }}
+        </td>
+        }
+      </tr>
+      <!-- Résultats d'exploitation -->
+      <tr>
+        <th>
+          Résultat d'Exploitation <sup>TND</sup>
+          <div class="comment">
+            Données du BP :
+            {{ paramsForm.get("businessPlan")?.value?.label }}
+          </div>
+        </th>
+        @for(r of irrCalculationData; track $index) {
+        <td class="text-right">{{ r.value | number : "1.0-0" }}</td>
+        }
+      </tr>
+
+      <!-- Rémunération OCA -->
+      <tr>
+        <th>Rémunération OCA <sup>TND</sup></th>
+        @for(r of renumerationsOCA; track $index) {
+        <td class="text-right">{{ r.value | number : "1.0-0" }}</td>
+        }
+      </tr>
+
+      <!-- Cash Flow -->
+      <tr>
+        <th>Cash Flow <sup>TND</sup></th>
+        @for(c of cashFlow; track $index) {
+        <td class="text-right">{{ c.value | number : "1.0-0" }}</td>
+        }
+      </tr>
+      <tr>
+        <th>Dettes Nettes</th>
+        <td colspan="5" style="text-align: right">
+          {{ netDeptEntity ? (netDeptDatum?.value | number : "1.0-0") : "N/A" }}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<!-- Stats -->
+
+@if(isPreviousData){
+<div class="alert alert-warning alert-sm" role="alert">
+  <div class="alert-items">
+    <div class="alert-item static">
+      <div class="alert-icon-wrapper">
+        <cds-icon class="alert-icon" shape="warning-standard"></cds-icon>
+      </div>
+      <div class="alert-text">
+        Ces valeurs proviennent de la dernière simulation TRI calculée.
+      </div>
+    </div>
+  </div>
+</div>
+}
+
+<div cds-layout="horizontal align:stretch m-t:md gap:xxl">
+  <app-kpi-badge-01
+    [title]="'Total remboursement OCA'"
+    [value]="totalRemboursement"
+    [type]="'currency'"
+    [size]="'large'"
+    [color]="'var(--cds-alias-status-info)'"
+  >
+  </app-kpi-badge-01>
+
+  <app-kpi-badge-01
+    [title]="'TRI OCA'"
+    [value]="irr"
+    [type]="'ratio'"
+    [size]="'large'"
+    [color]="'var(--cds-alias-status-success)'"
+  >
+  </app-kpi-badge-01>
+</div>
+
+<!-- Bloc bouton -->
+<div cds-layout="horizontal m-y:lg">
+  <cds-button
+    (click)="persistIRR()"
+    [disabled]="
+      paramsForm.invalid || isPreviousData || !irr || !totalRemboursement
+    "
+  >
+    <cds-icon shape="floppy"></cds-icon> Sauvegarder
+  </cds-button>
+</div>

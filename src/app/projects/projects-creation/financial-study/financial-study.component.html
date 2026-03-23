@@ -1,0 +1,109 @@
+<!-- Header -->
+<div class="info" style="font-size: 1.5em" cds-layout="m-t:lg m-b:sm"> <cds-icon shape="recycle" solid=""
+        size="md"></cds-icon> Etude </div>
+
+<cds-divider class="htitled-divider centered" title="Workflow de l'étude"></cds-divider>
+
+
+
+<clr-accordion>
+    <clr-accordion-panel [clrAccordionPanelOpen]="true">
+        <clr-accordion-title>Phase 1 : Signature d'un NDA</clr-accordion-title>
+        <clr-accordion-content *clrIfExpanded>
+            @if(!ndaAlreadySigned) {
+            <div class="approval-area" style="min-height:120px !important">
+                <cds-button action="outline" (click)="genererPDF()">
+                    <cds-icon shape="digital-signature" size="60"></cds-icon>
+                    Générer le NDA et le signer
+                </cds-button>
+            </div>
+
+            <div cds-layout="p-b:md">
+                @for(conformite of nda_conformite_documentaires; track $index) {
+                <document-upload [compliance]="{ conformite: conformite }" [data]="prospection()" [task_row]="8"
+                    [phase_row]="2" (hasDocumentsEvent)="ndaAlreadySigned = $event"></document-upload>
+                }
+            </div>
+            }
+
+        </clr-accordion-content>
+    </clr-accordion-panel>
+
+    <clr-accordion-panel>
+        <clr-accordion-title>Phase 2 : Collecte des documents du projet</clr-accordion-title>
+        <clr-accordion-content *clrIfExpanded cds-layout="p-b:lg">
+            <documents-collecting [prospection]="prospection()"></documents-collecting>
+        </clr-accordion-content>
+    </clr-accordion-panel>
+
+    <clr-accordion-panel>
+        <clr-accordion-title>Phase 3 : Visite du site du projet</clr-accordion-title>
+        <clr-accordion-content *clrIfExpanded>
+            <div cds-layout="horizontal align:stretch m-b:lg">
+                @for(conformite of visite_conformite_documentaires; track $index) {
+                <document-upload [compliance]="{ conformite: conformite }" [data]="prospection()"
+                    [with_description]="true" [task_row]="7" [phase_row]="2"></document-upload>
+                }
+            </div>
+        </clr-accordion-content>
+    </clr-accordion-panel>
+
+    <clr-accordion-panel>
+        <clr-accordion-title>Phase 4 : Données financières historiques</clr-accordion-title>
+        <clr-accordion-content *clrIfExpanded>
+            <financial-data [prospection]="prospection()"></financial-data>
+        </clr-accordion-content>
+    </clr-accordion-panel>
+
+    <clr-accordion-panel>
+        <clr-accordion-title>Phase 5 : Business Plan</clr-accordion-title>
+        <clr-accordion-content *clrIfExpanded>
+            <business-plan [prospection]="prospection()"></business-plan>
+        </clr-accordion-content>
+    </clr-accordion-panel>
+
+    <clr-accordion-panel>
+        <clr-accordion-title>Phase 6 : Valorisation de l'action</clr-accordion-title>
+        <clr-accordion-content *clrIfExpanded>
+            <valuation-shares [prospection]="prospection()"></valuation-shares>
+        </clr-accordion-content>
+    </clr-accordion-panel>
+
+    <clr-accordion-panel>
+        <clr-accordion-title>Phase 7 : Participation(s) de(s) fonds</clr-accordion-title>
+        <clr-accordion-content *clrIfExpanded>
+            <funds-participation [prospection]="prospection()"></funds-participation>
+        </clr-accordion-content>
+    </clr-accordion-panel>
+
+    <clr-accordion-panel>
+        <clr-accordion-title>Phase 8 : Schéma d'investissement et de
+            financement</clr-accordion-title>
+        <clr-accordion-content *clrIfExpanded>
+            <investment-schema [prospection]="prospection()"></investment-schema>
+
+        </clr-accordion-content>
+    </clr-accordion-panel>
+
+    <clr-accordion-panel>
+        <clr-accordion-title>Phase 9 : Structure du capital</clr-accordion-title>
+        <clr-accordion-content *clrIfExpanded>
+            <captital-structure [prospection]="prospection()"></captital-structure>
+        </clr-accordion-content>
+    </clr-accordion-panel>
+
+    <clr-accordion-panel>
+        <clr-accordion-title>Phase 10 : Calcul du TRI</clr-accordion-title>
+        <clr-accordion-content *clrIfExpanded>
+            <tri-home [prospection]="prospection()"></tri-home>
+        </clr-accordion-content>
+    </clr-accordion-panel>
+
+    <clr-accordion-panel>
+        <clr-accordion-title>Phase 11 : Méthodes de valorisation
+        </clr-accordion-title>
+        <clr-accordion-content *clrIfExpanded>
+            <valuation-methods [prospection]="prospection()"></valuation-methods>
+        </clr-accordion-content>
+    </clr-accordion-panel>
+</clr-accordion>

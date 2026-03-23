@@ -1,0 +1,332 @@
+<clr-datagrid>
+  <clr-dg-column style="width: 200px">Date</clr-dg-column>
+  <clr-dg-column [clrDgField]="'lieu'">Lieu </clr-dg-column>
+  <clr-dg-column [clrDgField]="'typeReunion.libelle'" style="width: 250px"
+    >Type</clr-dg-column
+  >
+  <clr-dg-column style="width: 100px"></clr-dg-column>
+
+  <clr-dg-row
+    *clrDgItems="let r of reunions(); let i = index"
+    [clrDgItem]="r"
+    style="cursor: pointer"
+    title="Veuillez cliquer sur la réunion pour voir ses détails"
+  >
+    <clr-dg-cell style="font-size: 110%; white-space: nowrap; width: 200px">
+      <span cds-layout="horizontal gap:xs">
+        <span>{{ r.dateReunion | date : "dd/MM/yyyy" }} </span>
+        <span cds-layout="align:right">
+          <cds-icon shape="pop-out" size="16"     (click)="openedSidePanel(r)"
+></cds-icon
+        ></span>
+      </span>
+    </clr-dg-cell>
+    <clr-dg-cell style="font-size: 110%">{{ r.lieu }}</clr-dg-cell>
+    <clr-dg-cell style="font-size: 110%; width: 250px">{{
+      r.typeReunion.libelle
+    }}</clr-dg-cell>
+
+    <clr-dg-cell
+      style="
+        width: 100px;
+        display: flex;
+        white-space: nowrap;
+        align-items: center;
+        justify-items: center;
+      "
+    >
+      <cds-icon
+        onkeypress=""
+        status="info"
+        shape="note"
+        solid=""
+        style="cursor: pointer"
+        (click)="showReunionEditModal(r)"
+      ></cds-icon>
+
+      <cds-divider orientation="vertical" style="padding: 0 7px"></cds-divider>
+
+      <cds-icon
+        onkeypress=""
+        status="danger"
+        shape="trash"
+        solid=""
+        style="cursor: pointer"
+        (click)="deleteReunion(r)"
+      ></cds-icon>
+    </clr-dg-cell>
+  </clr-dg-row>
+  <clr-dg-footer>{{ reunions()?.length }} Réunions</clr-dg-footer>
+</clr-datagrid>
+
+<!-- Side panel -->
+<clr-side-panel
+  [(clrSidePanelOpen)]="sidePanelOpened"
+  [clrSidePanelSize]="'lg'"
+  [clrSidePanelSkipAnimation]="false"
+  [clrSidePanelBackdrop]="true"
+>
+  <h3 class="side-panel-title" style="color: var(--cds-alias-status-info)">
+    Réunion du
+    <span style="text-transform: capitalize">{{
+      selectedMeeting?.dateReunion | date : "EEEE dd/MM/yyyy"
+    }}</span>
+  </h3>
+  <div class="side-panel-body">
+    <div cds-layout=" horizontal gap:xs p-y:md p-x:none">
+      <span cds-text="section">{{ selectedMeeting?.typeReunion.libelle }}</span>
+      au
+      <span cds-text="section">{{ selectedMeeting?.lieu }}</span>
+    </div>
+
+    <div style="display: flex; flex-direction: column; width: 100%">
+      <div cds-layout="p-y:md p-x:none" cds-text="section" style="width: 100%">
+        <cds-icon shape="lightbulb" size="22" solid=""></cds-icon>
+        <label style="font-size: 90%"> Ordre du jour </label>
+      </div>
+      <cds-divider></cds-divider>
+      <div
+        class="panel"
+        cds-layout="p:md"
+        [innerHTML]="formatMD2HTML(selectedMeeting?.ordreJour)"
+      ></div>
+
+      <div cds-layout="p-y:md p-x:none" cds-text="section" style="width: 100%">
+        <cds-icon shape="employee-group" size="22" solid=""></cds-icon>
+
+        <label style="font-size: 90%"> Membres présents </label>
+        <cds-icon
+          shape="plus-circle"
+          status="info"
+          solid=""
+          style="cursor: pointer; height: 22px; width: 22px"
+          (click)="displayMembreModal(selectedMeeting)"
+        ></cds-icon>
+      </div>
+      <cds-divider></cds-divider>
+      <div class="panel" cds-layout="p:md m-b:md">
+        <ul>
+          <li *ngFor="let membre of membres()?.[selectedMeeting?.id]">
+            <ng-container [ngSwitch]="membre.type">
+              <ng-container *ngSwitchCase="'ACTIONNAIRE'">
+                <span>{{ membre.actionnaire?.libelle }}</span> représenté par
+                <span>{{
+                  membre.actionnaire?.libelle === membre.libelle
+                    ? "lui-même"
+                    : membre.libelle
+                }}</span>
+              </ng-container>
+
+              <ng-container *ngSwitchCase="'ADMINISTRATEUR'">
+                <span>{{ membre.administrateur?.nom }}</span> représenté par
+                <span>{{
+                  membre.administrateur?.nom === membre.libelle
+                    ? "lui-même"
+                    : membre.libelle
+                }}</span>
+              </ng-container>
+
+              <ng-container *ngSwitchCase="'FONDS'">
+                <span>{{ membre.fonds?.denomination }}</span> représenté par
+                <span>{{ membre.libelle }}</span>
+              </ng-container>
+              <ng-container *ngSwitchCase="'COMMISSAIRE_AUX_COMPTES'">
+                <span>{{ membre.commisaireAuxComptes?.nom }}</span>
+                représenté par
+                <span>{{ membre.commisaireAuxComptes?.nom }}</span>
+              </ng-container>
+
+              <ng-container *ngSwitchCase="'AUTRE'">
+                <span>{{ membre.autre }}</span
+                >:
+                <span>{{ membre.description }}</span>
+              </ng-container>
+            </ng-container>
+            <div cds-layout="horizontal align:right">
+              <cds-icon
+                (click)="deleteMembre(membre)"
+                status="danger"
+                shape="trash"
+                solid=""
+                style="cursor: pointer"
+              ></cds-icon>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div cds-layout="p-y:md p-x:none" cds-text="section" style="width: 100%">
+        <cds-icon shape="gavel" size="22" solid=""></cds-icon>
+        <label style="font-size: 90%"> Décisions/Résolutions </label>
+        <cds-icon
+          shape="plus-circle"
+          solid=""
+          status="info"
+          style="cursor: pointer; height: 22px; width: 22px"
+          (click)="displayDecisionModal(meeting)"
+        ></cds-icon>
+      </div>
+      <cds-divider></cds-divider>
+
+      <div cds-layout="p:md m-b:md" class="panel">
+        @for(decision of decisions()?.[selectedMeeting?.id]; track $index) {
+
+        <div [innerHTML]="formatMD2HTML(decision?.libelle)"></div>
+
+        <!-- decision type vote -->
+        <div cds-layout="horizontal gap:stretch m-t:md">
+          <!-- Section gauche -->
+          <div cds-layout="horizontal align:left gap:xs">
+            <cds-icon
+              shape="cursor-hand"
+              size="md"
+              solid=""
+              [status]="
+                decision.typeVote?.libelle == 'avec réserve'
+                  ? 'info'
+                  : 'success'
+              "
+            ></cds-icon>
+            <span>Votée</span>
+            <span
+              [style]="{
+        padding: '5px',
+        marginTop: '0.2em',
+        letterSpacing: '2px',
+        borderRadius: '3px',
+      }"
+              [class]="
+                decision.typeVote?.libelle == 'avec réserve'
+                  ? 'badge badge-info reserve'
+                  : ' badge badge-success reserve'
+              "
+              >{{ decision.typeVote?.libelle }}</span
+            >
+          </div>
+
+          <!-- Section droite -->
+          <div cds-layout="horizontal align:right gap:xs">
+            <cds-icon
+              (click)="edit(decision)"
+              onkeypress=""
+              status="info"
+              shape="note"
+              solid=""
+              style="cursor: pointer"
+            ></cds-icon>
+
+            <cds-divider
+              orientation="vertical"
+              style="padding: 0 2px; margin: 0 5px"
+            ></cds-divider>
+
+            <cds-icon
+              (click)="deleteDecision(decision)"
+              onkeypress=""
+              status="danger"
+              shape="trash"
+              solid=""
+              style="cursor: pointer"
+            ></cds-icon>
+          </div>
+        </div>
+        @if(!$last){
+        <cds-divider cds-layout="m-y:xs"></cds-divider>} }
+      </div>
+
+      <div
+        cds-layout="p-y:md p-x:none p-t:xxs"
+        cds-text="section"
+        style="width: 100%"
+      >
+        <cds-icon shape="cursor-hand" size="22" solid=""></cds-icon>
+        <label style="font-size: 90%"> Remarques </label>
+      </div>
+      <cds-divider></cds-divider>
+      <div
+        cds-layout="p:md m-b:md"
+        class="panel"
+        [innerHTML]="formatMD2HTML(selectedMeeting?.remarques)"
+      ></div>
+
+      <div cds-layout="p-y:md p-x:none" cds-text="section" style="width: 100%">
+        <cds-icon shape="upload" size="md"></cds-icon>
+        Téléchargement des documents
+      </div>
+      <cds-divider></cds-divider>
+      <document-upload
+        *ngFor="let conformite of conformite_documentaires"
+        [compliance]="{ conformite: conformite }"
+        [data]="selectedMeeting"
+        [task_row]="1"
+        [phase_row]="5"
+        (documentUploadedEvent)="onUploadSuccess()"
+      ></document-upload>
+    </div>
+  </div>
+</clr-side-panel>
+
+<!-- Modal meeting-form modification-->
+<clr-modal #modal [(clrModalOpen)]="isEditMode" [clrModalSize]="'lg'">
+  <h1 class="modal-title">
+    <cds-icon shape="event" status="info" solid size="25"></cds-icon>
+    Modification de réunion
+  </h1>
+  <div class="modal-body">
+    <!-- Form -->
+    <meeting-form
+      [projet]="projet"
+      [meeting]="meeting"
+      (refresh)="handleReunionUpdated($event)"
+    ></meeting-form>
+  </div>
+</clr-modal>
+
+<!-- Modal membre -->
+<clr-modal #modal [(clrModalOpen)]="membreModalOpened" [clrModalSize]="'lg'">
+  <h1 class="modal-title">
+    <cds-icon shape="employee" status="info" solid size="25"></cds-icon> Ajout
+    d'un membre
+  </h1>
+  <div class="modal-body" style="margin-top: 15px">
+    <!-- Form -->
+    <member-meeting
+      [actionnaires]="actionnaires"
+      [administrateurs]="administrateurs"
+      [commisaires_aux_comptes]="commisaires_aux_comptes"
+      [fonds]="fonds"
+      [reunion]="meeting"
+      (refresh)="handleMemberSaved($event)"
+    ></member-meeting>
+  </div>
+</clr-modal>
+
+<!-- Modal decision-resolution -->
+<clr-modal #modal [(clrModalOpen)]="decisionModalOpened" [clrModalSize]="'lg'">
+  <h1 class="modal-title">
+    <cds-icon shape="gavel" status="info" solid size="25"></cds-icon> Ajout
+    d'une décision/résolution
+  </h1>
+  <div class="modal-body">
+    <!-- Form -->
+    <decision-resolution
+      [reunion]="meeting"
+      (refresh)="handleDecisionSaved($event)"
+    ></decision-resolution>
+  </div>
+</clr-modal>
+
+<!-- Modal decision-resolution modification-->
+<clr-modal #modal [(clrModalOpen)]="opened" [clrModalSize]="'lg'">
+  <h1 class="modal-title">
+    <cds-icon shape="gavel" size="25" solid></cds-icon> Modifier la
+    décision/résolution
+  </h1>
+  <div class="modal-body">
+    <!-- Form -->
+    <decision-resolution
+      [decision]="decision"
+      (refresh)="handleDecisionSaved($event)"
+    ></decision-resolution>
+  </div>
+</clr-modal>

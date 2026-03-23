@@ -1,0 +1,349 @@
+<!-- Loading Spinner -->
+<div
+  class="modal-backdrop"
+  aria-hidden="true"
+  [style.display]="loading ? 'block' : 'none'"
+  (click)="loading = false"
+>
+  <span
+    class="spinner"
+    style="
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    "
+    >Loading...</span
+  >
+</div>
+
+<!-- Header -->
+<div cds-layout="horizontal gap:none p:none align:stretch">
+  <span cds-text="headline">Fonds sous gestion</span>
+
+  <!-- Layout toggle -->
+  <div class="btn-group" cds-layout="horizontal align:right p:none">
+    <div class="radio btn">
+      <input
+        type="radio"
+        name="display-mode"
+        id="display-mode-grid"
+        value="grid"
+        [ngModel]="layout"
+        (click)="layout = 'grid'"
+      />
+      <label for="display-mode-grid">
+        <cds-icon shape="grid-view"></cds-icon>
+      </label>
+    </div>
+    <div class="radio btn">
+      <input
+        type="radio"
+        name="display-mode"
+        id="display-mode-table"
+        value="table"
+        [ngModel]="layout"
+        (click)="layout = 'table'"
+      />
+      <label for="display-mode-table">
+        <cds-icon shape="bars"></cds-icon>
+      </label>
+    </div>
+  </div>
+</div>
+
+<!-- Search and filters -->
+<div cds-layout="horizontal gap:sm p-y:sm align:left">
+  <!-- Search Input -->
+  <cds-form-group style="margin: 0" [formGroup]="searchPatternForm">
+    <cds-search>
+      <label cds-layout="display:screen-reader-only">Recherche des fonds</label>
+      <input
+        type="search"
+        placeholder="Recherche des fonds"
+        formControlName="pattern"
+        name="pattern"
+      />
+    </cds-search>
+  </cds-form-group>
+
+  <!-- Filters -->
+  <span cds-layout="p-t:xxs">
+    Filtrer <cds-icon shape="filter"></cds-icon> :
+  </span>
+
+  <!-- Etats fonds Dropdown -->
+  <clr-dropdown>
+    <button class="btn btn-sm btn-outline" clrDropdownTrigger>
+      État du fonds
+      <cds-icon shape="angle" direction="down"></cds-icon>
+    </button>
+
+    <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
+      <!-- etats -->
+      @for (e of etats; track $index) {
+      <div clrDropdownItem (click)="filterEtat(e)">
+        <cds-icon
+          shape="stop"
+          [style]="{ color: e.couleur + '!important' }"
+          solid
+        ></cds-icon>
+        {{ e.libelle }}
+      </div>
+      }
+      <div class="dropdown-divider" role="separator" aria-hidden="true"></div>
+
+      <!-- etats rejets -->
+      @for (e of etats_rejets; track $index) {
+      <div clrDropdownItem (click)="filterEtat(e)">
+        <cds-icon
+          shape="stop"
+          [style]="{ color: e.couleur + '!important' }"
+          solid
+        ></cds-icon>
+        {{ e.libelle }}
+      </div>
+      }
+    </clr-dropdown-menu>
+  </clr-dropdown>
+
+  <cds-divider orientation="vertical"></cds-divider>
+
+  <!-- Natures fonds Dropdown -->
+  <clr-dropdown>
+    <button class="btn btn-sm btn-outline" clrDropdownTrigger>
+      Type de fonds
+      <cds-icon shape="angle" direction="down"></cds-icon>
+    </button>
+    <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
+      @for (n of natures; track $index) {
+      <div clrDropdownItem (click)="filterNature(n)">
+        {{ n.libelle }}
+      </div>
+      }
+    </clr-dropdown-menu>
+  </clr-dropdown>
+
+  <!-- count fonds -->
+  <span>({{ filteredFonds.length | number : "1.0-0" }} fonds) </span>
+</div>
+
+<!-- Filters Patterns -->
+<div cds-layout="horizontal gap:xxs">
+  @for (filter of filteredEtats; track $index) {
+  <span class="label">
+    <cds-icon
+      shape="stop"
+      [style]="{ color: filter.couleur, marginLeft: '-5px' }"
+      solid=""
+    ></cds-icon>
+    {{ filter.libelle }}
+    <span
+      class="badge"
+      (click)="cancelFilterEtat(filter)"
+      style="cursor: pointer"
+      >X</span
+    >
+  </span>
+  }
+
+  <cds-divider
+    orientation="vertical"
+    [style]="{ marginRight: '7px' }"
+  ></cds-divider>
+
+  @for (filter of filteredNatures; track $index) {
+  <span
+    class="label"
+    style="background-color: var(--cds-alias-status-info-tint)"
+  >
+    {{ filter.libelle }}
+    <span
+      class="badge"
+      (click)="cancelFilterNature(filter)"
+      style="cursor: pointer"
+      >X</span
+    >
+  </span>
+  }
+</div>
+
+<!-- Inventory -->
+<cds-divider
+  class="htitled-divider"
+  title="Inventaire des fonds"
+  cds-layout="m-y:lg"
+></cds-divider>
+
+<!-- Inventory -->
+@if (layout === 'grid') {
+
+<div
+  cds-layout="grid align:stretch gap:lg cols@xl:4 cols@lg:4 cols@md:6 cols@sm:12"
+>
+  <!-- Cards -->
+  @for (f of filteredFonds; track $index) {
+  <fund-card
+    [fund]="f"
+    (openEtatChangePopup)="displayEtatChangeModal($event)"
+  ></fund-card>
+  }
+</div>
+
+} @if (layout === 'table') {
+<!-- Table -->
+<clr-datagrid style="height: calc(100vh - 255px); margin-top: 1em">
+  <clr-dg-column>Denomination</clr-dg-column>
+  <clr-dg-column>
+    <ng-container>Forme légale</ng-container>
+  </clr-dg-column>
+  <clr-dg-column>
+    <ng-container>Montant projeté</ng-container>
+  </clr-dg-column>
+  <clr-dg-column>
+    <ng-container>Durée</ng-container>
+  </clr-dg-column>
+  <clr-dg-column>
+    <ng-container>Banque dépositaire</ng-container>
+  </clr-dg-column>
+  <clr-dg-column>
+    <ng-container>Nature</ng-container>
+  </clr-dg-column>
+  <clr-dg-column>État</clr-dg-column>
+
+  <clr-dg-row *clrDgItems="let record of filteredFonds">
+    <clr-dg-action-overflow>
+      <button class="action-item" (click)="displayEtatChangeModal(record)">
+        <cds-icon shape="pop-out"></cds-icon> Modifier l'état du fonds
+      </button>
+      <button
+        class="action-item"
+        type="button"
+        [routerLink]="['/funds/edition-funds/', record?.id]"
+      >
+        <cds-icon shape="form"></cds-icon> Éditer le fonds
+      </button>
+      <button
+        class="action-item"
+        [routerLink]="['/funds/fiche-funds/', record?.id]"
+      >
+        <cds-icon shape="eye"></cds-icon> Fiche fonds
+      </button>
+    </clr-dg-action-overflow>
+
+    <clr-dg-cell>
+      <span style="font-size: 90%" class="info">{{
+        record?.denomination?.toUpperCase()
+      }}</span>
+    </clr-dg-cell>
+    <clr-dg-cell>{{ record?.formeLegale?.libelle }}</clr-dg-cell>
+    <clr-dg-cell>{{ record?.montant | number : "1.0-0" }}</clr-dg-cell>
+    <clr-dg-cell>{{ record?.duree }}</clr-dg-cell>
+    <clr-dg-cell>{{ record?.banque?.libelle }}</clr-dg-cell>
+    <clr-dg-cell>{{ record?.nature?.libelle }}</clr-dg-cell>
+
+    <clr-dg-cell [style.fontSize]="'85%'">
+      <div cds-layout="horizontal align:stretch" style="white-space: nowrap">
+        <span>
+          <cds-icon
+            shape="stop"
+            solid
+            [style]="{
+              color: record?.etat?.couleur,
+              marginLeft: '-10px'
+            }"
+          ></cds-icon>
+          {{ record?.etat?.libelle }}
+        </span>
+        <div cds-layout="align:right" style="text-align: right">
+          <cds-icon
+            shape="pop-out"
+            class="info"
+            (click)="displayEtatChangeModal(record)"
+          ></cds-icon>
+        </div>
+      </div>
+    </clr-dg-cell>
+  </clr-dg-row>
+
+  <clr-dg-footer>{{ filteredFonds.length }} fonds</clr-dg-footer>
+</clr-datagrid>
+}
+
+<!-- Fund state management Modal -->
+<clr-modal [clrModalSize]="'md'" [(clrModalOpen)]="etatChangeModalOpened">
+  <h3 class="modal-title">
+    <cds-icon shape="note" status="info" size="lg" solid=""></cds-icon> Changer
+    l'état du Fonds
+  </h3>
+
+  <div class="modal-body">
+    <form [formGroup]="etatForm" clrForm clrLabelSize="3">
+      <clr-control-container>
+        <label class="clr-control-label">Fonds:</label>
+        <div
+          class="clr-control-label"
+          [style.whiteSpace]="'nowrap'"
+          [style.color]="'var(--cds-alias-status-info)'"
+          [style.fontSize]="'125%'"
+          [style.fontWeight]="200"
+          [innerHTML]="selectedFunds?.denomination"
+        ></div>
+      </clr-control-container>
+
+      <clr-combobox-container>
+        <label>État du fonds:</label>
+        <clr-combobox formControlName="etat" name="policies">
+          <ng-container *clrOptionSelected="let selected">
+            <cds-icon
+              shape="filter-grid"
+              role="img"
+              aria-label="policies list"
+            ></cds-icon>
+            {{ selected?.libelle }}
+          </ng-container>
+          <clr-options>
+            <clr-option
+              *clrOptionItems="let etat of etats; field: 'libelle'"
+              [clrValue]="etat"
+            >
+              <cds-icon
+                shape="stop"
+                [style]="{ color: etat.couleur + '!important' }"
+                solid
+              ></cds-icon>
+              {{ etat.libelle }}
+            </clr-option>
+            <clr-option
+              *clrOptionItems="let etat of etats_rejets; field: 'libelle'"
+              [clrValue]="etat"
+            >
+              <cds-icon
+                shape="stop"
+                [style]="{ color: etat.couleur + '!important' }"
+                solid
+              ></cds-icon>
+              {{ etat.libelle }}
+            </clr-option>
+          </clr-options>
+        </clr-combobox>
+        <clr-control-helper
+          >Veuillez choisir l état d'avancement
+        </clr-control-helper>
+      </clr-combobox-container>
+    </form>
+  </div>
+
+  <div class="modal-footer" cds-layout="horizontal gap:sm">
+    <button class="btn btn-outline" (click)="etatChangeModalOpened = false">
+      Annuler
+    </button>
+    <button
+      class="btn btn-primary"
+      [disabled]="etatForm.invalid"
+      (click)="updateEtat()"
+    >
+      <cds-icon shape="floppy"></cds-icon> Sauvegarder
+    </button>
+  </div>
+</clr-modal>

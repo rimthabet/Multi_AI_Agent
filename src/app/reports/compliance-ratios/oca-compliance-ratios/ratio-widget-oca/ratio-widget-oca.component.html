@@ -1,0 +1,50 @@
+<div class="gauge-row" [title]="projet()?.nom">
+  @if(!loading){
+  <div class="gauge-container">
+    @if (ratio >= 5) {
+    <ngx-gauge
+      [size]="130"
+      type="full"
+      [thick]="7"
+      [value]="ratio"
+      cap="round"
+      append="%"
+      foregroundColor="#33cc33"
+      backgroundColor="#ecf0f1"
+    ></ngx-gauge>
+    } @if (ratio < 5) {
+    <ngx-gauge
+      [size]="130"
+      type="full"
+      [thick]="7"
+      [value]="ratio"
+      cap="round"
+      append="%"
+      foregroundColor="#ff1a1a"
+      backgroundColor="#ecf0f1"
+    ></ngx-gauge>
+    }
+  </div>
+  }@else {
+  <clr-spinner></clr-spinner>
+  }
+  <div class="gauge-info">
+    <div class="title" [innerHTML]="projet()?.nom"></div>
+    <div style="text-align: left">
+      <span style="font-variant: small-caps">Mnt OCA: </span>
+      <span
+        class="gauge-volume"
+        [innerHTML]="montantOCA | number : '1.0-0'"
+      ></span>
+      <sup style="font-size: 90%; margin-left: 3px">tnd</sup>
+    </div>
+    <div cds-layout="m-t:xs" style="text-align: left">
+      <span style="font-variant: small-caps">Capital: </span>
+      <span
+        class="gauge-volume"
+        [innerHTML]="capital | number : '1.0-0'"
+      ></span>
+      <sup style="font-size: 90%; margin-left: 3px">tnd</sup>
+    </div>
+  </div>
+</div>

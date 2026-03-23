@@ -1,0 +1,81 @@
+<!-- horizontal-scroller2.component.html -->
+
+<div class="scroll-container-wrapper">
+  <div class="scroll-container">
+    <!-- Left Arrow -->
+    <button
+      class="scroll-arrow scroll-arrow-left"
+      [class.hidden]="!canScrollLeft"
+      (click)="scrollToLeft()"
+      type="button"
+      [attr.aria-label]="'Scroll left'"
+      [attr.aria-hidden]="!canScrollLeft"
+    >
+      <svg
+        width="28"
+        height="28"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M15 18L9 12L15 6"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </button>
+
+    <!-- Scrollable Content -->
+    <!-- (wheel)="onWheel($event)"  -->
+    <div
+      #scrollContainer
+      class="scroll-content"
+      [class.dragging]="isDragging"
+      (scroll)="onScroll()"
+      (mousedown)="startDrag($event)"
+      (mousemove)="onDrag($event)"
+      (mouseup)="endDrag()"
+      (mouseleave)="endDrag()"
+      (touchstart)="startDrag($event)"
+      (touchmove)="onDrag($event)"
+      (touchend)="endDrag()"
+      aria-label="Scrollable content"
+    >
+      <!-- Render content children templates -->
+      @for (template of itemTemplates; track $index) {
+      <div class="content-item" cds-layout="horizontal align:center">
+        <ng-container *ngTemplateOutlet="template"></ng-container>
+      </div>
+      }
+    </div>
+
+    <!-- Right Arrow -->
+    <button
+      class="scroll-arrow scroll-arrow-right"
+      [class.hidden]="!canScrollRight"
+      (click)="scrollToRight()"
+      type="button"
+      [attr.aria-label]="'Scroll right'"
+      [attr.aria-hidden]="!canScrollRight"
+    >
+      <svg
+        width="28"
+        height="28"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M9 18L15 12L9 6"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </button>
+  </div>
+</div>

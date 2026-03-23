@@ -1,0 +1,67 @@
+label {
+    font-weight: 400;
+    letter-spacing: 1px;
+    vertical-align: middle;
+    white-space: nowrap;
+    padding: .4em;
+
+    cds-icon {
+        color: var(--clr-color-action-600)
+    }
+}
+
+
+.label.bs {
+    padding: 1.5em 0;
+    margin-top: auto;
+
+    .badge {
+        padding: 1.21em;
+        margin-right: 2em;
+        margin-left: .2em;
+        border-top-left-radius: 10px;
+        border-bottom-left-radius: 10px;
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        font-size: 12px;
+
+        &.disabled {
+            opacity: .2;
+        }
+    }
+
+    button {
+        margin-top: 0;
+    }
+}
+
+form {
+    padding-left: 1em !important;
+}
+
+cds-alert-group {
+    * {
+        font-size: 110% !important;
+    }
+}
+
+.badge-date {
+    font-size: 95% !important;
+    padding: .2em .5em !important;
+    letter-spacing: 1px;
+    line-height: .5em;
+    margin-right: 0 !important;
+    color: var(--clr-color-action-600);
+    border: 1px solid hsl(198, 10.3%, 38%);
+    border-radius: 7px;
+    margin-top: 5px;
+}
+
+.active .badge {
+    background-color: var(--clr-color-action-600);
+    color: whitesmoke !important;
+}
+
+a {
+    text-decoration: none;
+}

@@ -1,0 +1,87 @@
+<clr-modal [(clrModalOpen)]="open" [clrModalSize]="'xl'">
+  <h3 class="modal-title">
+    <cds-icon shape="gavel" status="info" size="lg" solid></cds-icon> Dossier(s)
+    Contentieux
+  </h3>
+
+  <div class="modal-body" cds-layout="m-t:lg">
+    <!-- Dropdown dossier -->
+    <div cds-layout="horizontal align:left gap:xs">
+      <!-- Dropdown dossier -->
+      <clr-dropdown>
+        <cds-button size="md" action="outline" clrDropdownTrigger>
+          {{ selectedDossier?.titre?.toUpperCase() }}
+          <cds-icon shape="angle" status="info" direction="down"></cds-icon>
+        </cds-button>
+
+        <clr-dropdown-menu *clrIfOpen>
+          @for(dossier of dossiersContentieux; track $index){
+          <div clrDropdownItem (click)="selectDossier(dossier)">
+            {{ dossier?.titre?.toUpperCase() }}
+          </div>
+          }
+        </clr-dropdown-menu>
+      </clr-dropdown>
+
+      <!--   Dossier Name -->
+      <span class="project-name active">
+        {{ selectedDossier?.titre?.toUpperCase() }}
+      </span>
+    </div>
+
+    <!-- Calendar -->
+    <div cds-layout="grid gap:md">
+      <div class="card" cds-layout="col@lg:8 col@md:12 col@sm:12 m-t:md">
+        <div class="card-block">
+          @if(calendarInitialized){
+          <full-calendar #calendar [options]="calendarOptions"></full-calendar>
+          }
+        </div>
+      </div>
+
+      <!-- Left Side Panel for detail -->
+      <div
+        cds-layout="vertical col@lg:4 col@md:12 col@sm:12 gap:lg align:stretch m-t:md"
+      >
+        <!-- Dossier juridique -->
+        <span cds-text="subsection"
+          ><cds-icon shape="folder-open"></cds-icon> Dossier juridique</span
+        >
+        <div class="panel">
+          <ul>
+            <li>Dossier: {{ selectedDossier?.titre?.toUpperCase() }}</li>
+            <li>Statut: {{ selectedDossier?.statut?.libelle }}</li>
+            <li>Type: {{ selectedDossier?.type?.libelle }}</li>
+            <li>Avocat: {{ selectedDossier?.avocat?.nom }}</li>
+          </ul>
+        </div>
+
+        <!-- Audiences -->
+        <span cds-text="subsection"
+          ><cds-icon shape="calendar"></cds-icon> Audiences</span
+        >
+        <div class="panel">
+          <ul>
+            <li>Dossier: {{ selectedDossier?.titre?.toUpperCase() }}</li>
+            <li>Statut: {{ selectedDossier?.statut?.libelle }}</li>
+            <li>Type: {{ selectedDossier?.type?.libelle }}</li>
+            <li>Avocat: {{ selectedDossier?.avocat?.nom }}</li>
+          </ul>
+        </div>
+
+        <!-- Documents -->
+        <span cds-text="subsection"
+          ><cds-icon shape="file"></cds-icon> Documents</span
+        >
+        <div class="panel">
+          <ul>
+            <li>Dossier: {{ selectedDossier?.titre?.toUpperCase() }}</li>
+            <li>Statut: {{ selectedDossier?.statut?.libelle }}</li>
+            <li>Type: {{ selectedDossier?.type?.libelle }}</li>
+            <li>Avocat: {{ selectedDossier?.avocat?.nom }}</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</clr-modal>

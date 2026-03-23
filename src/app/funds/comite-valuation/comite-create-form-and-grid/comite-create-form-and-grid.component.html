@@ -1,0 +1,410 @@
+<!-- Table content here -->
+<table class="table" style="width: 100%">
+  <!--TABLE CAPTION-->
+  <caption>
+    <div cds-layout="horizontal align:stretch">
+      <div
+        style="
+          display: flex;
+          justify-content: flex-start;
+          gap: 1em;
+          padding: 0.5em 0;
+        "
+      >
+        @if (!collapsed) {
+        <cds-button action="outline" size="sm" (click)="collapse()">
+          <cds-icon shape="shrink" size="md"></cds-icon>
+          Réduire
+        </cds-button>
+        } @else {
+        <cds-button action="outline" size="sm" (click)="extend()">
+          <cds-icon shape="resize" size="md"></cds-icon>
+          Étendre
+        </cds-button>
+        }
+      </div>
+
+      <div style="padding-top: 15px !important">
+        @if (loading) {
+        <clr-progress-bar id="progressBar" clrLoop></clr-progress-bar>
+        }
+      </div>
+      <div
+        style="
+          display: flex;
+          justify-content: flex-end;
+          gap: 1em;
+          padding: 0.5em 0;
+        "
+      >
+        <cds-button (click)="showValorisationModal()" size="sm" onkeypress="">
+          <cds-icon shape="plus" size="sm"></cds-icon> Ajouter un projet
+        </cds-button>
+        <cds-button
+          status="neutral"
+          (click)="showDocumentModal()"
+          size="sm"
+          onkeypress=""
+        >
+          <cds-icon shape="folder" size="sm"></cds-icon> Téléchager des documents
+        </cds-button>
+      </div>
+    </div>
+  </caption>
+  <!--TABLE HEAD-->
+  <thead>
+    <tr>
+      <th style="border-left: none !important; text-align: left" scope="col">
+        Projet
+      </th>
+      <th scope="col">Nombre de titres</th>
+      <th scope="col">Titres acquis par le fonds</th>
+      <th scope="col">Coût d'acquisition</th>
+      <th scope="col">+/- values potentielles</th>
+      <th scope="col">
+        Valeur au 31/12/<span class="info">{{ year() }}</span>
+      </th>
+      <th scope="col">
+        Valeur/action au 31/12/<span class="info">{{ year() }}</span>
+      </th>
+      <th scope="col">% de détention</th>
+      <th scope="col">Méthode d'évaluation retenue</th>
+      <th style="width: 70px" scope="col">&nbsp;</th>
+    </tr>
+  </thead>
+  <!--TABLE BODY-->
+  <tbody>
+    @if (!collapsed) { @for (c of comites; track c) {
+    <tr>
+      <td class="left">
+        <a
+          class="show-hide-icon"
+          style="margin-top: auto; color: var(--cds-alias-status-info)"
+          [routerLink]="['/dashboard/projects/', c?.projet?.id]"
+        >
+          {{ c.projet?.nom }} <cds-icon shape="link" size="sm"></cds-icon>
+        </a>
+      </td>
+      <td style="text-align: right">{{ c.titres | number : "1.0-0" }}</td>
+      <td style="text-align: right">{{ c.fondsTitres | number : "1.0-0" }}</td>
+      <td style="text-align: right">
+        {{ c.cout | currency : "tnd" : "symbol" : "1.2-2" }}
+      </td>
+      <td
+        style="text-align: right"
+        [style.whiteSpace]="'nowrap'"
+        [style.color]="
+          c.pmValues < 0
+            ? 'var(--cds-global-color-red) !important'
+            : c.pmValues > 0
+            ? 'var(--cds-global-color-green) !important'
+            : 'inherit'
+        "
+      >
+        {{ c.pmValues | currency : "tnd" : "symbol" : "1.2-2" }}
+      </td>
+      <td style="text-align: right">
+        {{ c.valeur | currency : "tnd" : "symbol" : "1.2-2" }}
+      </td>
+      <td style="text-align: right">
+        {{ c.valeurAction | currency : "tnd" : "symbol" : "1.2-2" }}
+      </td>
+      <td style="text-align: right">
+        {{ c.fondsTitres / c.titres | percent : "1.2-2" }}
+      </td>
+      <td style="text-align: left">{{ c.methodeEvaluation.libelle }}</td>
+      <td style="display: flex">
+        <cds-icon
+          onkeypress=""
+          status="info"
+          shape="note"
+          size="sm"
+          solid=""
+          style="cursor: pointer"
+          (click)="edit(c)"
+        ></cds-icon>
+
+        <cds-divider
+          orientation="vertical"
+          style="padding: 0 7px"
+        ></cds-divider>
+
+        <cds-icon
+          onkeypress=""
+          status="danger"
+          shape="trash"
+          size="sm"
+          solid=""
+          style="cursor: pointer"
+          (click)="delete(c)"
+        ></cds-icon>
+      </td>
+    </tr>
+    } }
+  </tbody>
+
+  <!--TABLE FOOTER-->
+  <tfoot>
+    <tr>
+      <th scope="row" class="left" colspan="2">Total</th>
+      <th scope="row" class="right digit">
+        {{ totalTitres | number : "1.0-0" }}
+      </th>
+      <th scope="row" class="right digit">
+        {{ totalCout | currency : "tnd" : "symbol" : "1.2-2" }}
+      </th>
+      <th
+        scope="row"
+        class="right digit"
+        [style.whiteSpace]="'nowrap'"
+        [style.color]="
+          totalPMValues < 0
+            ? 'var(--cds-global-color-red-700) !important'
+            : totalPMValues > 0
+            ? 'var(--cds-global-color-green-600) !important'
+            : 'inherit'
+        "
+      >
+        {{ totalPMValues | currency : "tnd" : "symbol" : "1.2-2" }}
+      </th>
+      <th scope="row" colspan="5"></th>
+    </tr>
+  </tfoot>
+</table>
+
+<!--MODAL ADD COMITE VALORISATION-->
+<clr-modal [clrModalSize]="'lg'" [(clrModalOpen)]="opened">
+  <!--MODAL HEADER-->
+  <h3 class="modal-title">
+    <cds-icon shape="lightbulb" size="28" solid status="info"></cds-icon> Ajout
+    de projet pour l'année
+    <span class="info digit" [style.fontSize]="'130%'"
+      ><u>{{ year() }}</u></span
+    >
+  </h3>
+  <!--MODAL BODY-->
+  <div class="modal-body" cds-layout="m-t:md">
+    @if (loading) {
+    <div class="progress-bar">
+      <span class="spinner spinner-lg">Loading...</span>
+    </div>
+    }
+
+    <!--MODAL FORM-->
+    <form
+      clrForm
+      [formGroup]="valuationSaveForm"
+      clrLabelSize="4"
+      class="clr-form-compact"
+    >
+      <clr-select-container>
+        <label for="projet">Projet: </label>
+        <select
+          clrSelect
+          name="projet"
+          formControlName="projet"
+          [compareWith]="equals"
+          style="width: 300px"
+        >
+          @for (p of projets(); track p) {
+          <option [ngValue]="p" [attr.data-value]="p">
+            {{ p?.nom }}
+          </option>
+          }
+        </select>
+      </clr-select-container>
+
+      <cds-divider cds-layout="m-y:lg"></cds-divider>
+
+      @if (fins != undefined && fins.length == 0) {
+      <div
+        style="margin-top: 1em"
+        class="alert alert-danger clr-col-12 clr-col-lg-8 clr-col-md-8"
+        role="alert"
+      >
+        <div class="alert-items">
+          <div class="alert-item static">
+            <div class="alert-icon-wrapper">
+              <cds-icon
+                class="alert-icon"
+                status="danger"
+                solid=""
+                shape="warning-standard"
+                size="28"
+              ></cds-icon>
+            </div>
+            <span class="alert-text"
+              >Aucun plan de financement est enregistré jusqu'à fin de l'année
+              <span style="font-weight: 600" class="info">{{ year() }}</span>
+            </span>
+          </div>
+        </div>
+      </div>
+      }
+
+      <clr-control-container>
+        <label for="cout">Coût d'acquisition:</label>
+        <label>{{
+          valuationSaveForm.controls["cout"].value
+            | currency : "tnd" : "symbol" : "1.2-2"
+        }}</label>
+      </clr-control-container>
+
+      <clr-control-container>
+        <label for="nbr_titre">Nombre global des titres:</label>
+        <label>{{
+          valuationSaveForm.controls["titres"].value | number : "1.0-0"
+        }}</label>
+      </clr-control-container>
+
+      <clr-control-container>
+        <label for="nbr_titre">Titres acquis par le fonds:</label>
+        <label>{{
+          valuationSaveForm.controls["fondsTitres"].value | number : "1.0-0"
+        }}</label>
+      </clr-control-container>
+
+      <clr-control-container>
+        <label for="actif">Pourcentage de détention:</label>
+        <label>{{
+          valuationSaveForm.controls["fondsTitres"].value /
+            valuationSaveForm.controls["titres"].value | percent : "1.2-2"
+        }}</label>
+      </clr-control-container>
+
+      <cds-divider cds-layout="m-y:md"></cds-divider>
+
+      <clr-number-input-container>
+        <label for="valeur"
+          >Valeur au 31/12/<span class="info">{{ year() }}</span
+          >:</label
+        >
+        <input
+          clrNumberInput
+          type="number"
+          formControlName="valeur"
+          name="valeur"
+          style="width: 270px"
+        />
+        <clr-control-helper>
+          <span style="font-size: 110%; font-weight: 500"
+            >{{
+              valuationSaveForm!.value["valeur"]
+                | currency : "tnd" : "symbol" : "1.2-2"
+            }}
+          </span></clr-control-helper
+        >
+      </clr-number-input-container>
+
+      <clr-select-container style="position: relative">
+        <label for="methodeEvaluation">Méthode d'évaluation retenue:</label>
+        <select
+          clrSelect
+          name="methodeEvaluation"
+          formControlName="methodeEvaluation"
+          [compareWith]="equals"
+          style="width: 270px"
+        >
+          @for (me of methodesEvaluation(); track me) {
+          <option [ngValue]="me" [attr.data-value]="me">
+            {{ me?.libelle }}
+          </option>
+          }
+        </select>
+
+        <clr-control-helper>
+          <cds-icon
+            onkeypress=""
+            shape="plus-circle"
+            size="md"
+            solid
+            (click)="showMethodeForm()"
+            style="cursor: pointer"
+            class="info"
+          ></cds-icon>
+        </clr-control-helper>
+      </clr-select-container>
+
+      <clr-number-input-container>
+        <label for="pmValues">+/- values potentielles:</label>
+        <input
+          clrNumberInput
+          type="number"
+          formControlName="pmValues"
+          name="pmValues"
+          style="width: 270px"
+        />
+        <clr-control-helper>
+          <span style="font-size: 110%; font-weight: 500"
+            >{{
+              valuationSaveForm!.value["pmValues"]
+                | currency : "tnd" : "symbol" : "1.2-2"
+            }}
+          </span></clr-control-helper
+        >
+      </clr-number-input-container>
+
+      <clr-control-container>
+        <label for="valeurAction"
+          >Valeur/action au 31/12/<span class="info">{{ year() }}</span
+          >:</label
+        >
+        <label>{{
+          valuationSaveForm!.value["valeurAction"]
+            | currency : "tnd" : "symbol" : "1.2-2"
+        }}</label>
+      </clr-control-container>
+    </form>
+
+    <!--MODAL FOOTER-->
+    <div class="modal-footer">
+      <cds-button
+        [disabled]="valuationSaveForm!.invalid"
+        (click)="saveValorisation()"
+      >
+        <cds-icon shape="floppy"></cds-icon> Sauvegarder
+      </cds-button>
+    </div>
+  </div>
+</clr-modal>
+
+<!--MODAL METHODE EVALUATION-->
+<clr-modal [clrModalSize]="'md'" [(clrModalOpen)]="openedMethodeEvaluationForm">
+  <h3 class="modal-title">
+    <cds-icon shape="update" badge="info" size="28"></cds-icon> Méthode
+    d'évaluation:
+  </h3>
+  <div class="modal-body">
+    <evaluation-method-form
+      [modal]="true"
+      (closeModalEvent)="modalClose()"
+      (refreshEvent)="loadMethodesEvaluation()"
+    ></evaluation-method-form>
+  </div>
+</clr-modal>
+
+<!--MODAL DOCUMENTS-->
+<clr-modal [clrModalSize]="'lg'" [(clrModalOpen)]="openedDocumentModal">
+  <h3 class="modal-title">
+    <cds-icon shape="folder" size="28" solid=""></cds-icon> Documents du comité
+    de valorisation pour l'année
+    <span class="info digit" [style.fontSize]="'130%'"
+      ><u>{{ year() }}</u></span
+    >
+  </h3>
+  <div class="modal-body" style="overflow: hidden">
+    <div style="width: 100%">
+      @for(conformite of conformite_documentaires; track $index) {
+      <document-upload
+        #docUpload
+        [compliance]="{ conformite: conformite }"
+        [data]="fonds"
+        [phase_row]="6"
+        [task_row]="1"
+        [tag]="'comite_valorisation_' + year"
+        (documentUploadedEvent)="loadComitesValorisation()"
+      ></document-upload>
+      }
+    </div>
+  </div>
+</clr-modal>

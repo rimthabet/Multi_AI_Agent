@@ -1,0 +1,51 @@
+@if(mode() == 'modal'){
+
+<ng-container>
+  <button
+    style="margin: 0"
+    class="btn btn-sm {{
+      button_style() == 'icon' ? ' btn-icon' : 'btn-outline'
+    }}"
+    (click)="show = true"
+  >
+    <cds-icon shape="folder"></cds-icon>
+    Télécharger
+  </button>
+  <clr-modal [clrModalSize]="'md'" [(clrModalOpen)]="show">
+    <h3 class="modal-title">
+      <cds-icon shape="file" size="md"> </cds-icon>
+      {{ compliance()?.conformite?.documentType?.libelle }}
+    </h3>
+    <div class="modal-body">
+      <app-document-upload-form
+        #docUpldForm
+        [mode]="mode()"
+        [compliance]="compliance()"
+        [data]="data()"
+        [task_row]="task_row()"
+        [phase_row]="phase_row()"
+        [tag]="tag()"
+        [with_description]="with_description()"
+        (documentUploadedEvent)="documentUploaded($event)"
+        (hasDocumentsEvent)="hasDocuments($event)"
+      ></app-document-upload-form>
+    </div>
+  </clr-modal>
+</ng-container>
+
+} @else{
+
+<app-document-upload-form
+  #docUpldForm
+  [mode]="mode()"
+  [compliance]="compliance()"
+  [data]="data()"
+  [task_row]="task_row()"
+  [phase_row]="phase_row()"
+  [tag]="tag()"
+  [with_description]="with_description()"
+  (documentUploadedEvent)="documentUploaded($event)"
+  (hasDocumentsEvent)="hasDocuments($event)"
+></app-document-upload-form>
+
+}

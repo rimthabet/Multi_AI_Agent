@@ -1,0 +1,25 @@
+.styled-badges .badge {
+  font-size: 105% !important;
+  padding: .7em .5em !important;
+  letter-spacing: 1px;
+  line-height: 1em;
+  margin-right: 0 !important;
+  background-color: white;
+  color: var(--clr-color-action-600);
+  border: 1px solid var(--clr-color-action-600);
+  border-radius: 3px;
+  border-bottom: 1px solid var(--clr-color-action-200);
+}
+
+.styled-badges .active .badge {
+  background-color: var(--clr-color-action-600);
+  color: whitesmoke !important;
+}
+
+.clr-timeline-step-body {
+  width: 100vw
+}
+
+label {
+  white-space: nowrap;
+}

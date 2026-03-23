@@ -1,0 +1,86 @@
+<cds-divider
+  cds-layout="m-t:lg"
+  class="htitled-divider"
+  title="Détails de la libération"
+></cds-divider>
+
+<!-- Form -->
+<form clrForm [formGroup]="liberationSaveForm!" clrLabelSize="5">
+  <clr-date-container>
+    <label for="dateLiberation" class="clr-required-mark"
+      >Date de Libération :
+    </label>
+    <input
+      clrDate
+      type="date"
+      formControlName="dateLiberation"
+      name="date_lancement"
+      size="24"
+    />
+  </clr-date-container>
+  <clr-number-input-container>
+    <label for="montant" class="clr-required-mark"
+      >Montant de Libération:</label
+    >
+    <input
+      clrNumberInput
+      type="number"
+      formControlName="montant"
+      name="montant_projete"
+      size="23"
+    />
+    <clr-control-helper
+      >{{
+        liberationSaveForm!.controls["montant"].value | number : "1.0-0"
+      }}
+      tnd</clr-control-helper
+    >
+  </clr-number-input-container>
+
+  <!-- Save Buttons -->
+  <div cds-layout="horizontal align:right gap:md m-t:lg m-b:md">
+    <cds-button action="outline">Annuler</cds-button>
+    <cds-button
+      [disabled]="liberationSaveForm!.invalid"
+      (click)="saveLiberation()"
+    >
+      <cds-icon shape="floppy"></cds-icon>
+      Sauvegarder
+    </cds-button>
+  </div>
+</form>
+
+<!-- Documents -->
+<cds-divider
+  cds-layout="m-t:lg m-b:lg"
+  class="htitled-divider"
+  title="Téléchargement des documents"
+></cds-divider>
+
+@if(!this.vesting()?.id){
+<div class="alert alert-info" role="alert">
+  <div class="alert-items">
+    <div class="alert-item static">
+      <div class="alert-icon-wrapper">
+        <cds-icon class="alert-icon" shape="exclamation-triangle"></cds-icon>
+      </div>
+      <span class="alert-text"
+        >Veuillez ajouter la liberation pour pouvoir ajouter le document
+        joint</span
+      >
+    </div>
+  </div>
+</div>
+} @if(vesting()?.id) { @for(conformite of liberation_conformite_documentaire();
+track $index){
+
+<!-- Document Upload Form -->
+<app-document-upload-form
+  [compliance]="{ conformite: conformite }"
+  [data]="vesting()"
+  [task_row]="3"
+  [phase_row]="1"
+  (documentUploadedEvent)="refreshEvent.emit($event)"
+>
+</app-document-upload-form>
+} }

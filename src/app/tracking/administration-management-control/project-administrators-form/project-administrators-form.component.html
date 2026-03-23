@@ -1,0 +1,192 @@
+<!-- Data grid -->
+<clr-datagrid [clrDgLoading]="loading" cds-layout="m-b:md">
+  <!-- Actions Bar -->
+  <clr-dg-action-bar>
+    <cds-button action="outline" status="primary" (click)="openFormModal()">
+      <cds-icon shape="plus" size="md"></cds-icon> Ajouter l'administrateur
+    </cds-button>
+  </clr-dg-action-bar>
+
+  <clr-dg-column>Nom d'administrateur</clr-dg-column>
+  <clr-dg-column>Organisme représenté</clr-dg-column>
+  <clr-dg-column [style.minWidth]="'270px'">Mandat</clr-dg-column>
+  <clr-dg-column>PV</clr-dg-column>
+  <clr-dg-column style="width: 70px"
+    ><cds-icon shape="folder-open"></cds-icon
+  ></clr-dg-column>
+  <clr-dg-column style="width: 70px"></clr-dg-column>
+
+  <clr-dg-row *clrDgItems="let a of administrateurs" [clrDgItem]="a">
+    <clr-dg-cell>{{ a?.nom }}</clr-dg-cell>
+    <clr-dg-cell>{{ a?.organisme }}</clr-dg-cell>
+    <clr-dg-cell [style.minWidth]="'270px'" [style.textAlign]="'center'">
+      <span class="badge-date">{{ a.dateDebut | date : "dd/MM/yyyy" }}</span>
+      <cds-icon shape="connect" size="24"></cds-icon>
+      <span class="badge-date">
+        {{ a.dateFin | date : "dd/MM/yyyy" }}</span
+      ></clr-dg-cell
+    >
+
+    <clr-dg-cell>
+      @for(document of a.documents; track $index){
+      <a
+        [href]="trimPath(document.chemin)"
+        target="_blank"
+        [style.display]="'block'"
+      >
+        <cds-icon shape="pdf-file" size="md" solid=""></cds-icon>
+        {{ document.nomFichier }}</a
+      >
+      } @if(a.documents?.length == 0){
+      <cds-icon shape="no-access" solid="" size="18" status="danger"></cds-icon>
+      Document manquant! }
+    </clr-dg-cell>
+
+    <clr-dg-cell style="width: 70px">
+      <cds-icon
+        shape="upload"
+        size="sm"
+        status="info"
+        solid
+        (click)="showDocument(a)"
+      ></cds-icon>
+    </clr-dg-cell>
+    <clr-dg-cell style="width: 70px">
+      <div cds-layout="horizontal align:center">
+        <cds-icon
+          onkeypress=""
+          status="info"
+          shape="note"
+          solid=""
+          style="cursor: pointer"
+          (click)="edit(a)"
+        ></cds-icon>
+
+        <cds-divider
+          orientation="vertical"
+          style="padding: 0 7px"
+        ></cds-divider>
+
+        <cds-icon
+          onkeypress=""
+          status="danger"
+          shape="trash"
+          solid=""
+          style="cursor: pointer"
+          (click)="deleteAdministrateur(a)"
+        ></cds-icon>
+      </div>
+    </clr-dg-cell>
+  </clr-dg-row>
+  <clr-dg-footer>Administrateur(s)</clr-dg-footer>
+</clr-datagrid>
+
+<!-- Modal for document upload -->
+<clr-modal [clrModalSize]="'md'" [(clrModalOpen)]="opened">
+  <h3 class="modal-title">
+    <cds-icon shape="upload" size="lg" solid=""></cds-icon> Télécharger le PV du
+    commissaire aux comptes
+  </h3>
+  <div class="modal-body">
+    @for(conformite of conformite_documentaires; track $index){
+    <document-upload
+      [compliance]="{ conformite: conformite }"
+      [data]="selectedAdministrateur"
+      [task_row]="3"
+      [phase_row]="5"
+      (documentUploadedEvent)="loadAdministrateursByProject()"
+    ></document-upload>
+    }
+  </div>
+</clr-modal>
+
+<!-- Modal for form -->
+<clr-modal [(clrModalOpen)]="formOpened" [clrModalSize]="'md'">
+  <h3 class="modal-title">
+    <cds-icon shape="assign-user" size="md" solid status="info"></cds-icon>
+    {{ selectedAdministrateur ? "Modifier" : "Ajouter" }} l'administrateur
+  </h3>
+
+  <div class="modal-body" cds-layout="m-t:xl">
+    <form
+      clrForm
+      [formGroup]="administrateurSaveForm!"
+      clrLayout="horizontal"
+      class="clr-form-compact"
+      clrLabelSize="6"
+    >
+      <clr-input-container>
+        <label class="clr-required-mark"
+          ><cds-icon shape="employee" size="sm" solid></cds-icon> Nom de
+          l'administrateur</label
+        >
+        <input
+          clrInput
+          type="text"
+          formControlName="nom"
+          name="nom"
+          size="24"
+        />
+      </clr-input-container>
+      <clr-input-container>
+        <label class="clr-required-mark"
+          ><cds-icon shape="building" size="sm" solid></cds-icon> Organisme
+          représenté</label
+        >
+        <input
+          clrInput
+          type="text"
+          formControlName="organisme"
+          name="organisme"
+          size="24"
+        />
+      </clr-input-container>
+
+      <clr-date-container>
+        <label class="clr-required-mark"
+          ><cds-icon
+            shape="calendar"
+            size="sm"
+            solid
+            badge="success"
+          ></cds-icon>
+          Exercice date début</label
+        >
+        <input
+          clrDate
+          type="date"
+          formControlName="dateDebut"
+          name="dateDebut"
+          size="20"
+        />
+      </clr-date-container>
+
+      <clr-date-container>
+        <label class="clr-required-mark"
+          ><cds-icon shape="calendar" size="sm" solid badge="danger">
+          </cds-icon>
+          Exercice date fin</label
+        >
+        <input
+          clrDate
+          type="date"
+          formControlName="dateFin"
+          name="dateFin"
+          size="20"
+        />
+      </clr-date-container>
+    </form>
+  </div>
+
+  <div class="modal-footer">
+    <cds-button action="outline" (click)="closeFormModal()">Annuler</cds-button>
+    <cds-button
+      status="primary"
+      (click)="addAdministrateur()"
+      [disabled]="administrateurSaveForm!.invalid"
+      onKeyPress=""
+    >
+      <cds-icon shape="floppy" size="md"></cds-icon> Sauvegarder
+    </cds-button>
+  </div>
+</clr-modal>

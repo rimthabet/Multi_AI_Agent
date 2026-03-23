@@ -1,0 +1,70 @@
+<!-- Project name -->
+<div class="project-name">
+  {{ projet()?.nom }}
+</div>
+
+<table class="table table-vertical table-compact" style="margin-top: -10px">
+  <caption>
+    <div cds-layout="horizontal gap:md p-y:md">
+      <div cds-layout="align:stretch">
+        <!-- Divider -->
+        <cds-divider
+          cds-layout="m-t:lg m-b:sm"
+          class="htitled-divider"
+          title="Informations sur le projet"
+        ></cds-divider>
+      </div>
+      <div cds-layout="align:right">
+        <!-- Button -->
+        <cds-button action="outline" status="primary" onKeyPress="">
+          <cds-icon shape="xls-file" size="md"></cds-icon> Export sur excel
+        </cds-button>
+      </div>
+    </div>
+  </caption>
+  <tbody>
+    <tr>
+      <th>Implantation</th>
+      <td>
+        <span style="color: #999">Siège social:</span>
+        {{ projet()?.adresseSiege }}
+        @if (projet()?.adresseUsine) {
+          <br />
+          <span style="color: #999">Adresse Usine:</span>
+          {{ projet()?.adresseUsine }}
+        }
+      </td>
+    </tr>
+    <tr>
+      <th scope="row">Secteur d'activité</th>
+      <td>
+        {{ projet()?.secteurs ? projet()?.secteurs[0]?.libelle : "" }}
+      </td>
+    </tr>
+
+    <tr>
+      <th scope="row">Activité</th>
+      <td>{{ projet()?.activite }}</td>
+    </tr>
+    <tr>
+      <th scope="row">Nature de la participation</th>
+      <td>{{ projet()?.typeInvestissement?.libelle }}</td>
+    </tr>
+  </tbody>
+</table>
+
+<cds-divider
+  class="htitled-divider"
+  title="Historique des comités d'investissement"
+  cds-layout="m-y:lg"
+></cds-divider>
+<app-horizontal-scroller>
+  @for (ci of comitesInvestissement; track $index) {
+  <ng-template #itemTemplate>
+    <ci-subscription-release [comite]="ci"></ci-subscription-release>
+  </ng-template>
+  }
+</app-horizontal-scroller>
+
+(<cds-icon shape="asterisk" class="warning" solid></cds-icon>) : cliquer sur
+l'icône pour voir les détails de la déclaration SOTUGAR

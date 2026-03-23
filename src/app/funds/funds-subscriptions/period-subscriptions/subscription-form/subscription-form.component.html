@@ -1,0 +1,96 @@
+<!-- Form -->
+<form clrForm [formGroup]="subscriptionSaveForm!" clrLabelSize="5">
+  <clr-select-container>
+    <label for="souscripteur" class="clr-required-mark">Souscripteur :</label>
+    <select
+      clrSelect
+      name="options"
+      formControlName="souscripteur"
+      style="width: 280px"
+      [compareWith]="equals"
+    >
+      <option>Choisir un souscripteur...</option>
+      @for(souscripteur of subscribers() ; track souscripteur) {
+      <option
+        [ngValue]="souscripteur"
+        [attr.data-value]="souscripteur"
+        value="{{ souscripteur?.id }}"
+      >
+        {{ souscripteur?.libelle }}
+      </option>
+      }
+    </select>
+  </clr-select-container>
+  <clr-date-container>
+    <label for="date_souscription" class="clr-required-mark"
+      >Date de subscription :
+    </label>
+    <input
+      style="width: 255px"
+      min="{{ subscription_periode().dateDebut | date : 'yyyy-MM-dd' }}"
+      max="{{ subscription_periode().dateFin | date : 'yyyy-MM-dd' }}"
+      clrDate
+      type="date"
+      formControlName="date_souscription"
+      name="date_souscription"
+    />
+  </clr-date-container>
+
+  <clr-number-input-container>
+    <label for="montant" class="clr-required-mark">Montant :</label>
+    <input
+      style="width: 230px"
+      clrNumberInput
+      type="number"
+      formControlName="montant"
+      name="montant"
+    />
+    <clr-control-helper>
+      {{ subscriptionSaveForm!.controls["montant"].value | number : "1.0-0" }}
+      tnd</clr-control-helper
+    >
+  </clr-number-input-container>
+  <div cds-layout="horizontal align:right gap:md m-t:lg m-b:md">
+    <cds-button action="outline">Annuler</cds-button>
+    <cds-button
+      [disabled]="subscriptionSaveForm?.invalid ?? true"
+      (click)="saveSubscription()"
+    >
+      <cds-icon shape="floppy"></cds-icon>
+      Sauvegarder
+    </cds-button>
+  </div>
+</form>
+
+<cds-divider
+  cds-layout="m-t:lg m-b:lg"
+  class="htitled-divider"
+  title="Téléchargement des documents"
+></cds-divider>
+<div class="alert alert-info" role="alert">
+  <div class="alert-items">
+    <div class="alert-item static">
+      <div class="alert-icon-wrapper">
+        <cds-icon class="alert-icon" shape="exclamation-triangle"></cds-icon>
+      </div>
+      <span class="alert-text"
+        >Veuillez ajouter la souscription pour pouvoir ajouter le document
+        joint</span
+      >
+    </div>
+  </div>
+</div>
+
+<!-- Documents upload -->
+@if(subscription_record()?.souscription){ @for(conformite of
+prospection_conformite_documentaire(); track $index){
+<div>
+  <document-upload
+    #doc_upload
+    [compliance]="{ conformite: conformite }"
+    [data]="subscription_record()?.souscription"
+    [task_row]="2"
+    [phase_row]="1"
+  ></document-upload>
+</div>
+} }

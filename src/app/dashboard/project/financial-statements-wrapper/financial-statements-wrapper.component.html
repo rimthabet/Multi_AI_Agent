@@ -1,0 +1,51 @@
+<!-- YEAR FORM -->
+<form clrForm [formGroup]="yearForm!" [clrLabelSize]="4">
+  <clr-number-input-container>
+    <label for="year" class="clr-required-mark" style="padding-top: 7px"
+      >Année des derniers états financiers:</label
+    >
+    <input clrNumberInput type="number" formControlName="year" name="year" />
+  </clr-number-input-container>
+</form>
+
+<!-- TABS -->
+<div cds-layout="m-y:md">
+  <clr-tabs>
+    @for(item of fin_statements; track $index) {
+    <!-- TAB-->
+    <clr-tab>
+      <button (click)="selectedTab = $index" clrTabLink [title]="item.libelle">
+        {{ item.libelle }}
+      </button>
+
+      <clr-tab-content *clrIfActive="$index == selectedTab">
+        <div cds-layout="grid gap:md">
+          <div cds-layout="col@sm:12 col@md:12 col@lg:12">
+            @if(selectedItem != undefined) {
+            <app-bar-chart-08
+              [prospection]="prospection()"
+              [item]="selectedItem"
+              [finItem]="item"
+              [year]="yearForm.controls['year'].value"
+            ></app-bar-chart-08>
+            }
+          </div>
+          <div cds-layout="col@sm:12 col@md:12 col@lg:12">
+            <financial-statement-sheet
+              [prospection]="prospection()"
+              [ref2]="-1"
+              [ref3]="-1"
+              [ref4]="-1"
+              [ref5]="-1"
+              [item]="item"
+              [data]="items"
+              [year]="yearForm.controls['year'].value"
+              (itemSelected)="handleData($event)"
+            ></financial-statement-sheet>
+          </div>
+        </div>
+      </clr-tab-content>
+    </clr-tab>
+    }
+  </clr-tabs>
+</div>

@@ -1,0 +1,69 @@
+<!--HEADER ICON-->
+<div
+  class="glowing-circle"
+  [style]="{
+    '--width': 'var(--clr-header-height)',
+    '--height': 'var(--clr-header-height)',
+    '--glowing-color': glowing
+      ? 'var(--cds-global-color-yellow-200)'
+      : 'transparent',
+    padding: '0 0 !important'
+  }"
+  title="Alertes de conformité"
+>
+  <a
+    class="nav-link"
+    (click)="alertsPanelOpened = true; glowing = false"
+    style="padding: 0 !important"
+  >
+    <cds-icon shape="bell" size="md"></cds-icon>
+
+    @if(alertes().length > 0) {
+    <sup class="badge badge-warning alertes">{{ alertes().length }}</sup>
+    }
+  </a>
+</div>
+
+<!--Alertes side panel-->
+<clr-side-panel
+  [(clrSidePanelOpen)]="alertsPanelOpened"
+  [clrSidePanelStaticBackdrop]="false"
+  [clrSidePanelSkipAnimation]="false"
+  [clrSidePanelBackdrop]="true"
+  [clrSidePanelSize]="'md'"
+>
+  <h3 class="side-panel-title" cds-text="left">Alertes de conformité</h3>
+  <div class="side-panel-body" cds-layout="p-t:xl">
+    @for (alerte of alertes(); track alerte.id) {
+    <cds-icon
+      shape="exclamation-triangle"
+      size="md"
+      status="warning"
+      solid=""
+    ></cds-icon>
+    <div class="label" style="letter-spacing: 1px">
+      @switch(alerte.type) { @case("FUND_RATIO") { Ratio Règlementaire }
+      @case("SUBSCRIBER_RATIO") { Ratio Souscripteur } @default { Ratio (Autre)
+      } }
+
+      <span
+        class="badge badge-warning"
+        style="padding: 0.8em; line-height: 1.5em"
+        >{{ alerte.createdOn | date }}</span
+      >
+    </div>
+
+    <div
+      cds-layout="p:md m-y:xs"
+      class="panel"
+      [innerHTML]="alerte.message"
+    ></div>
+    @if(!$last) {
+    <cds-divider
+      class="htitled-divider"
+      title="Business Alerts"
+      cds-layout="m-y:lg"
+    ></cds-divider>
+    }}
+  </div>
+</clr-side-panel>

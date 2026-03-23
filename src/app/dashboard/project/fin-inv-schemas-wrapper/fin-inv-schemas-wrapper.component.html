@@ -1,0 +1,27 @@
+<ul class="clr-timeline clr-timeline-vertical">
+  @for (fin of financements; track $index) {
+  <li class="clr-timeline-step">
+    <div class="clr-timeline-step-header">
+      <strong class="digit" [style.fontSize]="'x-large !important'">{{
+        fin.dateDemandeFinancement | date : "YYYY"
+      }}</strong>
+    </div>
+    <cds-icon shape="dot-circle" aria-label="Completed"></cds-icon>
+    <div class="clr-timeline-step-body">
+      <div class="clr-timeline-step-title">
+        Plan de financement du
+        {{ fin?.dateDemandeFinancement | date : "dd/MM/yyyy" }}
+
+        <cds-divider orientation="horizontal"></cds-divider>
+      </div>
+
+      <div class="clr-timeline-step-description" cds-layout="p-y:lg">
+        <fin-inv-schemas-group
+          [financement]="fin"
+          [(loading)]="loading"
+        ></fin-inv-schemas-group>
+      </div>
+    </div>
+  </li>
+  }
+</ul>

@@ -1,0 +1,51 @@
+<!-- Timeline -->
+<ul class="clr-timeline clr-timeline-vertical">
+  <!-- Timeline Steps -->
+  @for (fin of financements; track $index) {
+  <li class="clr-timeline-step">
+    <div class="clr-timeline-step-header">
+      <strong class="digit" [style.fontSize]="'x-large !important'">{{
+        fin.dateDemandeFinancement | date : "YYYY"
+      }}</strong>
+    </div>
+    <cds-icon shape="dot-circle" aria-label="Completed"></cds-icon>
+    <div class="clr-timeline-step-body">
+      <span class="clr-timeline-step-title"
+        >Plan de financement du
+        {{ fin.dateDemandeFinancement | date : "dd/MM/yyyy" }}</span
+      >
+
+      <div class="clr-timeline-step-description">
+        <captital-structure-wrapper
+          [financement]="fin"
+          [avantParticipations]="true"
+          [prospection]="projet()"
+        ></captital-structure-wrapper>
+      </div>
+    </div>
+  </li>
+  }
+
+  <!-- Timeline Step -->
+  @if (financements) {
+  <li class="clr-timeline-step">
+    <div class="clr-timeline-step-header">
+      <strong class="digit" [style.fontSize]="'x-large !important'">{{
+        financements.slice(-1)[0]?.dateDemandeFinancement | date : "YYYY"
+      }}</strong>
+    </div>
+    <cds-icon shape="dot-circle" aria-label="Completed"></cds-icon>
+    <div class="clr-timeline-step-body">
+      <span class="clr-timeline-step-title">Structure du capital initial</span>
+
+      <div class="clr-timeline-step-description">
+        <captital-structure-wrapper
+          [financement]="financements.slice(-1)[0]!"
+          [avantParticipations]="false"
+          [prospection]="projet()"
+        ></captital-structure-wrapper>
+      </div>
+    </div>
+  </li>
+  }
+</ul>

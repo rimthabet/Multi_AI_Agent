@@ -1,0 +1,145 @@
+<!-- Header -->
+<span cds-text="title">
+  <cds-icon shape="gavel" size="lg" solid status="info"></cds-icon>
+  Investissements approuvés par le comité d'investissement</span
+>
+
+<!-- Search fonds -->
+<div cds-layout="horizontal align:left gap:md m-t:xl">
+  <clr-dropdown>
+    <cds-button size="md" action="outline" clrDropdownTrigger>
+      {{ selectedFonds?.fonds?.denomination || "Nom du fonds ..." }}
+      <cds-icon shape="angle" status="info" direction="down"></cds-icon>
+    </cds-button>
+
+    <clr-dropdown-menu *clrIfOpen>
+      @for (f of fonds; track $index) {
+      <div clrDropdownItem (click)="selectFonds(f)" onkeypress="">
+        {{ f.fonds?.denomination }}
+      </div>
+      }
+    </clr-dropdown-menu>
+  </clr-dropdown>
+
+  <span class="fund-name active" [style.marginBottom]="'0.2em'">
+    {{ selectedFonds?.fonds?.denomination }}
+    <cds-icon
+      onkeypress=""
+      shape="dashboard"
+      size="lg"
+      title="Cliquer pour consulter la fiche funds"
+      style="cursor: pointer"
+      (click)="goToFiche()"
+    ></cds-icon>
+  </span>
+</div>
+
+<!-- Fund state -->
+@if (selectedFonds?.fonds.etat.libelle == 'En liquidation' ||
+selectedFonds?.fonds.etat.libelle == 'En pré-liquidation') {
+<div class="badge badge-warning" cds-text="caption" cds-layout="p:sm">
+  Fonds {{ selectedFonds?.fonds.etat.libelle }}
+</div>
+}
+
+<!-- Divider & Button -->
+<div cds-layout="horizontal gap:md">
+  <div cds-layout="align:stretch">
+    <cds-divider
+      cds-layout="m-t:lg m-b:sm"
+      class="htitled-divider"
+      title="Investissements approuvés par le comité d'investissement"
+    >
+    </cds-divider>
+  </div>
+  <div cds-layout="align:right">
+    <a href="/fmsApi/ratio-reglementaires-xls/fonds/">
+      <cds-button action="outline" status="primary" onKeyPress="">
+        <cds-icon shape="xls-file" status="info" size="md"></cds-icon> Générer
+        un rapport
+      </cds-button>
+    </a>
+  </div>
+</div>
+
+<!-- Datagrid -->
+<clr-datagrid [clrDgLoading]="loading" style="height: calc(100vh - 285px)">
+  <clr-dg-column
+    [clrDgField]="'pfa.comiteInvestissement.dateComite'"
+    [style.maxWidth]="'150px'"
+    >Date du comité d'investissement
+  </clr-dg-column>
+  <clr-dg-column [clrDgField]="'p.nom'">Nom du projet</clr-dg-column>
+
+  <clr-dg-column>Montant approuvé par le comité d'investissement</clr-dg-column>
+  <clr-dg-column>Capital social</clr-dg-column>
+  <clr-dg-column>% de détention</clr-dg-column>
+  <clr-dg-column>TRI</clr-dg-column>
+  <clr-dg-column [clrDgField]="'etat'">État d'avancement</clr-dg-column>
+
+  <clr-dg-row *clrDgItems="let fin of finsApprouvesParCI" [clrDgItem]="fin">
+    <clr-dg-cell style="max-width: 150px" class="text-center">{{
+      fin.pfa?.comiteInvestissement?.dateComite | date : "dd/MM/yyyy"
+    }}</clr-dg-cell>
+    <clr-dg-cell>
+      <a
+        class="show-hide-icon"
+        [routerLink]="['/dashboard/project', fin.p?.id]"
+        style="margin-top: auto; color: var(--clr-color-action-600)"
+      >
+        {{ fin.p?.nom }} <cds-icon shape="link" size="sm"></cds-icon>
+      </a>
+    </clr-dg-cell>
+
+    <clr-dg-cell>
+      <div class="cell-content">
+        <div class="calculate-total digit">
+          {{
+            calculateMontantTotal(fin.pfa)
+              | currency : "tnd" : "symbol" : "1.0-0"
+          }}
+        </div>
+
+        <div class="styled-badges">
+          <span class="badge">Actions</span>
+          <span class="badge-value digit">{{
+            fin.pfa?.montantActions | number : "1.0-0"
+          }}</span>
+          <span class="badge"> OCA</span
+          ><span class="badge-value digit">{{
+            fin.pfa?.montantOCA | number : "1.0-0"
+          }}</span>
+          <span class="badge"> CCA</span
+          ><span class="badge-value digit">{{
+            fin.pfa?.montantCCA | number : "1.0-0"
+          }}</span>
+        </div>
+      </div>
+    </clr-dg-cell>
+
+    <clr-dg-cell class="text-right digit">
+      {{ fin.pc?.capital | currency : "tnd" : "symbol" : "1.2-2" }}
+    </clr-dg-cell>
+    <clr-dg-cell class="text-right digit">
+      {{ fin.pc?.part | percent : "1.2-2" }}
+    </clr-dg-cell>
+    <clr-dg-cell class="text-center">
+      <!-- <tri-badge [financement]="fin.pfa.comiteInvestissement.financement"></tri-badge> -->
+    </clr-dg-cell>
+    <clr-dg-cell>
+      <cds-icon
+        shape="stop"
+        solid=""
+        [style]="{
+          color: fin.p?.etatAvancement?.couleur,
+          marginLeft: '-10px'
+        }"
+      ></cds-icon>
+      {{ fin.p?.etatAvancement?.libelle }}
+    </clr-dg-cell>
+  </clr-dg-row>
+
+  <clr-dg-footer
+    >{{ finsApprouvesParCI.length }} investissements approuvés</clr-dg-footer
+  >
+</clr-datagrid>

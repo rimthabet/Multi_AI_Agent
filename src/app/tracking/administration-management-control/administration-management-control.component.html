@@ -1,0 +1,80 @@
+<!-- Header -->
+<span cds-text="title">
+  <cds-icon shape="castle" solid="" size="lg" status="info"></cds-icon>
+  Administration, direction et contrôle</span
+>
+
+<!-- Search Project -->
+<div cds-layout="horizontal align:left gap:md m-t:xl">
+  <clr-dropdown>
+    <cds-button size="md" action="outline" clrDropdownTrigger>
+      {{ selectedProjet?.nom || "Sélectionner un projet" }}
+      <cds-icon shape="angle" status="info" direction="down"></cds-icon>
+    </cds-button>
+
+    <clr-dropdown-menu *clrIfOpen>
+      @for(p of projets; track p.id) {
+      <div
+        clrDropdownItem
+        (click)="setProjet(p)"
+        onkeypress=""
+      >
+        {{ p.nom | uppercase }}
+      </div>
+      }
+    </clr-dropdown-menu>
+  </clr-dropdown>
+
+  <div
+    class="project-name {{ selectedProjet ? 'active' : '' }}"
+    style="margin-top: 0px !important"
+  >
+    {{ selectedProjet ? selectedProjet.nom : "Nom du projet ..." }}
+    <cds-icon
+      onkeypress=""
+      shape="dashboard"
+      size="lg"
+      title="Cliquer pour consulter la fiche projet"
+      style="cursor: pointer"
+      (click)="goToFiche()"
+    ></cds-icon>
+  </div>
+</div>
+
+<!-- Divider -->
+<cds-divider
+  cds-layout="m-t:lg m-b:sm"
+  class="htitled-divider"
+  title="Administration,direction et contrôle"
+  style="padding-bottom: 10px"
+></cds-divider>
+
+<!-- Project name -->
+
+<!-- Accordion -->
+<clr-accordion>
+  <clr-accordion-panel [(clrAccordionPanelOpen)]="isPanelOpen">
+    <clr-accordion-title>DIRECTEUR GÉNÉRAL</clr-accordion-title>
+    <clr-accordion-content *clrIfExpanded
+      ><general-director-form [projet]="selectedProjet"></general-director-form
+    ></clr-accordion-content>
+  </clr-accordion-panel>
+
+  <clr-accordion-panel>
+    <clr-accordion-title>ADMINISTRATEURS DU PROJET</clr-accordion-title>
+    <clr-accordion-content *clrIfExpanded
+      ><project-administrators-form
+        [projet]="selectedProjet"
+      ></project-administrators-form
+    ></clr-accordion-content>
+  </clr-accordion-panel>
+
+  <clr-accordion-panel>
+    <clr-accordion-title>COMMISAIRES AUX COMPTES</clr-accordion-title>
+    <clr-accordion-content *clrIfExpanded
+      ><statutory-auditors-form
+        [projet]="selectedProjet"
+      ></statutory-auditors-form
+    ></clr-accordion-content>
+  </clr-accordion-panel>
+</clr-accordion>

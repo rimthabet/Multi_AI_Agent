@@ -1,0 +1,79 @@
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    padding-left: 0 !important;
+}
+
+form {
+    padding: 0 !important;
+}
+
+h3 {
+    padding-bottom: 1em;
+}
+
+a {
+    text-decoration: none;
+}
+
+
+a {
+
+    font-variant: small-caps;
+
+    cds-icon {
+        visibility: hidden;
+    }
+
+    &:hover {
+        cds-icon {
+            visibility: visible;
+        }
+    }
+}
+
+.projet-timeline-wrapper {
+    width: calc(160vh - 2px);
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.clr-timeline-step-body span {
+    padding-right: 35px
+}
+
+.clr-timeline-step-body span:first-child {
+    font-size: 102%;
+}
+
+.clr-timeline-step-body span:nth-child(2) {
+    color: #AAA;
+}
+
+::ng-deep ngx-charts-legend header {
+    display: none;
+}
+
+::ng-deep .chart-legend .legend-labels {
+    width: 125px !important;
+    margin-left: -40px;
+}
+
+.exchange-data td,
+th {
+    text-align: center !important;
+}
+
+@media only screen and (min-width: 1399px) {
+
+    .with-background {
+
+        background-size: auto 99px;
+
+    }
+
+}
+

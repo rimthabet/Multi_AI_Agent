@@ -1,0 +1,18 @@
+{
+    "/fmsApi": {
+        "target": "https://fms.nacloud.tn:7443",
+        "secure": false
+    },
+    "/finStatementApi": {
+        "target": "https://fms.nacloud.tn:7443",
+        "secure": false
+    },
+    "/chatAgent": {
+        "target": "http://localhost:5000",
+        "secure": false,
+        "changeOrigin": true,
+        "pathRewrite": {
+            "^/chatAgent": ""
+        }
+    }
+}

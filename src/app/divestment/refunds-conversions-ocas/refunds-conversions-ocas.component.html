@@ -1,0 +1,331 @@
+<!-- Header -->
+<span cds-text="title">
+  <cds-icon
+    shape="recycle"
+    solid=""
+    badge="success"
+    size="lg"
+    status="info"
+    size="lg"
+  ></cds-icon>
+  Remboursements/conversions en OCA par fonds</span
+>
+
+<!-- Search fonds -->
+<div cds-layout="horizontal align:left gap:md m-t:xl">
+  <clr-dropdown>
+    <cds-button size="md" action="outline" clrDropdownTrigger>
+      {{ selectedFonds?.denomination || "Sélectionner un fonds" }}
+      <cds-icon shape="angle" status="info" direction="down"></cds-icon>
+    </cds-button>
+
+    <clr-dropdown-menu *clrIfOpen>
+      @for (f of fonds; track $index) {
+      <div clrDropdownItem (click)="selectFund(f)" onkeypress="">
+        {{ f.denomination }}
+      </div>
+      }
+    </clr-dropdown-menu>
+  </clr-dropdown>
+
+  <!-- Fund name -->
+  <span class="fund-name active" [style.marginBottom]="'0.2em'">
+    {{
+      selectedFonds ? selectedFonds.denomination : "Dénomination du fonds ..."
+    }}
+    <cds-icon
+      onkeypress=""
+      shape="dashboard"
+      size="lg"
+      status="info"
+      title="Cliquer pour consulter la fiche funds"
+      style="cursor: pointer"
+      (click)="goToFiche()"
+    ></cds-icon>
+  </span>
+</div>
+
+<!-- Fund state -->
+@if (selectedFonds?.etat.libelle == 'En liquidation' ||
+selectedFonds?.etat.libelle == 'En pré-liquidation') {
+<div class="badge badge-warning" cds-text="caption" cds-layout="p:sm">
+  Fonds {{ selectedFonds?.etat.libelle }}
+</div>
+}
+
+<!-- Data grid -->
+<clr-datagrid style="max-height: calc(100vh - 240px)" [clrDgLoading]="loading">
+  <clr-dg-action-bar>
+    <div cds-layout="horizontal gap:md">
+      <div cds-layout="align:stretch">
+        <cds-divider
+          cds-layout="m-t:lg m-b:sm"
+          class="htitled-divider"
+          title="Saisir les remboursements par souscription OCA"
+        ></cds-divider>
+      </div>
+      <div cds-layout="align:right">
+        <cds-button
+          action="outline"
+          status="primary"
+          (click)="exportRembourcementsConversionOca()"
+          onKeyPress=""
+        >
+          <cds-icon shape="xls-file" status="info" size="md"></cds-icon> Générer
+          un rapport
+        </cds-button>
+      </div>
+    </div>
+  </clr-dg-action-bar>
+
+  <clr-dg-column [clrDgField]="'so.financement.projet.nom'"
+    >Projet</clr-dg-column
+  >
+  <clr-dg-column>Date de la souscription </clr-dg-column>
+  <clr-dg-column>Nombre d'actions souscrites</clr-dg-column>
+  <clr-dg-column>Montant total des OCA </clr-dg-column>
+
+  <clr-dg-column>Date de la dernière conversion</clr-dg-column>
+  <clr-dg-column>Montant total converti</clr-dg-column>
+
+  <clr-dg-row
+    *clrDgItems="let r of conversionOCA; let i = index"
+    [clrDgItem]="r"
+    [clrDgSelectable]="i == 0"
+  >
+    <clr-dg-action-overflow>
+      <cds-button action="flat-inline" (click)="displayConversion(r)">
+        <cds-icon shape="recycle" status="info"></cds-icon> Spécifier un
+        remboursement
+      </cds-button>
+    </clr-dg-action-overflow>
+
+    <clr-dg-cell
+      ><a
+        class="show-hide-icon"
+        [routerLink]="['/dashboard/project', r?.so?.financement?.projet.id]"
+        [title]="r?.so?.financement?.projet.nom"
+        >{{ r?.so?.financement?.projet.nom }}
+        <cds-icon shape="link" status="info"></cds-icon> </a
+    ></clr-dg-cell>
+
+    <clr-dg-cell class="text-center">{{
+      r?.so?.dateBulletin | date : "dd/MM/yyyy"
+    }}</clr-dg-cell>
+
+    <clr-dg-cell class="digit right">{{
+      r?.so?.nombreOCA | number : "1.0-0"
+    }}</clr-dg-cell>
+
+    <clr-dg-cell class="digit right">{{
+      r?.so?.montant | currency : "tnd" : "symbol" : "1.0-0"
+    }}</clr-dg-cell>
+
+    <clr-dg-cell class="text-center">{{
+      r.latestDate ? (r.latestDate | date : "dd/MM/yyyy") : "N/D"
+    }}</clr-dg-cell>
+
+    <clr-dg-cell class="digit right">{{
+      r.totalAmount | currency : "tnd" : "symbol" : "1.0-0"
+    }}</clr-dg-cell>
+
+    <ng-container ngProjectAs="clr-dg-row-detail">
+      <clr-dg-row-detail *clrIfExpanded>
+        <div style="width: 100%">
+          <div>
+            <span class="title"
+              ><cds-icon
+                shape="history"
+                status="info"
+                size="md"
+                solid=""
+              ></cds-icon>
+              Historique des remboursements</span
+            >
+          </div>
+
+          <!-- Tableau des conversion -->
+          <table class="table table-compact" style="width: 100%">
+            <caption></caption>
+            <thead>
+              <tr>
+                <th style="width: 200px">Date de la conversion</th>
+                <th style="width: 500px">Montant converti</th>
+                <th>Ratio %</th>
+                <th style="width: 150px"></th>
+                <th style="width: 70px"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let conversion of r?.rc; let i = index">
+                <td style="vertical-align: middle">
+                  {{ conversion.dateRealisation | date : "dd/MM/yyyy" }}
+                </td>
+                <td style="vertical-align: middle" class="digit">
+                  {{
+                    conversion.montantRealise
+                      | currency : "tnd" : "symbol" : "1.0-0"
+                  }}
+                </td>
+                <td style="vertical-align: middle" class="digit">
+                  <clr-progress-bar
+                    [clrValue]="conversion.ratio"
+                    [clrMax]="100"
+                    clrLabeled
+                    [clrDisplayval]="conversion.ratio + '%'"
+                  ></clr-progress-bar>
+                </td>
+
+                <td style="vertical-align: middle">
+                  <button
+                    class="btn btn-sm btn-link"
+                    (click)="deleteConversion(conversion)"
+                  >
+                    <cds-icon shape="trash" class="failure"></cds-icon>
+                    Supprimer
+                  </button>
+                </td>
+                <td style="vertical-align: middle">
+                  <span style="white-space: nowrap">
+                    <cds-icon
+                      shape="folder"
+                      solid=""
+                      size="md"
+                      status="info"
+                      (click)="showDocumentModal(conversion)"
+                      style="cursor: pointer"
+                    ></cds-icon>
+                    ({{ documentsCount(conversion) }} docs)</span
+                  >
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </clr-dg-row-detail>
+    </ng-container>
+  </clr-dg-row>
+  <clr-dg-footer>{{ conversionOCA.length }} conversions en ocas</clr-dg-footer>
+</clr-datagrid>
+
+<!-- Modal conversion -->
+<clr-modal
+  [clrModalSize]="'md'"
+  [(clrModalOpen)]="conversionModalOpened"
+  class="custom-modal-height"
+>
+  <h3 class="modal-title">
+    <cds-icon shape="recycle" status="info" solid="" size="lg"></cds-icon>
+    Remboursement/Conversion en OCA
+  </h3>
+
+  <div class="modal-body">
+    <div
+      cds-text="title uppercase"
+      style="color: var(--cds-alias-status-info)"
+      cds-layout="m-t:xl"
+    >
+      {{ selectedConversion?.so?.financement?.projet.nom }}
+    </div>
+    <cds-divider
+      cds-layout="m-t:lg m-b:sm"
+      class="htitled-divider"
+      [title]="
+        'Souscription en OCA du ' +
+        (selectedConversion?.so.dateBulletin | date : 'dd/MM/yyyy')
+      "
+    ></cds-divider>
+
+    <form
+      [formGroup]="conversionForm"
+      clrForm
+      clrLabelSize="6"
+      clrLayout="compact"
+      cds-layout="p-t:lg"
+    >
+      <clr-date-container>
+        <label
+          ><cds-icon shape="calendar" status="info" solid=""></cds-icon> Date du
+          remboursement:
+        </label>
+        <input
+          clrDate
+          type="date"
+          formControlName="dateRealisation"
+          name="dateRealisation"
+        />
+      </clr-date-container>
+
+      <clr-input-container>
+        <label
+          ><cds-icon shape="dollar" status="info" solid=""></cds-icon> Montant
+          remboursé (tnd):</label
+        >
+        <input
+          clrInput
+          type="number"
+          formControlName="montantRealise"
+          name="montantRealise"
+          class="small-input"
+          size="21"
+        />
+
+        <clr-control-helper>
+          {{
+            conversionForm.controls["montantRealise"].value != null
+              ? (conversionForm.controls["montantRealise"].value
+                | currency : "tnd" : "symbol" : "1.0-0")
+              : ""
+          }}
+        </clr-control-helper>
+      </clr-input-container>
+    </form>
+  </div>
+
+  <div class="modal-footer">
+    <button class="btn btn-outline" (click)="conversionModalOpened = false">
+      Annuler
+    </button>
+    <button
+      class="btn btn-primary"
+      [disabled]="conversionForm.invalid"
+      (click)="saveConversionOca()"
+    >
+      <cds-icon shape="floppy"></cds-icon> Sauvegarder
+    </button>
+  </div>
+</clr-modal>
+
+<!-- Modal documents -->
+<clr-modal
+  [clrModalSize]="'lg'"
+  [(clrModalOpen)]="openedDocumentModal"
+  class="custom-modal-height"
+>
+  <h3 class="modal-title" style="padding-bottom: 0 !important">
+    <cds-icon
+      shape="folder"
+      size="28"
+      solid=""
+      status="info"
+      cds-layout="m-b:xs"
+    ></cds-icon>
+    Documents du remboursement/conversion en OCA
+  </h3>
+  <div
+    class="modal-body"
+    style="max-height: 600px; overflow-y: scroll; padding-top: 0 !important"
+  >
+    @for (conformite of conformite_documentaires; track conformite.id) {
+    <document-upload
+      #docUpload
+      [compliance]="{ conformite: conformite }"
+      [data]="selectedItem"
+      [phase_row]="7"
+      [task_row]="14"
+      (documentUploadedEvent)="loadRembourcementsConversionOca()"
+    >
+    </document-upload>
+    }
+  </div>
+</clr-modal>

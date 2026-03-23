@@ -1,0 +1,50 @@
+<div [clrLoading]="loading">
+  <ul class="clr-timeline clr-timeline-horizontal">
+    @for (p of groupedPfa; track $index) {
+    <li class="clr-timeline-step">
+      <div class="clr-timeline-step-header">
+        {{ p.d | date : "dd/MM/yyyy" }}
+      </div>
+      <cds-icon shape="dot-circle" aria-label="current"></cds-icon>
+      <div class="clr-timeline-step-body">
+        @for (_pfa of p.p; track $index) {
+        <div cds-layout="vertical gap:xs horizontal-stretch">
+          <span class="clr-timeline-step-title" cds-layout="m-t:sm">
+            {{ _pfa.comiteInvestissement?.fonds?.denomination }}</span
+          >
+
+          <div
+            cds-layout="vertical align:stretch gap:xxs p:none"
+            class="clr-timeline-step-description"
+          >
+            <span>
+              Montant Actions:
+              <span class="digit">
+                {{ _pfa.montantActions | number : "1.0-0" }}
+                <small>tnd</small></span
+              >
+            </span>
+
+            <span>
+              Montant OCA:
+              <span class="digit">
+                {{ _pfa.montantOCA | number : "1.0-0" }}
+                <small>tnd</small></span
+              >
+            </span>
+
+            <span>
+              Montant CCA:
+              <span class="digit">
+                {{ _pfa.montantCCA | number : "1.0-0" }}
+                <small>tnd</small></span
+              >
+            </span>
+          </div>
+        </div>
+        }
+      </div>
+    </li>
+    }
+  </ul>
+</div>

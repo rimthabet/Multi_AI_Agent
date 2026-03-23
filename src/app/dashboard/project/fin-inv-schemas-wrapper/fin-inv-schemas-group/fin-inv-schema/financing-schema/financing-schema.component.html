@@ -1,0 +1,43 @@
+<div
+  cds-layout="grid cols@sm:12 cols@md:12 cols@lg:6 cols@xl:6 cols@2xl:6 gap:xl"
+>
+  <clr-datagrid [clrDgLoading]="loading()" style="height: 415px">
+    <clr-dg-column [clrDgField]="'libelle'">Financement</clr-dg-column>
+    <clr-dg-column>Montant (TND)</clr-dg-column>
+    <clr-dg-column>Nature de l'apport</clr-dg-column>
+    <clr-dg-column>%</clr-dg-column>
+
+    <clr-dg-row
+      *clrDgItems="let financement of financements"
+      [clrDgItem]="financement"
+      [class]="
+        financement?.natureBailleurFonds?.libelle == 'FCPR' ? 'fund-row' : ''
+      "
+      [clrDgSelectable]="financement?.natureBailleurFonds?.libelle != 'FCPR'"
+    >
+      <clr-dg-cell>{{ financement?.libelle }}</clr-dg-cell>
+      <clr-dg-cell class="text-right">{{
+        financement?.montant | number : "1.0-0"
+      }}</clr-dg-cell>
+      <clr-dg-cell style="letter-spacing: 1px">{{
+        financement?.natureBailleurFonds?.libelle?.toUpperCase()
+      }}</clr-dg-cell>
+      <clr-dg-cell class="text-right">{{
+        financement?.montant / (totalFinancing() || 1) | percent : "1.0-0"
+      }}</clr-dg-cell>
+    </clr-dg-row>
+
+    <clr-dg-footer>
+      Total Financement :
+      <span class="digit"
+        >{{ totalFinancing() | number : "1.0-0" }} <small>TND</small></span
+      >
+    </clr-dg-footer>
+  </clr-datagrid>
+  <div class="card" style="height: 399px; margin-top: 1em">
+    <app-pie-chart-04
+      [data]="financements"
+      #pieChart04Component
+    ></app-pie-chart-04>
+  </div>
+</div>

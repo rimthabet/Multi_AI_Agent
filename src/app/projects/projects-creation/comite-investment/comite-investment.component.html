@@ -1,0 +1,65 @@
+<!-- Financing Switch -->
+<div cds-layout="m-y:md">
+  <financing-switch
+    (financementChanged)="financementChanged($event)"
+    [prospection]="prospection()"
+    [message]="
+      ' Veuillez spécifier le plan de financement pour gêrer le comité interne'
+    "
+  ></financing-switch>
+</div>
+
+<!-- Loading -->
+@if (loading) {
+<div class="progress-block">
+  <label for="demoProgressBar">Téléchargement </label>
+  <clr-progress-bar id="progressBar" clrLoop></clr-progress-bar>
+</div>
+}
+
+<!-- Details -->
+<div cds-layout="m-y:lg">
+  <form clrForm class="details clr-form-compact" clrLabelSize="2">
+    <clr-control-container>
+      <label
+        ><cds-icon shape="user" size="md" status="info"></cds-icon>
+        Promoteur:</label
+      >
+      <span>{{ prospection()?.promoteur?.nom }}</span>
+    </clr-control-container>
+    <clr-control-container>
+      <label
+        ><cds-icon shape="factory" size="md" status="info"></cds-icon>
+        Activité:</label
+      >
+      <span>{{ prospection()?.activite }}</span>
+    </clr-control-container>
+    <clr-control-container>
+      <label>
+        <cds-icon shape="employee" size="md" status="info"></cds-icon> Activité
+        du promoteur:</label
+      >
+      <span>{{ prospection()?.promoteur?.poste }}</span>
+    </clr-control-container>
+  </form>
+</div>
+
+<!-- Tabs -->
+<clr-tabs>
+  @for(f of financement?.fonds; track f) {
+  <clr-tab>
+    <button clrTabLink>
+      {{ f.denomination }}
+    </button>
+    <clr-tab-content *clrIfActive="$index == 0">
+      <funds-comite-investment
+        #creationForm
+        [prospection]="prospection()"
+        [financement]="financement"
+        [participations]="participations"
+        [fonds]="f"
+      ></funds-comite-investment>
+    </clr-tab-content>
+  </clr-tab>
+  }
+</clr-tabs>

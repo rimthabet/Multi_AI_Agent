@@ -1,0 +1,12 @@
+h1 {
+    color: var(--clr-color-action-700);
+
+    cds-icon {
+        visibility: hidden;
+    }
+
+    &:hover cds-icon {
+        visibility: visible;
+        cursor: pointer;
+    }
+}

@@ -1,0 +1,35 @@
+<!-- Modal -->
+<clr-modal [clrModalSize]="'md'" [clrModalOpen]="opened() ?? false">
+    <!-- Modal header -->
+    <h3 class="modal-title">
+        <cds-icon shape="credit-card" size="lg" solid status="info"></cds-icon> Ajouter une
+        dépense
+    </h3>
+    <!-- Modal body -->
+    <div class="modal-body">
+        <form clrForm [formGroup]="expensesSaveForm!" clrLabelSize="3">
+            <clr-input-container>
+                <label for="libelle" class="clr-required-mark">Libellé:</label>
+                <input clrInput type="text" formControlName="libelle" name="libelle" style="width: 330px !important" />
+            </clr-input-container>
+            <clr-number-input-container>
+                <label for="montant" class="clr-required-mark">Montant:</label>
+                <input clrNumberInput type="number" formControlName="montant" name="montant" style="width: 330px !important" />
+                <clr-control-helper>Exprimez en tnd :
+                    <span style="font-size: 110%; font-weight: 500">{{ expensesSaveForm.get('montant')?.value | number :
+                        "1.2-2" }}
+                        <sup>tnd</sup></span>
+                </clr-control-helper>
+            </clr-number-input-container>
+        </form>
+    </div>
+    <!-- Boutons -->
+    <div class="modal-footer">
+        <cds-button action="outline" (click)="hideModal()">
+            Annuler
+        </cds-button>
+        <cds-button  status="primary" (click)="saveExpense()" [disabled]="expensesSaveForm.invalid">
+            Sauvegarder
+        </cds-button>
+    </div>
+</clr-modal>

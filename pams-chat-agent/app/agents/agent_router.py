@@ -9,22 +9,27 @@ _DOC_KEYWORDS = [
     "document", "rapport", "bilan", "prospectus", "pv",
     "politique", "règlement", "reglement", "situation annuelle",
     "actif net", "résultat", "pdf", "liste des documents", "disponible",
-    "frais", "commission", "souscription", "rachat", "cession",
+    "frais", "commission", "souscription", "souscripteurs", "rachat", "cession",
     "durée de blocage", "duree de blocage", "blocage",
     "politique d'investissement", "stratégie d'investissement",
-    "modalité", "modalite", "montant minimum",
-    "secteur", "peut-il investir", "peut investir",
-    "agrément", "agrement", "visa cmf",
+    "modalité", "modalite", "montant minimum", "type de fonds",
+    "profil", "investisseur", "secteur", "peut-il investir", "peut investir",
+    "agrément", "agrement", "visa cmf", "redevance", "honoraires", "frais de gestion"
 ]
 
 _DOC_PATTERNS = re.compile(
     r"\b("
     r"document(s)?\b|rapport(s)?\b|bilan(s)?\b|prospectus\b|"
-    r"politique.d.investissement|règlement|reglement|"
+    r"politique.d['’].?investissement|règlement|reglement|"
     r"situation.annuelle|actif.net|"
     r"pv\b|procès.verbal|proces.verbal|"
     r"résultat(s)?\b|resultat(s)?\b|"
-    r"pdf\b|fichier(s)?\b"
+    r"pdf\b|fichier(s)?\b|"
+    r"type\s+de\s+fonds|"
+    r"souscripteurs?(\s+concernés?)?|"
+    r"profil(\s+de\s+l['’]investisseur)?|"
+    r"stratégie\s+d['’].?investissement|"
+    r"strategie\s+d['’].?investissement"
     r")",
     re.IGNORECASE,
 )
@@ -65,30 +70,51 @@ def _route_by_llm(question: str) -> str:
     return "donnees"
 
 
+# Prefixes indiquant une question d'information (pas une action)
+_INFO_SEEKING_PATTERNS = re.compile(
+    r"^(donne[\s-]moi|quels?\s+sont|qu['']est[\s-]ce|comment|explique|liste[\s-]moi|"
+    r"quelles?\s+sont|montre[\s-]moi\s+les?\s+champs|c['']est\s+quoi|"
+    r"dis[\s-]moi|présente|presente|résume|resume)\b",
+    re.IGNORECASE,
+)
+
+# Mots indiquant que c'est une demande d'info et non une action
+_INFO_KEYWORDS = [
+    "champ", "champs", "obligatoire", "obligatoires", "requis",
+    "information", "informations", "comment", "comment faire",
+    "que faut-il", "qu'est-ce qu'il faut", "nécessaire", "necessaire",
+    "prérequis", "prerequis", "besoin",
+]
+
+
 def _detect_agent(question: str) -> str:
     q = question.lower()
 
-    # 0. Priorite creation/ajout -> navigation
-    if re.search(r"\b(ajoute?r?|ajout|cr[eé]e?r?|cr[eé]ation)\b", q):
-        if "fonds" in q or "projet" in q:
+    # 0. Si c'est une QUESTION D'INFORMATION sur la création (pas une action),
+    #    router vers données et non navigation.
+    #    Ex: "donne moi les champs obligatoires pour créer un fonds"
+    is_info_seeking = _INFO_SEEKING_PATTERNS.search(q) or any(kw in q for kw in _INFO_KEYWORDS)
+    has_creation_word = bool(re.search(r"\b(ajoute?r?|ajout|cr[eé]e?r?|cr[eé]ation)\b", q))
+
+    if not is_info_seeking:
+        # 0b. Action de création/ajout réelle -> navigation
+        if has_creation_word and ("fonds" in q or "projet" in q):
             return "navigation"
 
-    # 0b. Requetes de donnees avec annee explicite
+    # 1. Navigation en priorité absolue (mais pas si c'est une question d'info)
+    if not is_info_seeking and _NAV_PATTERNS.search(question):
+        return "navigation"
+
+    # 2. Documents (PRIORITÉ: même s'il y a une année, un document demandé va aux docs)
+    if any(w in q for w in _DOC_KEYWORDS) or _DOC_PATTERNS.search(question):
+        return "documents"
+
+    # 3. Requêtes de données avec année explicite
     if re.search(r"\b20\d{2}\b", q):
         if "fonds" in q or "projet" in q:
             return "donnees"
 
-    # 1. Navigation en priorité absolue
-    if _NAV_PATTERNS.search(question):
-        return "navigation"
-
-    # 2. Documents
-    if any(w in q for w in _DOC_KEYWORDS):
-        return "documents"
-    if _DOC_PATTERNS.search(question):
-        return "documents"
-
-    # 3. Données par défaut
+    # 4. Données par défaut
     return "donnees"
 
 

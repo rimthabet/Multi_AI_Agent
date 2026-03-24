@@ -302,8 +302,8 @@ export class FundsCreateFormV2Component implements OnInit, AfterViewInit {
     financial.matricule_fiscal = this.getParam('matricule_fiscal', 'matriculeFiscal') ?? financial.matricule_fiscal;
 
     const charges = this.templateForm.management_charges;
-    const fraisDepositaire = this.parseNumber(this.getParam('frais_depositaire'));
-    const fraisGestion = this.parseNumber(this.getParam('frais_gestion'));
+    const fraisDepositaire = this.parseNumber(this.getParam('frais_depositaire', 'fraisDepositaire','frais_du_depositaire','frais_du_dépositaire','frais_dépositaire'));
+    const fraisGestion = this.parseNumber(this.getParam('frais_gestion', 'fraisGestion','frais_de_gestion'));
     if (fraisDepositaire !== undefined) charges.frais_depositaire = fraisDepositaire;
     if (fraisGestion !== undefined) charges.frais_gestion = fraisGestion;
 
@@ -331,45 +331,68 @@ export class FundsCreateFormV2Component implements OnInit, AfterViewInit {
   }
 
   private applyPrefillSelectFields() {
-    if (this.prefillApplied) return;
     if (!Object.keys(this.prefillParams).length) return;
 
     const financial = this.templateForm.financial_identity;
     const legal = this.templateForm.legal_identity;
 
-    const banqueValue = this.getParam('banque', 'banque_depositaire');
+    const banqueValue = this.getParam('banque', 'banque_dépositaire', 'banque_depositaire', 'banquedepositaire', 'banque_depoitaire');
     if (banqueValue && this.banques.length) {
       const normalizedValue = this.normalizeKey(banqueValue);
       const banque = this.banques.find(b => {
-        const label = this.normalizeKey(b?.libelle || '');
-        return String(b?.id) === banqueValue || label === normalizedValue || label.includes(normalizedValue) || normalizedValue.includes(label);
+        const libelle = b?.libelle || '';
+        const label = this.normalizeKey(libelle);
+        const acronym = libelle.split(/[\s'-]+/).filter((w: string) => w.length > 0).map((w: string) => w.charAt(0).toLowerCase()).join('');
+        return String(b?.id) === banqueValue 
+            || (label && normalizedValue && label === normalizedValue)
+            || (acronym && normalizedValue && acronym === normalizedValue)
+            || (normalizedValue.length > 2 && label.includes(normalizedValue));
       });
       if (banque) financial.banque = banque;
     }
 
-    const formeValue = this.getParam('forme_legale', 'formeLegale');
+    const formeValue = this.getParam('forme_legale', 'formeLegale', 'formelegale', 'forme_légale');
     if (formeValue && this.forme_legales.length) {
-      const forme = this.forme_legales.find(f => String(f?.id) === formeValue || (f?.libelle || '').toLowerCase() === formeValue.toLowerCase());
+      const normalizedValue = this.normalizeKey(formeValue);
+      const forme = this.forme_legales.find(f => {
+        const libelle = f?.libelle || '';
+        const label = this.normalizeKey(libelle);
+        const acronym = libelle.split(/[\s'-]+/).filter((w: string) => w.length > 0 && !['de', 'a', 'à', 'la', 'le', 'et', 'en', 'au'].includes(w.toLowerCase())).map((w: string) => w.charAt(0).toLowerCase()).join('');
+        return String(f?.id) === formeValue 
+            || (label && normalizedValue && label === normalizedValue)
+            || (acronym && normalizedValue && acronym === normalizedValue)
+            || (normalizedValue.length > 2 && label.includes(normalizedValue));
+      });
       if (forme) legal.forme_legale = forme;
     }
 
-    const natureValue = this.getParam('nature');
+    const natureValue = this.getParam('nature', 'natures');
     if (natureValue && this.natures.length) {
-      const nature = this.natures.find(n => String(n?.id) === natureValue || (n?.libelle || '').toLowerCase() === natureValue.toLowerCase());
+      const normalizedValue = this.normalizeKey(natureValue);
+      const nature = this.natures.find(n => {
+        const label = this.normalizeKey(n?.libelle || '');
+        return String(n?.id) === natureValue 
+            || (label && normalizedValue && label === normalizedValue)
+            || (normalizedValue.length > 2 && label.includes(normalizedValue));
+      });
       if (nature) legal.nature = nature;
     }
 
-    const cadreValue = this.getParam('cadre_investissement', 'cadres_investissement');
+    const cadreValue = this.getParam('cadre_investissement', 'cadres_investissement' , 'cadre_d_investissement' , 'cadres_d_investissement', 'cadre_dinvestissement', 'cadres_dinvestissement', 'cadreinvestissement', 'cadresinvestissement');
     if (cadreValue && this.cadresInvestissement.length) {
-      const parts = cadreValue.split(',').map(v => v.trim()).filter(Boolean);
-      const selected = this.cadresInvestissement.filter(c =>
-        parts.some(p => String(c?.id) === p || (c?.libelle || '').toLowerCase() === p.toLowerCase())
-      );
+      const parts = cadreValue.split(',').map(v => this.normalizeKey(v)).filter(Boolean);
+      const selected = this.cadresInvestissement.filter(c => {
+        const label = this.normalizeKey(c?.libelle || '');
+        return parts.some(p => {
+          return String(c?.id) === p 
+              || (label && p && label === p)
+              || (p.length > 2 && label.includes(p));
+        });
+      });
       if (selected.length) legal.cadre_investissement = selected;
     }
-
-    this.prefillApplied = true;
   }
+
 
   // ===== SAVE FUND =====
   saveFund() {

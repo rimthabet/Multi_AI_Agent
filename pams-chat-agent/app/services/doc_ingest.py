@@ -34,12 +34,12 @@ def strip_leading_chunk_index(text: str) -> str:
 
     original = text.strip()
 
-    # chiffre seul sur sa propre ligne au début
+   
     cleaned = re.sub(r"^\d{1,4}\s*\n+", "", original, count=1).strip()
     if cleaned != original and len(cleaned) >= 15:
         return cleaned
 
-    # chiffre au début de la même ligne, suivi d'un espace puis du contenu
+    
     cleaned = re.sub(r"^\d{1,4}\s+", "", original, count=1).strip()
     if len(cleaned) < 15:
         return original
@@ -52,15 +52,13 @@ def enhance_table_extraction(table_text: str) -> str:
     if not table_text:
         return table_text
     
-    # Étape 1: Nettoyage de base
+    
     lines = table_text.strip().split("\n")
     cleaned_lines = []
     
     for line in lines:
         stripped = line.strip()
-        # Garder les lignes avec contenu
         if stripped and not re.match(r"^[\|\s\-]+$", stripped):
-            # Normaliser les espaces dans chaque cellule
             cells = stripped.split("|")
             cells = [re.sub(r"\s+", " ", c).strip() for c in cells]
             cleaned_lines.append(" | ".join(cells))
@@ -68,10 +66,10 @@ def enhance_table_extraction(table_text: str) -> str:
     if not cleaned_lines:
         return table_text
     
-    # Étape 2: Corriger la concaténation catégories/sous-catégories
+    # Corriger la concaténation catégories/sous-catégories
     cleaned_lines = _fix_category_concatenation(cleaned_lines)
     
-    # Étape 3: Détecter et ajouter les lignes manquantes
+   
     cleaned_lines = _fix_missing_lines(cleaned_lines)
     
     return "\n".join(cleaned_lines)
@@ -239,11 +237,11 @@ def _is_table_continuation(table1, table2) -> bool:
     if table1.df.empty or table2.df.empty:
         return False
 
-    # C1: pages strictement consécutives
+    #  pages strictement consécutives
     if table2.page != table1.page + 1:
         return False
 
-    # C2: nombre de colonnes compatible (tolérance ±1 : OCR peut perdre une colonne)
+    #  nombre de colonnes compatible (tolérance ±1 : OCR peut perdre une colonne)
     n1 = table1.df.shape[1]
     n2 = table2.df.shape[1]
     if abs(n1 - n2) > 1 or n1 < 2:
@@ -259,7 +257,7 @@ def _is_table_continuation(table1, table2) -> bool:
     t1_col_vals = list(table1.df.columns)
     t2_col_vals = list(table2.df.columns)
 
-    # C4: si table2 commence par un titre de nouveau tableau → refus
+    #  si table2 commence par un titre de nouveau tableau → refus
     # Titre = une seule cellule non-vide, texte long tout en majuscules, sans chiffres
     non_empty_t2 = [str(v).strip() for v in t2_col_vals if str(v).strip()]
     if len(non_empty_t2) == 1:

@@ -4,159 +4,70 @@
     <!-- Branding -->
     <div class="branding" style="padding-left: 5px">
       <a routerLink="/dashboard" class="nav-link">
-        <cds-icon
-          shape="crown"
-          [style.color]="'var(--clr-header-font-color)'"
-        ></cds-icon>
-        <span
-          [style.fontSize]="'2em !important'"
-          [style.letterSpacing]="'3px'"
-          [style.fontWeight]="'300 !important'"
-          [style.color]="'var(--clr-header-font-color)'"
-          [style.marginLeft]="'5px'"
-          >PAMS</span
-        >
+        <cds-icon shape="crown" [style.color]="'var(--clr-header-font-color)'"></cds-icon>
+        <span [style.fontSize]="'2em !important'" [style.letterSpacing]="'3px'" [style.fontWeight]="'300 !important'"
+          [style.color]="'var(--clr-header-font-color)'" [style.marginLeft]="'5px'">PAMS</span>
       </a>
     </div>
 
     <div class="header-nav">
       <clr-dropdown>
-        <cds-button
-          action="flat-inline"
-          size="sm"
-          cds-layout="m-t:xs"
-          clrDropdownTrigger
-          class="shortcut-btn"
-        >
+        <cds-button action="flat-inline" size="sm" cds-layout="m-t:xs" clrDropdownTrigger class="shortcut-btn">
           <cds-icon shape="bolt"></cds-icon> Accès Rapide
           <cds-icon shape="angle" direction="down"></cds-icon>
         </cds-button>
-        <clr-dropdown-menu
-          clrPosition="bottom-left"
-          *clrIfOpen
-          style="width: 300px"
-        >
-          <div
-            [routerLink]="['/dashboard']"
-            aria-label="Tableau de bord global"
-            clrDropdownItem
-            cds-layout="horizontal"
-            title="Tableau de bord"
-          >
+        <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen style="width: 300px">
+          <div [routerLink]="['/dashboard']" aria-label="Tableau de bord global" clrDropdownItem cds-layout="horizontal"
+            title="Tableau de bord">
             <cds-icon shape="dashboard"></cds-icon>Tableau de bord
             <span cds-layout="align:right">CTRL + D</span>
           </div>
 
-          <div
-            class="dropdown-divider"
-            role="separator"
-            aria-hidden="true"
-          ></div>
-          <div
-            [routerLink]="['/repository']"
-            aria-label="Inventaire des fonds"
-            clrDropdownItem
-            cds-layout="horizontal"
-            title="Inventaire des fonds"
-          >
+          <div class="dropdown-divider" role="separator" aria-hidden="true"></div>
+          <div [routerLink]="['/repository']" aria-label="Inventaire des fonds" clrDropdownItem cds-layout="horizontal"
+            title="Inventaire des fonds">
             <cds-icon shape="coin-bag"></cds-icon>Inventaire des fonds
             <span cds-layout="align:right">CTRL + F</span>
           </div>
-          <div
-            [routerLink]="['/projects/inventory']"
-            aria-label="Inventaire des projets"
-            clrDropdownItem
-            cds-layout="horizontal"
-            title="Inventaire des projets"
-          >
+          <div [routerLink]="['/projects/inventory']" aria-label="Inventaire des projets" clrDropdownItem
+            cds-layout="horizontal" title="Inventaire des projets">
             <cds-icon shape="building"></cds-icon>Inventaire des projets
             <span cds-layout="align:right">CTRL + P</span>
           </div>
 
-          <div
-            class="dropdown-divider"
-            role="separator"
-            aria-hidden="true"
-          ></div>
-          <div
-            [routerLink]="['/projects/under-study']"
-            aria-label="Projets en étude"
-            clrDropdownItem
-            cds-layout="horizontal"
-            title="Projets en étude"
-          >
+          <div class="dropdown-divider" role="separator" aria-hidden="true"></div>
+          <div [routerLink]="['/projects/under-study']" aria-label="Projets en étude" clrDropdownItem
+            cds-layout="horizontal" title="Projets en étude">
             <cds-icon shape="recycle"></cds-icon>Projets en étude
           </div>
-          <div
-            [routerLink]="['/investments/projects']"
-            aria-label="Projets en investissement"
-            clrDropdownItem
-            cds-layout="horizontal"
-            title="Projets en investissement"
-          >
+          <div [routerLink]="['/investments/projects']" aria-label="Projets en investissement" clrDropdownItem
+            cds-layout="horizontal" title="Projets en investissement">
             <cds-icon shape="factory"></cds-icon>Projets en investissement
           </div>
-          <div
-            [routerLink]="['/tracking/projects']"
-            aria-label="Projets à suivre"
-            clrDropdownItem
-            cds-layout="horizontal"
-            title="Projets à suivre"
-          >
+          <div [routerLink]="['/tracking/projects']" aria-label="Projets à suivre" clrDropdownItem
+            cds-layout="horizontal" title="Projets à suivre">
             <cds-icon shape="eye" solid=""></cds-icon>Projets à suivre
           </div>
-          <div
-            [routerLink]="['/tracking/capital-structure']"
-            aria-label="Structures des capitaux"
-            clrDropdownItem
-            cds-layout="horizontal"
-            title="Structures des capitaux"
-          >
+          <div [routerLink]="['/tracking/capital-structure']" aria-label="Structures des capitaux" clrDropdownItem
+            cds-layout="horizontal" title="Structures des capitaux">
             <cds-icon shape="employee-group"></cds-icon>Structures des capitaux
           </div>
 
-          <div
-            class="dropdown-divider"
-            role="separator"
-            aria-hidden="true"
-          ></div>
-          <div
-            [routerLink]="['/investments/vesting']"
-            aria-label="Libérations des fonds"
-            clrDropdownItem
-            cds-layout="horizontal"
-            title="Libérations des fonds"
-          >
+          <div class="dropdown-divider" role="separator" aria-hidden="true"></div>
+          <div [routerLink]="['/investments/vesting']" aria-label="Libérations des fonds" clrDropdownItem
+            cds-layout="horizontal" title="Libérations des fonds">
             <cds-icon shape="logout"></cds-icon>Libérations des fonds
           </div>
 
-          <div
-            class="dropdown-divider"
-            role="separator"
-            aria-hidden="true"
-          ></div>
-          <div
-            [routerLink]="['/tracking/meeting-tracking']"
-            aria-label="Suivi des réunions"
-            clrDropdownItem
-            cds-layout="horizontal"
-            title="Suivi des réunions"
-          >
+          <div class="dropdown-divider" role="separator" aria-hidden="true"></div>
+          <div [routerLink]="['/tracking/meeting-tracking']" aria-label="Suivi des réunions" clrDropdownItem
+            cds-layout="horizontal" title="Suivi des réunions">
             <cds-icon shape="eye"></cds-icon>Suivi des réunions
           </div>
 
-          <div
-            class="dropdown-divider"
-            role="separator"
-            aria-hidden="true"
-          ></div>
-          <div
-            [routerLink]="['/divestment/realized-divestments']"
-            aria-label="Desinvestissement réalisés"
-            clrDropdownItem
-            cds-layout="horizontal"
-            title="Desinvestissement réalisés"
-          >
+          <div class="dropdown-divider" role="separator" aria-hidden="true"></div>
+          <div [routerLink]="['/divestment/realized-divestments']" aria-label="Desinvestissement réalisés"
+            clrDropdownItem cds-layout="horizontal" title="Desinvestissement réalisés">
             <cds-icon shape="logout"></cds-icon>Désinvestissement réalisés
           </div>
         </clr-dropdown-menu>
@@ -169,18 +80,9 @@
       <app-alerts-listener></app-alerts-listener>
 
       <!-- Theme Switcher -->
-      <a
-        class="nav-link"
-        (click)="changeTheme(!dark)"
-        (mouseenter)="themeIconSolid = true"
-        (mouseleave)="themeIconSolid = false"
-        title="Themes Switcher"
-      >
-        <cds-icon
-          shape="{{ dark ? 'sun' : 'moon' }}"
-          size="md"
-          [solid]="themeIconSolid"
-        ></cds-icon>
+      <a class="nav-link" (click)="changeTheme(!dark)" (mouseenter)="themeIconSolid = true"
+        (mouseleave)="themeIconSolid = false" title="Themes Switcher">
+        <cds-icon shape="{{ dark ? 'sun' : 'moon' }}" size="md" [solid]="themeIconSolid"></cds-icon>
       </a>
       <clr-dropdown>
         <button clrDropdownTrigger aria-label="Change Language">
@@ -191,19 +93,11 @@
           <a clrDropdownItem>
             <div cds-layout="horizontal align:stretch">
               <span>FR - Français</span> &nbsp;
-              <cds-icon
-                shape="check"
-                status="success"
-                solid
-                size="sm"
-                style="cursor: pointer; margin-top: 0.3em"
-              ></cds-icon>
+              <cds-icon shape="check" status="success" solid size="sm"
+                style="cursor: pointer; margin-top: 0.3em"></cds-icon>
             </div>
           </a>
-          <a
-            clrDropdownItem
-            style="pointer-events: none; opacity: 0.5; cursor: not-allowed"
-          >
+          <a clrDropdownItem style="pointer-events: none; opacity: 0.5; cursor: not-allowed">
             <div cds-layout="horizontal align:stretch">
               <span>EN - Anglais</span> &nbsp;
             </div>
@@ -211,133 +105,68 @@
         </clr-dropdown-menu>
       </clr-dropdown>
 
-      <a
-        class="nav-link"
-        title="Feedback"
-        (mouseenter)="feedbackIconSolid = true"
-        (mouseout)="feedbackIconSolid = false"
-        (click)="openFeedbackModal()"
-      >
+      <a class="nav-link" title="Feedback" (mouseenter)="feedbackIconSolid = true"
+        (mouseout)="feedbackIconSolid = false" (click)="openFeedbackModal()">
         <cds-icon shape="happy-face" size="md"></cds-icon>
       </a>
 
       <clr-dropdown>
-        <button
-          class="nav-icon"
-          clrDropdownTrigger
-          aria-label="toggle settings menu"
-        >
+        <button class="nav-icon" clrDropdownTrigger aria-label="toggle settings menu">
           <cds-icon shape="applications" solid></cds-icon>
           <cds-icon shape="angle" direction="down"></cds-icon>
         </button>
 
         <clr-dropdown-menu *clrIfOpen clrPosition="bottom-right">
-          <a
-            clrDropdownItem
-            (click)="openAboutModal()"
-            cds-layout="horizontal gap:xs"
-            title="À propos"
-          >
+          <a clrDropdownItem (click)="openAboutModal()" cds-layout="horizontal gap:xs" title="À propos">
             <cds-icon shape="bolt"></cds-icon> À propos
             <span cds-layout="align:right" cds-text="caption">CTRL + A</span>
           </a>
 
-          <a
-            clrDropdownItem
-            (click)="passwordManagerOpened = true"
-            cds-layout="horizontal gap:xs"
-            title="Changer de mot de passe"
-          >
+          <a clrDropdownItem (click)="passwordManagerOpened = true" cds-layout="horizontal gap:xs"
+            title="Changer de mot de passe">
             <cds-icon shape="key"></cds-icon>
             Changer de mot de passe
-            <span cds-layout="align:right p-l:lg" cds-text="caption"
-              >CTRL + I</span
-            >
+            <span cds-layout="align:right p-l:lg" cds-text="caption">CTRL + I</span>
           </a>
 
-          <a
-            clrDropdownItem
-            (click)="openScreenFit = true"
-            cds-layout="horizontal gap:xs"
-            title="Plein écran"
-          >
+          <a clrDropdownItem (click)="openScreenFit = true" cds-layout="horizontal gap:xs" title="Plein écran">
             <cds-icon shape="resize"></cds-icon> Plein écran
-            <span cds-layout="align:right p-l:lg" cds-text="caption"
-              >CTRL + Z</span
-            >
+            <span cds-layout="align:right p-l:lg" cds-text="caption">CTRL + Z</span>
           </a>
 
           <cds-divider orientation="horizontal"></cds-divider>
 
-          <a
-            clrDropdownItem
-            (click)="openShortcutsModal()"
-            cds-layout="horizontal gap:xs"
-            title="Raccourcis pour accès rapide"
-          >
+          <a clrDropdownItem (click)="openShortcutsModal()" cds-layout="horizontal gap:xs"
+            title="Raccourcis pour accès rapide">
             <cds-icon shape="link"></cds-icon>
             Raccourcis pour accès rapide
-            <span cds-layout="align:right p-l:lg" cds-text="caption"
-              >CTRL + C</span
-            >
+            <span cds-layout="align:right p-l:lg" cds-text="caption">CTRL + C</span>
           </a>
 
           <cds-divider orientation="horizontal"></cds-divider>
 
-          <a
-            clrDropdownItem
-            routerLink="/documentation"
-            cds-layout="horizontal gap:xs"
-            title="Documentation"
-          >
+          <a clrDropdownItem routerLink="/documentation" cds-layout="horizontal gap:xs" title="Documentation">
             <cds-icon shape="help-info"></cds-icon> Documentation
-            <span cds-layout="align:right p-l:lg" cds-text="caption"
-              >CTRL + H</span
-            ></a
-          >
+            <span cds-layout="align:right p-l:lg" cds-text="caption">CTRL + H</span></a>
 
           <cds-divider orientation="horizontal"></cds-divider>
 
-          <a
-            clrDropdownItem
-            (click)="disconnect()"
-            cds-layout="horizontal gap:xs"
-            title="Se déconnecter"
-          >
+          <a clrDropdownItem (click)="disconnect()" cds-layout="horizontal gap:xs" title="Se déconnecter">
             <cds-icon shape="lock"></cds-icon> Se déconnecter
-            <span cds-layout="align:right p-l:lg" cds-text="caption"
-              >CTRL + X</span
-            >
+            <span cds-layout="align:right p-l:lg" cds-text="caption">CTRL + X</span>
           </a>
         </clr-dropdown-menu>
       </clr-dropdown>
     </div>
   </header>
   <!-- CHAT -->
-  <button
-    class="ai-assistant-fab"
-    type="button"
-    aria-label="Ouvrir l'assistant IA"
-    title="Assistant IA"
-    (click)="chatPanelOpened = true"
-    (mouseenter)="chatIconSolid = true"
-    (mouseleave)="chatIconSolid = false"
-  >
-    <cds-icon
-      shape="talk-bubbles"
-      size="md"
-      [solid]="chatIconSolid"
-    ></cds-icon>
+  <button class="ai-assistant-fab" type="button" aria-label="Ouvrir l'assistant IA" title="Assistant IA"
+    (click)="chatPanelOpened = true" (mouseenter)="chatIconSolid = true" (mouseleave)="chatIconSolid = false">
+    <cds-icon shape="talk-bubbles" size="md" [solid]="chatIconSolid"></cds-icon>
     <span class="ai-assistant-dot" aria-hidden="true"></span>
   </button>
-  <clr-side-panel
-    [(clrSidePanelOpen)]="chatPanelOpened"
-    [clrSidePanelStaticBackdrop]="false"
-    [clrSidePanelSkipAnimation]="false"
-    [clrSidePanelBackdrop]="true"
-    [clrSidePanelSize]="'lg'"
-    class="ai-side-panel"
-  >
+  <clr-side-panel [(clrSidePanelOpen)]="chatPanelOpened" [clrSidePanelStaticBackdrop]="false"
+    [clrSidePanelSkipAnimation]="false" [clrSidePanelBackdrop]="true" [clrSidePanelSize]="'lg'" class="ai-side-panel">
     <h3 class="side-panel-title ai-panel-title">Assistant IA</h3>
     <div class="side-panel-body ai-side-panel-body">
       <div class="ai-panel" role="region" aria-label="Assistant IA">
@@ -346,47 +175,28 @@
             <cds-icon shape="lightbulb" size="md"></cds-icon>
             Assistant IA
           </div>
-          
-          
+
+
         </div>
 
         <div class="ai-quick-actions">
-          <button
-            class="ai-chip"
-            type="button"
-            (click)="applyQuickPrompt('Acces intelligent a l information')"
-          >
+          <button class="ai-chip" type="button" (click)="applyQuickPrompt('Acces intelligent a l information')">
             Accès intelligent à l’information
           </button>
-          <button
-            class="ai-chip"
-            type="button"
-            (click)="applyQuickPrompt('Risque & alertes')"
-          >
+          <button class="ai-chip" type="button" (click)="applyQuickPrompt('Risque & alertes')">
             Risque & alertes
           </button>
-          <button
-            class="ai-chip"
-            type="button"
-            (click)="applyQuickPrompt('Suivi des fonds')"
-          >
+          <button class="ai-chip" type="button" (click)="applyQuickPrompt('Suivi des fonds')">
             Suivi des fonds
           </button>
-          <button
-            class="ai-chip"
-            type="button"
-            (click)="applyQuickPrompt('Suivi des projets')"
-          >
+          <button class="ai-chip" type="button" (click)="applyQuickPrompt('Suivi des projets')">
             Suivi des projets
           </button>
         </div>
 
         <div class="ai-thread" aria-live="polite">
           @for (message of chatMessages; track message.id) {
-          <div
-            class="ai-message"
-            [class.ai-message--user]="message.role === 'user'"
-          >
+          <div class="ai-message" [class.ai-message--user]="message.role === 'user'">
             @if (message.role === 'assistant') {
             <div class="ai-avatar">AI</div>
             }
@@ -394,25 +204,36 @@
               @if (message.title) {
               <div class="ai-bubble-title">{{ message.title }}</div>
               }
-              <p>{{ message.text }}</p>
-              @if (message.meta) {
-              <div class="ai-bubble-meta">{{ message.meta }}</div>
-              }
+              <markdown class="ai-md" [data]="message.text"></markdown>
+              <div class="ai-bubble-footer">
+                @if (message.meta) {
+                <span class="ai-bubble-meta">{{ message.meta }}</span>
+                }
+                @if (message.timestamp) {
+                <span class="ai-bubble-time">{{ message.timestamp }}</span>
+                }
+              </div>
             </div>
           </div>
           }
+          <!-- ── Typing indicator (remplace "Analyse en cours...") ── -->
           @if (chatBusy) {
           <div class="ai-message">
             <div class="ai-avatar">AI</div>
             <div class="ai-bubble">
-              <p>Analyse en cours...</p>
+              <div class="ai-typing" aria-label="Analyse en cours">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
             </div>
           </div>
           }
+
           @if (chatError) {
           <div class="ai-message">
             <div class="ai-avatar">AI</div>
-            <div class="ai-bubble">
+            <div class="ai-bubble ai-bubble--error">
               <div class="ai-bubble-title">Erreur</div>
               <p>{{ chatError }}</p>
             </div>
@@ -422,27 +243,18 @@
 
         <div class="ai-input">
           <label class="ai-label" for="ai-input-textarea">Votre message</label>
-          <textarea
-            id="ai-input-textarea"
-            rows="3"
-            name="chatInput"
-            placeholder="Poser une question ou demander une action."
+          <textarea id="ai-input-textarea" rows="3" name="chatInput"
+            placeholder="Poser une question ou demander une action. "
             [(ngModel)]="chatInput"
             [disabled]="chatBusy"
-          ></textarea>
+            (keydown)="onChatKeydown($event)"></textarea>
           <div class="ai-input-actions">
-            <button
-              class="ai-send-button"
-              type="button"
-              (click)="sendChatMessage()"
-              [disabled]="chatBusy || !chatInput.trim()"
-            >
+            <span class="ai-helper">L'agent IA propose des recommandations.</span>
+            <button class="ai-send-button" type="button" (click)="sendChatMessage()"
+              [disabled]="chatBusy || !chatInput.trim()">
               <cds-icon shape="bolt" size="sm"></cds-icon>
               Envoyer
             </button>
-          </div>
-          <div class="ai-helper">
-            L'agent IA propose des recommandations. Verifier avant validation.
           </div>
         </div>
       </div>
@@ -454,26 +266,14 @@
 
   <div class="content-container">
     <!-- Vertical navigation -->
-    <clr-vertical-nav
-      #nav
-      [clrVerticalNavCollapsible]="true"
-      [(clrVerticalNavCollapsed)]="isNavCollapsed"
-      [style.width]="'300px'"
-      class="nav-trigger--bottom"
-      cds-layout="p-t:md"
-    >
+    <clr-vertical-nav #nav [clrVerticalNavCollapsible]="true" [(clrVerticalNavCollapsed)]="isNavCollapsed"
+      [style.width]="'300px'" class="nav-trigger--bottom" cds-layout="p-t:md">
       <!-- Tableau de bord -->
       <clr-vertical-nav-group-children>
-        <a
-          clrVerticalNavLink
-          routerLink="/dashboard"
-          style="font-weight: bold"
-          routerLinkActive="active"
-          title="Tableau de bord"
-        >
+        <a clrVerticalNavLink routerLink="/dashboard" style="font-weight: bold" routerLinkActive="active"
+          title="Tableau de bord">
           <cds-icon shape="dashboard" clrVerticalNavIcon></cds-icon>
-          TABLEAU DE BORD</a
-        >
+          TABLEAU DE BORD</a>
       </clr-vertical-nav-group-children>
 
       <!-- Gestion des fonds -->
@@ -481,78 +281,35 @@
         <cds-icon shape="coin-bag" clrVerticalNavIcon></cds-icon>
         GESTION DES FONDS
         <clr-vertical-nav-group-children>
-          <a
-            clrVerticalNavLink
-            routerLink="/repository"
-            routerLinkActive="active"
-            title="Inventaire des fonds"
-          >
+          <a clrVerticalNavLink routerLink="/repository" routerLinkActive="active" title="Inventaire des fonds">
             <cds-icon shape="coin-bag" solid=""></cds-icon> Inventaire des
-            fonds</a
-          >
-          <a
-            clrVerticalNavLink
-            routerLink="/funds/creation-funds"
-            routerLinkActive="active"
-            title="Ajout de fonds"
-          >
-            <cds-icon shape="coin-bag"></cds-icon> Ajout de fonds</a
-          >
+            fonds</a>
+          <a clrVerticalNavLink routerLink="/funds/creation-funds" routerLinkActive="active" title="Ajout de fonds">
+            <cds-icon shape="coin-bag"></cds-icon> Ajout de fonds</a>
 
-          <a
-            clrVerticalNavLink
-            routerLink="/funds/subscribers"
-            routerLinkActive="active"
-            title="Inventaire des souscripteurs"
-            ><cds-icon shape="bank"></cds-icon> Inventaire des souscripteurs</a
-          >
-          <a
-            clrVerticalNavLink
-            routerLink="/funds/subscriptions"
-            routerLinkActive="active"
-            title="Gestion des souscriptions"
-          >
-            <cds-icon shape="login"></cds-icon> Gestion des souscriptions</a
-          >
-          <a
-            clrVerticalNavLink
-            routerLink="/funds/subscriber-subscriptions"
-            routerLinkActive="active"
-            title="Souscriptions/Souscripteur"
-            ><cds-icon shape="employee"></cds-icon>
-            Souscriptions/Souscripteur</a
-          >
+          <a clrVerticalNavLink routerLink="/funds/subscribers" routerLinkActive="active"
+            title="Inventaire des souscripteurs"><cds-icon shape="bank"></cds-icon> Inventaire des souscripteurs</a>
+          <a clrVerticalNavLink routerLink="/funds/subscriptions" routerLinkActive="active"
+            title="Gestion des souscriptions">
+            <cds-icon shape="login"></cds-icon> Gestion des souscriptions</a>
+          <a clrVerticalNavLink routerLink="/funds/subscriber-subscriptions" routerLinkActive="active"
+            title="Souscriptions/Souscripteur"><cds-icon shape="employee"></cds-icon>
+            Souscriptions/Souscripteur</a>
 
           <div class="nav-divider"></div>
 
-          <a
-            clrVerticalNavLink
-            routerLink="/funds/comite-interne"
-            routerLinkActive="active"
-            title="Comités internes"
-            ><cds-icon shape="employee-group"></cds-icon> Comités internes
+          <a clrVerticalNavLink routerLink="/funds/comite-interne" routerLinkActive="active"
+            title="Comités internes"><cds-icon shape="employee-group"></cds-icon> Comités internes
           </a>
-          <a
-            clrVerticalNavLink
-            routerLink="/funds/comite-investment"
-            routerLinkActive="active"
-            title="Comités d'investissement"
-            ><cds-icon shape="gavel"></cds-icon> Comités d'investissement
+          <a clrVerticalNavLink routerLink="/funds/comite-investment" routerLinkActive="active"
+            title="Comités d'investissement"><cds-icon shape="gavel"></cds-icon> Comités d'investissement
           </a>
 
-          <a
-            clrVerticalNavLink
-            routerLink="/funds/comite-strategic"
-            routerLinkActive="active"
-            title="Comités de suivi et de stratégie"
-            ><cds-icon shape="cog"></cds-icon> Comités de suivi et de stratégie
+          <a clrVerticalNavLink routerLink="/funds/comite-strategic" routerLinkActive="active"
+            title="Comités de suivi et de stratégie"><cds-icon shape="cog"></cds-icon> Comités de suivi et de stratégie
           </a>
-          <a
-            clrVerticalNavLink
-            routerLink="/funds/comite-valuation"
-            routerLinkActive="active"
-            title="Comités de valorisation"
-            ><cds-icon shape="lightbulb"></cds-icon> Comités de valorisation
+          <a clrVerticalNavLink routerLink="/funds/comite-valuation" routerLinkActive="active"
+            title="Comités de valorisation"><cds-icon shape="lightbulb"></cds-icon> Comités de valorisation
           </a>
 
           <div class="nav-divider"></div>
@@ -564,46 +321,19 @@
         <cds-icon shape="building" clrVerticalNavIcon></cds-icon>
         GESTION DES PROJETS
         <clr-vertical-nav-group-children>
-          <a
-            clrVerticalNavLink
-            routerLink="/projects/inventory"
-            routerLinkActive="active"
-            title="Inventaire des projets"
-          >
+          <a clrVerticalNavLink routerLink="/projects/inventory" routerLinkActive="active"
+            title="Inventaire des projets">
             <cds-icon shape="building" solid=""></cds-icon> Inventaire des
-            projets</a
-          >
-          <a
-            clrVerticalNavLink
-            routerLink="/projects/creation"
-            routerLinkActive="active"
-            title="Ajout de projets"
-          >
-            <cds-icon shape="building"></cds-icon> Ajout de projets</a
-          >
-          <a
-            clrVerticalNavLink
-            routerLink="/projects/contacts"
-            routerLinkActive="active"
-            title="Gestion des contacts"
-            ><cds-icon shape="users"></cds-icon> Gestion des contacts</a
-          >
-          <a
-            clrVerticalNavLink
-            routerLink="/projects/promotors"
-            routerLinkActive="active"
-            title="Gestion des promoteurs"
-            ><cds-icon shape="employee-group"></cds-icon> Gestion des
-            promoteurs</a
-          >
-          <a
-            clrVerticalNavLink
-            routerLink="/projects/under-study"
-            routerLinkActive="active"
-            title="Projets en étude"
-          >
-            <cds-icon shape="sync"></cds-icon> Projets en étude</a
-          >
+            projets</a>
+          <a clrVerticalNavLink routerLink="/projects/creation" routerLinkActive="active" title="Ajout de projets">
+            <cds-icon shape="building"></cds-icon> Ajout de projets</a>
+          <a clrVerticalNavLink routerLink="/projects/contacts" routerLinkActive="active"
+            title="Gestion des contacts"><cds-icon shape="users"></cds-icon> Gestion des contacts</a>
+          <a clrVerticalNavLink routerLink="/projects/promotors" routerLinkActive="active"
+            title="Gestion des promoteurs"><cds-icon shape="employee-group"></cds-icon> Gestion des
+            promoteurs</a>
+          <a clrVerticalNavLink routerLink="/projects/under-study" routerLinkActive="active" title="Projets en étude">
+            <cds-icon shape="sync"></cds-icon> Projets en étude</a>
           <div class="nav-divider"></div>
         </clr-vertical-nav-group-children>
       </clr-vertical-nav-group>
@@ -613,37 +343,18 @@
         <cds-icon shape="factory" clrVerticalNavIcon></cds-icon>
         INVESTISSEMENT
         <clr-vertical-nav-group-children>
-          <a
-            clrVerticalNavLink
-            routerLink="/investments/collecte-documents"
-            routerLinkActive="active"
-            title="Collecte des documents et/ou levée des réserves"
-            ><cds-icon shape="file-group"></cds-icon> Collecte des documents</a
-          >
-          <a
-            clrVerticalNavLink
-            routerLink="/investments/subscription"
-            routerLinkActive="active"
-            title="Souscriptions des fonds"
-          >
-            <cds-icon shape="login"></cds-icon> Souscriptions des fonds</a
-          >
-          <a
-            clrVerticalNavLink
-            routerLink="/investments/projects"
-            routerLinkActive="active"
-            title="Projets en investissement"
-          >
-            <cds-icon shape="factory"></cds-icon> Projets en investissement</a
-          >
-          <a
-            clrVerticalNavLink
-            routerLink="/investments/vesting"
-            routerLinkActive="active"
-            title="Libérations des fonds"
-          >
-            <cds-icon shape="logout"></cds-icon> Libérations des fonds</a
-          >
+          <a clrVerticalNavLink routerLink="/investments/collecte-documents" routerLinkActive="active"
+            title="Collecte des documents et/ou levée des réserves"><cds-icon shape="file-group"></cds-icon> Collecte
+            des documents</a>
+          <a clrVerticalNavLink routerLink="/investments/subscription" routerLinkActive="active"
+            title="Souscriptions des fonds">
+            <cds-icon shape="login"></cds-icon> Souscriptions des fonds</a>
+          <a clrVerticalNavLink routerLink="/investments/projects" routerLinkActive="active"
+            title="Projets en investissement">
+            <cds-icon shape="factory"></cds-icon> Projets en investissement</a>
+          <a clrVerticalNavLink routerLink="/investments/vesting" routerLinkActive="active"
+            title="Libérations des fonds">
+            <cds-icon shape="logout"></cds-icon> Libérations des fonds</a>
 
           <div class="nav-divider"></div>
         </clr-vertical-nav-group-children>
@@ -654,15 +365,9 @@
         <cds-icon shape="certificate" clrVerticalNavIcon></cds-icon>
         ASSURANCES
         <clr-vertical-nav-group-children>
-          <a
-            clrVerticalNavLink
-            routerLink="/sotugar"
-            routerLinkActive="active"
-            title="SOTUGAR"
-          >
+          <a clrVerticalNavLink routerLink="/sotugar" routerLinkActive="active" title="SOTUGAR">
             <cds-icon shape="certificate" clrVerticalNavIcon></cds-icon>
-            SOTUGAR</a
-          >
+            SOTUGAR</a>
           <div class="nav-divider"></div>
         </clr-vertical-nav-group-children>
       </clr-vertical-nav-group>
@@ -672,30 +377,16 @@
         <cds-icon shape="eye" clrVerticalNavIcon></cds-icon>
         SUIVI
         <clr-vertical-nav-group-children>
-          <a
-            clrVerticalNavLink
-            routerLink="/tracking/projects"
-            routerLinkActive="active"
-            title="Projets à suivre"
-          >
-            <cds-icon shape="factory"></cds-icon> Projets à suivre</a
-          >
-          <a
-            clrVerticalNavLink
-            routerLink="/tracking/administration"
-            routerLinkActive="active"
-            title="Administration, direction & contrôle"
-          >
+          <a clrVerticalNavLink routerLink="/tracking/projects" routerLinkActive="active" title="Projets à suivre">
+            <cds-icon shape="factory"></cds-icon> Projets à suivre</a>
+          <a clrVerticalNavLink routerLink="/tracking/administration" routerLinkActive="active"
+            title="Administration, direction & contrôle">
             <cds-icon shape="castle"></cds-icon> Administration, direction &
             contrôle
           </a>
 
-          <a
-            clrVerticalNavLink
-            routerLink="/tracking/capital-structure"
-            routerLinkActive="active"
-            title="Structures des capitaux"
-          >
+          <a clrVerticalNavLink routerLink="/tracking/capital-structure" routerLinkActive="active"
+            title="Structures des capitaux">
             <cds-icon shape="employee-group"></cds-icon> Structure de capital
             par projet
           </a>
@@ -703,73 +394,41 @@
           <clr-vertical-nav-group>
             <cds-icon shape="calendar"></cds-icon> &nbsp;Réunions
             <clr-vertical-nav-group-children>
-              <a
-                clrVerticalNavLink
-                routerLink="/tracking/meetings"
-                routerLinkActive="active"
-                title="Réunions"
-              >
+              <a clrVerticalNavLink routerLink="/tracking/meetings" routerLinkActive="active" title="Réunions">
                 <cds-icon shape="event"></cds-icon> Gestion des réunions
               </a>
 
-              <a
-                clrVerticalNavLink
-                routerLink="/tracking/followup-decisions-resolutions"
-                routerLinkActive="active"
-                title="Suivi des décisions et réserves"
-              >
+              <a clrVerticalNavLink routerLink="/tracking/followup-decisions-resolutions" routerLinkActive="active"
+                title="Suivi des décisions et réserves">
                 <cds-icon shape="gavel"></cds-icon> Suivi des décisions sous
                 réserves
               </a>
-              <a
-                clrVerticalNavLink
-                routerLink="/tracking/meeting-tracking"
-                routerLinkActive="active"
-                title="Suivi des réunions"
-              >
-                <cds-icon shape="eye"></cds-icon> Suivi des réunions</a
-              >
+              <a clrVerticalNavLink routerLink="/tracking/meeting-tracking" routerLinkActive="active"
+                title="Suivi des réunions">
+                <cds-icon shape="eye"></cds-icon> Suivi des réunions</a>
             </clr-vertical-nav-group-children>
           </clr-vertical-nav-group>
 
           <clr-vertical-nav-group>
             <cds-icon shape="lightbulb"></cds-icon> &nbsp;Analyses
-            <clr-vertical-nav-group-children
-              *clrIfExpanded="selectedMenu == 'suivi'"
-            >
-              <a
-                clrVerticalNavLink
-                routerLink="/tracking/financial-statements"
-                routerLinkActive="active"
-                title="États financiers"
-              >
+            <clr-vertical-nav-group-children *clrIfExpanded="selectedMenu == 'suivi'">
+              <a clrVerticalNavLink routerLink="/tracking/financial-statements" routerLinkActive="active"
+                title="États financiers">
                 <cds-icon shape="tree-view"></cds-icon> États financiers
               </a>
 
-              <a
-                clrVerticalNavLink
-                routerLink="/tracking/bp"
-                routerLinkActive="active"
-                title="Budgets prévisionnels"
-              >
+              <a clrVerticalNavLink routerLink="/tracking/bp" routerLinkActive="active" title="Budgets prévisionnels">
                 <cds-icon shape="bullseye"></cds-icon> Business plans
               </a>
 
-              <a
-                clrVerticalNavLink
-                routerLinkActive="active"
-                title="Comparaison entre réalisations & BP"
-                routerLink="/tracking/comparaison-realisations-bp"
-              >
+              <a clrVerticalNavLink routerLinkActive="active" title="Comparaison entre réalisations & BP"
+                routerLink="/tracking/comparaison-realisations-bp">
                 <cds-icon shape="slider"></cds-icon> Comparaison entre
                 réalisations & BP
               </a>
-              <a
-                clrVerticalNavLink
-                routerLinkActive="active"
+              <a clrVerticalNavLink routerLinkActive="active"
                 routerLink="/tracking/comparaison-schema-investissement-realisations"
-                title="Comparaison entre schémas d’investissement et réalisations"
-              >
+                title="Comparaison entre schémas d’investissement et réalisations">
                 <cds-icon shape="align-bottom"></cds-icon>
                 Comparaison entre schémas d'investissement et réalisations
               </a>
@@ -779,12 +438,8 @@
           <clr-vertical-nav-group>
             <cds-icon shape="crosshairs"></cds-icon> &nbsp;Autres
             <clr-vertical-nav-group-children>
-              <a
-                clrVerticalNavLink
-                routerLink="/tracking/faits-marquants"
-                routerLinkActive="active"
-                title="Faits marquants"
-              >
+              <a clrVerticalNavLink routerLink="/tracking/faits-marquants" routerLinkActive="active"
+                title="Faits marquants">
                 <cds-icon shape="cursor-hand"></cds-icon> Faits Marquants
               </a>
             </clr-vertical-nav-group-children>
@@ -798,58 +453,30 @@
       <clr-vertical-nav-group routerLinkActive="active">
         <cds-icon shape="logout" clrVerticalNavIcon></cds-icon>
         DÉSINVESTISSEMENT
-        <clr-vertical-nav-group-children
-          *clrIfExpanded="selectedMenu == 'desinvestissement'"
-        >
-          <a
-            clrVerticalNavLink
-            routerLink="/divestment/shares_participations"
-            routerLinkActive="active"
-            title="Participations en Actions"
-          >
+        <clr-vertical-nav-group-children *clrIfExpanded="selectedMenu == 'desinvestissement'">
+          <a clrVerticalNavLink routerLink="/divestment/shares_participations" routerLinkActive="active"
+            title="Participations en Actions">
             <cds-icon shape="bullseye"></cds-icon> Participations en Actions
           </a>
-          <a
-            clrVerticalNavLink
-            routerLink="/divestment/realized-divestments"
-            routerLinkActive="active"
-            title="Désinvestissements réalisés"
-          >
+          <a clrVerticalNavLink routerLink="/divestment/realized-divestments" routerLinkActive="active"
+            title="Désinvestissements réalisés">
             <cds-icon shape="logout"></cds-icon> Désinvestissements réalisés
           </a>
-          <a
-            clrVerticalNavLink
-            routerLink="divestment/oca_participations"
-            routerLinkActive="active"
-            title="Participations en OCA"
-          >
+          <a clrVerticalNavLink routerLink="divestment/oca_participations" routerLinkActive="active"
+            title="Participations en OCA">
             <cds-icon shape="bullseye"></cds-icon> Participations en OCA
           </a>
-          <a
-            title=" Rembourcements/Conversions des OCAs"
-            clrVerticalNavLink
-            routerLink="/divestment/refunds-conversions-ocas"
-            routerLinkActive="active"
-            title="Remboursement des OCA"
-          >
+          <a title=" Rembourcements/Conversions des OCAs" clrVerticalNavLink
+            routerLink="/divestment/refunds-conversions-ocas" routerLinkActive="active" title="Remboursement des OCA">
             <cds-icon shape="recycle"></cds-icon> Remboursement des OCA
           </a>
-          <a
-            clrVerticalNavLink
-            routerLink="/divestment/cca_participations"
-            routerLinkActive="active"
-            title="Participations en CCA"
-          >
+          <a clrVerticalNavLink routerLink="/divestment/cca_participations" routerLinkActive="active"
+            title="Participations en CCA">
             <cds-icon shape="bullseye"></cds-icon> Participations en CCA
           </a>
 
-          <a
-            title=" Rembourcements/Conversions des CCAs"
-            clrVerticalNavLink
-            routerLink="/divestment/refunds-conversions-ccas"
-            routerLinkActive="active"
-            title="Remboursement des CCA"
-          >
+          <a title=" Rembourcements/Conversions des CCAs" clrVerticalNavLink
+            routerLink="/divestment/refunds-conversions-ccas" routerLinkActive="active" title="Remboursement des CCA">
             <cds-icon shape="recycle"></cds-icon> Remboursement des CCA
           </a>
 
@@ -866,35 +493,17 @@
             <cds-icon shape="gavel" solid=""></cds-icon>&nbsp; Ratios
             règlementaires
             <clr-vertical-nav-group-children>
-              <a
-                clrVerticalNavLink
-                routerLink="/reports/fund-ratios"
-                routerLinkActive="active"
-                title="Ratios des fonds"
-              >
-                Ratios des fonds</a
-              >
-              <a
-                clrVerticalNavLink
-                routerLink="/reports/historical-fund-ratios"
-                routerLinkActive="active"
-                title="Ratios des fonds (Historique)"
-                >Ratios des fonds (Historique)</a
-              >
-              <a
-                clrVerticalNavLink
-                routerLink="/reports/subscriber-ratios"
-                routerLinkActive="active"
-                title="Ratios des abonnes"
-              >
+              <a clrVerticalNavLink routerLink="/reports/fund-ratios" routerLinkActive="active"
+                title="Ratios des fonds">
+                Ratios des fonds</a>
+              <a clrVerticalNavLink routerLink="/reports/historical-fund-ratios" routerLinkActive="active"
+                title="Ratios des fonds (Historique)">Ratios des fonds (Historique)</a>
+              <a clrVerticalNavLink routerLink="/reports/subscriber-ratios" routerLinkActive="active"
+                title="Ratios des abonnes">
                 {{ getLabelForRatioType(ratioType) }}
               </a>
-              <a
-                clrVerticalNavLink
-                routerLink="/reports/historical-subscriber-ratios"
-                routerLinkActive="active"
-                title="Ratios des abonnes (Historique)"
-              >
+              <a clrVerticalNavLink routerLink="/reports/historical-subscriber-ratios" routerLinkActive="active"
+                title="Ratios des abonnes (Historique)">
                 {{ getLabelForRatioType(ratioType, true) }}
               </a>
               <div class="nav-divider"></div>
@@ -905,38 +514,18 @@
             <cds-icon shape="success-standard" solid=""></cds-icon>&nbsp; Ratios
             de conformité
             <clr-vertical-nav-group-children>
-              <a
-                clrVerticalNavLink
-                routerLink="/reports/sector-activity"
-                routerLinkActive="active"
-                title="Par secteur d'activité/société"
-                >Par secteur d'activité/société</a
-              >
-              <a
-                clrVerticalNavLink
-                routerLink="/reports/ratios-conformity-qfp"
-                routerLinkActive="active"
-                title="En quasi fonds propre"
-              >
-                En quasi fonds propre</a
-              >
-              <a
-                clrVerticalNavLink
-                routerLink="/reports/oca-compliance-ratios"
-                routerLinkActive="active"
-                title="Ratios de conformité OCA"
-              >
-                Ratios de conformité OCA</a
-              >
+              <a clrVerticalNavLink routerLink="/reports/sector-activity" routerLinkActive="active"
+                title="Par secteur d'activité/société">Par secteur d'activité/société</a>
+              <a clrVerticalNavLink routerLink="/reports/ratios-conformity-qfp" routerLinkActive="active"
+                title="En quasi fonds propre">
+                En quasi fonds propre</a>
+              <a clrVerticalNavLink routerLink="/reports/oca-compliance-ratios" routerLinkActive="active"
+                title="Ratios de conformité OCA">
+                Ratios de conformité OCA</a>
 
-              <a
-                clrVerticalNavLink
-                routerLink="/reports/alternative-market"
-                routerLinkActive="active"
-                title="Investissement sur le marché alternatif"
-              >
-                Investissement sur le marché alternatif</a
-              >
+              <a clrVerticalNavLink routerLink="/reports/alternative-market" routerLinkActive="active"
+                title="Investissement sur le marché alternatif">
+                Investissement sur le marché alternatif</a>
 
               <div class="nav-divider"></div>
             </clr-vertical-nav-group-children>
@@ -944,37 +533,19 @@
 
           <clr-vertical-nav-group>
             <cds-icon shape="wallet" solid=""></cds-icon>&nbsp; Portefeuille
-            <clr-vertical-nav-group-children
-              *clrIfExpanded="selectedMenu == 'reporting'"
-            >
-              <a
-                clrVerticalNavLink
-                routerLink="/reports/funds-companies"
-                routerLinkActive="active"
-                title="Sociétés du portefeuille"
-                >Sociétés du portefeuille</a
-              >
+            <clr-vertical-nav-group-children *clrIfExpanded="selectedMenu == 'reporting'">
+              <a clrVerticalNavLink routerLink="/reports/funds-companies" routerLinkActive="active"
+                title="Sociétés du portefeuille">Sociétés du portefeuille</a>
 
-              <a
+              <a title="Investissements approuvés par le comité
+              d'investissement" alt="Investissements approuvés par le comité
+              d'investissement" clrVerticalNavLink routerLink="/reports/inv-approves-ci" routerLinkActive="active"
                 title="Investissements approuvés par le comité
-              d'investissement"
-                alt="Investissements approuvés par le comité
-              d'investissement"
-                clrVerticalNavLink
-                routerLink="/reports/inv-approves-ci"
-                routerLinkActive="active"
-                title="Investissements approuvés par le comité
-              d'investissement"
-                >Inv. approuvés par le comité d'investissement
+              d'investissement">Inv. approuvés par le comité d'investissement
               </a>
-              <a
-                clrVerticalNavLink
-                routerLink="/reports/inv-approved-released"
-                routerLinkActive="active"
-                title="Investissements approuvés et libérés"
-              >
-                Investissements approuvés et libérés</a
-              >
+              <a clrVerticalNavLink routerLink="/reports/inv-approved-released" routerLinkActive="active"
+                title="Investissements approuvés et libérés">
+                Investissements approuvés et libérés</a>
             </clr-vertical-nav-group-children>
           </clr-vertical-nav-group>
           <div class="nav-divider"></div>
@@ -986,261 +557,139 @@
         PARAMÉTRAGE
 
         <clr-vertical-nav-group-children>
-          <a
-            clrVerticalNavLink
-            routerLink="/settings/document-category"
-            routerLinkActive="active"
-            title="Catégories des documents"
-          >
+          <a clrVerticalNavLink routerLink="/settings/document-category" routerLinkActive="active"
+            title="Catégories des documents">
             Catégories des documents
           </a>
 
-          <a
-            clrVerticalNavLink
-            routerLink="/settings/document-type"
-            routerLinkActive="active"
-            title="Types des documents"
-          >
+          <a clrVerticalNavLink routerLink="/settings/document-type" routerLinkActive="active"
+            title="Types des documents">
             Types des documents
           </a>
 
-          <a
-            clrVerticalNavLink
-            routerLink="/settings/document-compliance"
-            routerLinkActive="active"
-            title="Conformités documentaires"
-          >
+          <a clrVerticalNavLink routerLink="/settings/document-compliance" routerLinkActive="active"
+            title="Conformités documentaires">
             Conformités documentaires
           </a>
 
-          <a
-            clrVerticalNavLink
-            routerLink="/settings/document-checklist"
-            routerLinkActive="active"
-            title="Listes de contrôle (Checklists)"
-          >
+          <a clrVerticalNavLink routerLink="/settings/document-checklist" routerLinkActive="active"
+            title="Listes de contrôle (Checklists)">
             Listes de contrôle (Checklists)
           </a>
           <div class="nav-divider"></div>
 
-          <a
-            clrVerticalNavLink
-            routerLink="/settings/treatment-phase"
-            routerLinkActive="active"
-            title="Phases de traitement"
-          >
+          <a clrVerticalNavLink routerLink="/settings/treatment-phase" routerLinkActive="active"
+            title="Phases de traitement">
             Phases de traitement
           </a>
 
-          <a
-            clrVerticalNavLink
-            routerLink="/settings/treatment-task"
-            routerLinkActive="active"
-            title="Tâches de traitement"
-          >
+          <a clrVerticalNavLink routerLink="/settings/treatment-task" routerLinkActive="active"
+            title="Tâches de traitement">
             Tâches de traitement
           </a>
 
-          <a
-            clrVerticalNavLink
-            routerLink="/settings/funds-status"
-            routerLinkActive="active"
-            title="États des fonds"
-          >
+          <a clrVerticalNavLink routerLink="/settings/funds-status" routerLinkActive="active" title="États des fonds">
             États des fonds
           </a>
 
-          <a
-            clrVerticalNavLink
-            routerLink="/settings/project-progress-status"
-            routerLinkActive="active"
-            title="États d'avancement des projets"
-          >
+          <a clrVerticalNavLink routerLink="/settings/project-progress-status" routerLinkActive="active"
+            title="États d'avancement des projets">
             États d'avancement des projets
           </a>
 
-          <a
-            clrVerticalNavLink
-            routerLink="/settings/progress-status-meeting"
-            routerLinkActive="active"
-            title="États d'avancement des décisions/resolitions"
-          >
+          <a clrVerticalNavLink routerLink="/settings/progress-status-meeting" routerLinkActive="active"
+            title="États d'avancement des décisions/resolitions">
             États d'avancement des décisions/resolitions
           </a>
 
-          <a
-            clrVerticalNavLink
-            routerLink="/settings/evaluation-method"
-            routerLinkActive="active"
-            title="Méthode d'évaluation"
-          >
+          <a clrVerticalNavLink routerLink="/settings/evaluation-method" routerLinkActive="active"
+            title="Méthode d'évaluation">
             Méthode d'évaluation
           </a>
           <div class="nav-divider"></div>
 
-          <a
-            clrVerticalNavLink
-            routerLink="/settings/sector"
-            routerLinkActive="active"
-            title="Secteurs d'activité"
-          >
+          <a clrVerticalNavLink routerLink="/settings/sector" routerLinkActive="active" title="Secteurs d'activité">
             Secteurs d'activité
           </a>
 
-          <a
-            clrVerticalNavLink
-            routerLink="/settings/investment-framework"
-            routerLinkActive="active"
-            title="Cadres d'investissement"
-          >
+          <a clrVerticalNavLink routerLink="/settings/investment-framework" routerLinkActive="active"
+            title="Cadres d'investissement">
             Cadres d'investissement
           </a>
           <div class="nav-divider"></div>
 
-          <a
-            clrVerticalNavLink
-            routerLink="/settings/funds-nature"
-            routerLinkActive="active"
-            title="Natures des fonds"
-          >
+          <a clrVerticalNavLink routerLink="/settings/funds-nature" routerLinkActive="active" title="Natures des fonds">
             Natures des fonds
           </a>
 
-          <a
-            clrVerticalNavLink
-            routerLink="/settings/legal-form"
-            routerLinkActive="active"
-            title="Formes légales"
-          >
+          <a clrVerticalNavLink routerLink="/settings/legal-form" routerLinkActive="active" title="Formes légales">
             Formes légales
           </a>
           <div class="nav-divider"></div>
 
-          <a
-            clrVerticalNavLink
-            routerLink="/settings/bank"
-            routerLinkActive="active"
-            title="Banques"
-          >
+          <a clrVerticalNavLink routerLink="/settings/bank" routerLinkActive="active" title="Banques">
             Banques
           </a>
 
-          <a
-            clrVerticalNavLink
-            routerLink="/settings/funds-auditor"
-            routerLinkActive="active"
-            title="Commissaires aux comptes des fonds"
-          >
+          <a clrVerticalNavLink routerLink="/settings/funds-auditor" routerLinkActive="active"
+            title="Commissaires aux comptes des fonds">
             Commissaires aux comptes des fonds
           </a>
 
-          <a
-            clrVerticalNavLink
-            routerLink="/settings/project-auditor"
-            routerLinkActive="active"
-            title="Commissaires aux comptes des projets"
-          >
+          <a clrVerticalNavLink routerLink="/settings/project-auditor" routerLinkActive="active"
+            title="Commissaires aux comptes des projets">
             Commissaires aux comptes des projets
           </a>
 
-          <a
-            clrVerticalNavLink
-            routerLink="/settings/institution"
-            routerLinkActive="active"
-            title="Établissements"
-          >
+          <a clrVerticalNavLink routerLink="/settings/institution" routerLinkActive="active" title="Établissements">
             Établissements
           </a>
           <div class="nav-divider"></div>
 
-          <a
-            clrVerticalNavLink
-            routerLink="/settings/investment-nature"
-            routerLinkActive="active"
-            title="Natures d'investissement"
-          >
+          <a clrVerticalNavLink routerLink="/settings/investment-nature" routerLinkActive="active"
+            title="Natures d'investissement">
             Natures d'investissement
           </a>
 
-          <a
-            clrVerticalNavLink
-            routerLink="/settings/investment-type"
-            routerLinkActive="active"
-            title="Types d'investissement"
-          >
+          <a clrVerticalNavLink routerLink="/settings/investment-type" routerLinkActive="active"
+            title="Types d'investissement">
             Types d'investissement
           </a>
 
-          <a
-            clrVerticalNavLink
-            routerLink="/settings/investment-charge"
-            routerLinkActive="active"
-            title="Chargés d'investissement"
-          >
+          <a clrVerticalNavLink routerLink="/settings/investment-charge" routerLinkActive="active"
+            title="Chargés d'investissement">
             Chargés d'investissement
           </a>
 
-          <a
-            clrVerticalNavLink
-            routerLink="/settings/preselection-criteria"
-            routerLinkActive="active"
-            title="Critères de présélection"
-          >
+          <a clrVerticalNavLink routerLink="/settings/preselection-criteria" routerLinkActive="active"
+            title="Critères de présélection">
             Critères de présélection
           </a>
 
-          <a
-            clrVerticalNavLink
-            routerLink="/settings/contribution-types"
-            routerLinkActive="active"
-            title="Natures d'apport"
-          >
+          <a clrVerticalNavLink routerLink="/settings/contribution-types" routerLinkActive="active"
+            title="Natures d'apport">
             Natures d'apport
           </a>
 
-          <a
-            clrVerticalNavLink
-            routerLink="/settings/meeting-type"
-            routerLinkActive="active"
-            title="Type de réunion"
-          >
+          <a clrVerticalNavLink routerLink="/settings/meeting-type" routerLinkActive="active" title="Type de réunion">
             Type de réunion
           </a>
 
-          <a
-            clrVerticalNavLink
-            routerLink="/settings/output-type"
-            routerLinkActive="active"
-            title="Type de sortie"
-          >
+          <a clrVerticalNavLink routerLink="/settings/output-type" routerLinkActive="active" title="Type de sortie">
             Type de sortie
           </a>
 
-          <a
-            clrVerticalNavLink
-            routerLink="/settings/election-type"
-            routerLinkActive="active"
-            title="Type de vote"
-          >
+          <a clrVerticalNavLink routerLink="/settings/election-type" routerLinkActive="active" title="Type de vote">
             Type de vote
           </a>
           <div class="nav-divider"></div>
 
-          <a
-            clrVerticalNavLink
-            routerLink="/settings/financial-items"
-            routerLinkActive="active"
-            title="Items Financiers"
-          >
+          <a clrVerticalNavLink routerLink="/settings/financial-items" routerLinkActive="active"
+            title="Items Financiers">
             Items Financiers
           </a>
 
-          <a
-            clrVerticalNavLink
-            routerLink="/settings/tri"
-            routerLinkActive="active"
-            title="Calcul TRI"
-          >
+          <a clrVerticalNavLink routerLink="/settings/tri" routerLinkActive="active" title="Calcul TRI">
             Calcul TRI
           </a>
 
@@ -1249,20 +698,9 @@
       </clr-vertical-nav-group>
     </clr-vertical-nav>
 
-    <app-div-back-to-top
-      id="back-to-top-scrollable-container"
-      containerHeight="calc(100vh - 64px)"
-      [showAfter]="150"
-      [showProgress]="true"
-      [useIcon]="false"
-      (onScroll)="handleScroll($event)"
-      (onBackToTop)="handleBackToTop()"
-    >
-      <div
-        class="content-area"
-        (dblclick)="isNavCollapsed.set(true)"
-        style="overflow-x: hidden"
-      >
+    <app-div-back-to-top id="back-to-top-scrollable-container" containerHeight="calc(100vh - 64px)" [showAfter]="150"
+      [showProgress]="true" [useIcon]="false" (onScroll)="handleScroll($event)" (onBackToTop)="handleBackToTop()">
+      <div class="content-area" (dblclick)="isNavCollapsed.set(true)" style="overflow-x: hidden">
         <router-outlet></router-outlet>
       </div>
     </app-div-back-to-top>
@@ -1270,20 +708,12 @@
 </div>
 
 <!--Screenfit-->
-<screenfit
-  [openScreenFit]="openScreenFit"
-  (closeEvent)="openScreenFit = false"
-></screenfit>
+<screenfit [openScreenFit]="openScreenFit" (closeEvent)="openScreenFit = false"></screenfit>
 
 <app-about #aboutModal></app-about>
 <app-shortcuts #shortcutsModal></app-shortcuts>
 
-<clr-modal
-  #modal
-  [(clrModalOpen)]="openfeedbackModal"
-  [clrModalSize]="'md'"
-  [clrModalStaticBackdrop]="false"
->
+<clr-modal #modal [(clrModalOpen)]="openfeedbackModal" [clrModalSize]="'md'" [clrModalStaticBackdrop]="false">
   <div class="modal-title" style="margin-bottom: 24px">
     Coonaitre votre feedback
   </div>

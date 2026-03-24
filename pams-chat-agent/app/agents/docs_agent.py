@@ -23,42 +23,56 @@ _MCP_SERVER_PATH = os.path.abspath(
 )
 _PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 
-_SYSTEM_PROMPT = """Tu es un agent francophone spécialisé dans les documents de fonds d'investissement tunisiens.
-LANGUE : Tu réponds EXCLUSIVEMENT en français. Jamais en anglais, jamais en arabe, jamais en chinois.
-COMPORTEMENT OBLIGATOIRE :
-- Pour toute question sur le contenu → appelle search_docs()
-- Pour lister les documents → appelle list_documents()
-- Ne réponds JAMAIS sans avoir appelé un outil d'abord
+_SYSTEM_PROMPT = """
+Tu es un expert en extraction de données financières à partir de documents PDF de fonds d'investissement tunisiens.
+LANGUE : EXCLUSIVEMENT en français. JAMAIS en anglais, arabe ou autre langue.
 
-RÈGLES STRICTES :
-- Tu utilises UNIQUEMENT les informations présentes dans les extraits retournés par les outils
-- Tu n'inventes JAMAIS de données (montants, dates, durées, pourcentages)
-- Cite toujours la source (titre du document, page si disponible)
+══════════════════════════════════════════════════
+RÈGLE ABSOLUE N°1 — EXTRACTION DE VALEUR PRÉCISE
+══════════════════════════════════════════════════
+Si la question demande une valeur, un montant, un résultat ou un chiffre spécifique :
+1. Appelle search_docs() avec la question complète.
+2. Cherche dans les TABLEAUX retournés la ligne dont le libellé correspond exactement.
+3. Retourne la valeur trouvée avec ce format OBLIGATOIRE :
 
-RÈGLE CRITIQUE — SI LE DOCUMENT DEMANDÉ N'EST PAS TROUVÉ :
-Si l'utilisateur demande un type de document (bilan, rapport annuel, états financiers, PV...)
-et que les outils retournent un document d'un autre type (prospectus, règlement intérieur...),
-tu DOIS répondre exactement selon ce modèle :
+   "D'après **[TITRE DU DOCUMENT]**, page [X] :
+   **[Libellé exact du tableau] : [VALEUR] DT**"
 
-"Le document disponible pour ce fonds est le [NOM DU DOCUMENT TROUVÉ] ([détails si disponibles]),
-qui contient [ce que le document contient réellement] — pas [ce qui était demandé].
-Si vous souhaitez [ce qui était demandé], il faut ingérer ce document dans le système."
+EXEMPLE CORRECT :
+   Question : "valeur de VARIATION DE L'ACTIF NET au 31.12.2020 du fonds FCPR MAXULA CROISSANCE ENTREPRISES"
+   search_docs() retourne un tableau avec : "VARIATION DE L'ACTIF NET RÉSULTANT DES OPÉRATIONS D'EXPLOITATION | 1 234 567"
+   Réponse : "D'après **comite_valorisation_2020_fcpr_maxula_croissance_entreprises_2020.pdf**, page 5 :\n**Variation de l'actif net résultant des opérations d'exploitation : 1 234 567 DT**"
 
-EXEMPLES DE RÉPONSES CORRECTES :
-- Demande : "bilan de FCPR MAXULA JASMIN" → documents trouvés : prospectus
-  Réponse : "Le document disponible pour ce fonds est le Prospectus (agréé par le CMF le 15 juin 2017),
-  qui contient la politique d'investissement, les frais, les modalités de souscription et de rachat
-  — pas un bilan financier.
-  Si vous souhaitez le bilan financier, il faut ingérer les états financiers annuels du fonds."
+══════════════════════════════════════════════════
+RÈGLE ABSOLUE N°2 — INTERDICTIONS STRICTES
+══════════════════════════════════════════════════
+- Tu ne dois JAMAIS afficher des scores de similarité (ex: "Score : 1.14").
+- Tu ne dois JAMAIS afficher une liste de documents au lieu de répondre à la question.
+- Tu ne dois JAMAIS mélanger des chiffres provenant de documents différents.
+- Tu ne dois JAMAIS inventer une valeur si elle n'est pas dans les extraits.
 
-- Demande : "rapport annuel de FCPR MAX ESPOIR" → aucun document trouvé
-  Réponse : "Aucun document n'est disponible pour le fonds FCPR MAX ESPOIR dans le système.
-  Si vous souhaitez consulter le rapport annuel, il faut l'ingérer dans le système."
+══════════════════════════════════════════════════
+RÈGLE N°3 — QUAND UN DOCUMENT EST CIBLÉ
+══════════════════════════════════════════════════
+Si l'utilisateur mentionne un nom de document spécifique :
+"à partir du document nommé X" / "dans le fichier X" / etc.
+→ Concentre-toi UNIQUEMENT sur les chunks provenant de ce document.
+→ Ignore les extraits provenant d'autres documents.
 
-- Demande : "PV du comité" → documents trouvés : règlement intérieur
-  Réponse : "Le document disponible est le Règlement Intérieur, qui contient les modalités
-  de fonctionnement du fonds — pas les PV du comité.
-  Si vous souhaitez consulter les PV, il faut les ingérer dans le système."
+══════════════════════════════════════════════════
+RÈGLE N°4 — SI LA VALEUR N'EST PAS TROUVÉE
+══════════════════════════════════════════════════
+Si la valeur demandée est absente des extraits retournés, répond :
+"La valeur de [libellé demandé] n'a pas été trouvée dans les documents disponibles pour [nom du fonds].
+Les documents disponibles sont : [liste des sources retournées par search_docs]."
+
+══════════════════════════════════════════════════
+RÈGLE N°5 — DOCUMENTS MANQUANTS
+══════════════════════════════════════════════════
+Si l'utilisateur demande un type de document non disponible (bilan, PV, rapport annuel...),
+utilise ce modèle :
+"Le document disponible pour ce fonds est le [NOM TROUVÉ], qui contient [contenu réel]
+— pas [ce qui était demandé]. Pour consulter [ce qui était demandé], il faut l'ingérer."
 """
 
 _REQUESTED_DOC_PATTERNS = [
@@ -99,26 +113,57 @@ _REQUESTED_DOC_INGEST_HINTS = {
 }
 
 
+def _extract_document_name(question: str) -> str:
+    """Extrait le nom de document si l'utilisateur le spécifie explicitement."""
+    patterns = [
+        r"(?:à partir du document|du document|depuis le document|dans le document)\s+(?:nommé|intitulé|appelé|qui s'appelle)?\s*[\"«]?([\w\s\-\.]+?)[\"»]?(?:\s+donne|\s+calcule|\s+indique|\s+quel|$)",
+        r"(?:document|fichier)\s+[\"«]([^\"»\n]+)[\"»]",
+        r"document\s+(?:nommé|intitulé)\s+\"?([\w\s\-\.]+?)\"?(?:\s+donne|$)",
+    ]
+    for p in patterns:
+        m = re.search(p, question, re.IGNORECASE)
+        if m:
+            return m.group(1).strip().strip('"\'')
+    return ""
+
+
 def _augment_question(question: str) -> str:
     q = question.lower().strip()
+    doc_name = _extract_document_name(question)
 
-    if any(w in q for w in ["liste", "quels documents", "disponible", "lister"]):
+    if any(w in q for w in ["liste", "quels documents", "lister"]) and not any(
+        w in q for w in ["valeur", "montant", "résultat", "variation", "total", "actif net", "quel est", "quelle est"]
+    ):
         return (
             f"{question}\n\n"
             "[ACTION : appelle list_documents() pour lister les documents disponibles. "
             "Réponds en français.]"
         )
 
+    # Demande d'extraction de valeur
+    doc_hint = f" Concentre-toi sur les chunks du document '{doc_name}'." if doc_name else ""
     return (
         f"{question}\n\n"
-        "[ACTION : appelle search_docs() avec la question et le nom du fonds si mentionné. "
-        "Si le document trouvé n'est pas celui demandé, explique ce qui est disponible "
-        "et ce qui manque selon le modèle défini. Réponds UNIQUEMENT en français.]"
+        f"[ACTION : appelle search_docs() avec la question complète et le nom du fonds.{doc_hint} "
+        "Cherche dans les tableaux retournés la valeur exacte demandée. "
+        "Retourne la valeur et sa source. INTERDICTION d'afficher des scores ou une liste de documents. "
+        "Réponds UNIQUEMENT en français.]"
     )
 
+
 def _is_list_documents_question(question: str) -> bool:
+    """Retourne True seulement si c'est une vraie demande de liste de documents."""
     q = (question or "").lower()
-    return any(w in q for w in ["liste", "lister", "documents", "document", "disponible", "disponibles"])
+    # Si la question veut une valeur/extraction → ce n'est PAS une liste
+    has_extraction_intent = any(w in q for w in [
+        "valeur", "montant", "quel est", "quelle est", "donne moi",
+        "variation", "résultat", "total", "actif net", "redevance",
+        "bilan", "combien", "chiffre", "données par part", "flux",
+    ])
+    if has_extraction_intent:
+        return False
+    # Sinon, vrais mots de listage
+    return any(w in q for w in ["liste des documents", "lister", "quels documents", "quels sont les documents", "documents disponibles"])
 
 
 def _extract_fund_name(question: str) -> str:

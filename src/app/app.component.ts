@@ -311,6 +311,7 @@ import { KeycloakService } from './services/keycloak.service';
 import { ScreenfitComponent } from "./tools/screenfit/screenfit.component";
 import { AlertsListenerComponent } from "./alerts/alerts-listener/alerts-listener.component";
 import { ChatAgentService } from './services/chat-agent.service';
+import { MarkdownModule } from 'ngx-markdown';
 
 interface ChatMessage {
   id: number;
@@ -318,6 +319,7 @@ interface ChatMessage {
   text: string;
   title?: string;
   meta?: string;
+  timestamp?: string;
 }
 
 @Component({
@@ -334,7 +336,8 @@ interface ChatMessage {
     FeedbackComponent,
     ShortcutsComponent,
     ScreenfitComponent,
-    AlertsListenerComponent
+    AlertsListenerComponent,
+    MarkdownModule
   ],
   providers: [KeycloakService],
 
@@ -387,7 +390,8 @@ export class AppComponent implements OnInit {
       id: 1,
       role: 'assistant',
       title: 'Bonjour, je suis votre agent IA.',
-      text: 'Posez une question ou demandez une action.'
+      text: 'Posez une question ou demandez une action.',
+      timestamp: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
     }
   ];
   ///////// CHAT
@@ -512,6 +516,15 @@ export class AppComponent implements OnInit {
   applyQuickPrompt(prompt: string) {
     this.chatInput = prompt;
   }
+  onChatKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      if (!this.chatBusy && this.chatInput.trim()) {
+        this.sendChatMessage();
+      }
+    }
+  }
+
 //////////////////////////AGENT
   sendChatMessage() {
   const question = this.chatInput.trim();
@@ -519,10 +532,12 @@ export class AppComponent implements OnInit {
 
   this.chatBusy = true;
   this.chatError = '';
+  const sendTime = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
   this.addChatMessage({
     id: this.nextChatMessageId(),
     role: 'user',
-    text: question
+    text: question,
+    timestamp: sendTime
   });
   this.chatInput = '';
 
@@ -539,30 +554,36 @@ export class AppComponent implements OnInit {
             this.router.navigate(segments, { queryParams: action.params || {} });
 
             // Affiche un message de confirmation dans le chat
+            const navTime = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
             this.addChatMessage({
               id: this.nextChatMessageId(),
               role: 'assistant',
               text: `✓ ${action.label || 'Navigation effectuée'}`,
-              meta: 'Agent: navigation'
+              meta: 'Agent: navigation',
+              timestamp: navTime
             });
 
           } else if (action.action === 'error' || action.action === 'unknown') {
             // Affiche le message d'erreur
+            const errNavTime = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
             this.addChatMessage({
               id: this.nextChatMessageId(),
               role: 'assistant',
               text: action.message || 'Action non reconnue.',
-              meta: 'Agent: navigation'
+              meta: 'Agent: navigation',
+              timestamp: errNavTime
             });
           }
 
         } catch (e) {
           // JSON invalide → affiche comme texte normal
+          const catchTime = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
           this.addChatMessage({
             id: this.nextChatMessageId(),
             role: 'assistant',
             text: response.answer,
-            meta: 'Agent: navigation'
+            meta: 'Agent: navigation',
+            timestamp: catchTime
           });
         }
 
@@ -570,11 +591,13 @@ export class AppComponent implements OnInit {
       } else {
         const answer = response?.answer?.trim() || 'Je n\'ai pas de réponse pour le moment.';
         const meta = response?.agent ? `Agent: ${response.agent}` : undefined;
+        const respTime = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
         this.addChatMessage({
           id: this.nextChatMessageId(),
           role: 'assistant',
           text: answer,
-          meta: meta
+          meta: meta,
+          timestamp: respTime
         });
       }
 

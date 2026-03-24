@@ -119,8 +119,13 @@ def doc_search(question: str, top_k: int | None = None, include_tables: bool = T
           (
             (0.50 * vscore) +
             (0.30 * LEAST(tscore, 1.0)) +
-            -- Boost via métadonnées strictes (Très fort)
-            CASE WHEN %s <> '' AND LOWER(metadata->>'fund_name') LIKE ('%%' || LOWER(%s) || '%%') THEN 0.50 ELSE 0 END +
+            -- Boost fort si le chunk appartient au bon fonds (métadonnées)
+            CASE WHEN %s <> '' AND LOWER(metadata->>'fund_name') LIKE ('%%' || LOWER(%s) || '%%') THEN 0.80 ELSE 0 END +
+            -- Pénalité si le chunk appartient clairement à un AUTRE fonds connu
+            CASE WHEN %s <> '' AND metadata->>'fund_name' IS NOT NULL
+                      AND metadata->>'fund_name' <> ''
+                      AND LOWER(metadata->>'fund_name') NOT LIKE ('%%' || LOWER(%s) || '%%')
+                 THEN -0.30 ELSE 0 END +
             CASE WHEN %s <> '' AND metadata->>'years' LIKE ('%%' || %s || '%%') THEN 0.40 ELSE 0 END +
             -- Boost via texte/titre (Fallback)
             CASE WHEN %s <> '' AND LOWER(REPLACE(title, '_', ' ')) LIKE ('%%' || LOWER(%s) || '%%') THEN 0.20 ELSE 0 END +
@@ -136,8 +141,9 @@ def doc_search(question: str, top_k: int | None = None, include_tables: bool = T
     base_params = [
         q_vec,
         " ".join(kws) if kws else q,
-        
-        fund, fund,          # fund in metadata
+
+        fund, fund,          # fund boost in metadata
+        fund, fund,          # fund penalty in metadata (wrong-fund)
         year, year,          # year in metadata
         fund, fund,          # fund in title
         fund, fund,          # fund in text

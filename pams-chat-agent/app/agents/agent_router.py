@@ -3,6 +3,7 @@ from __future__ import annotations
 import re
 from app.services.llm_client import llm_generate
 
+
 # ─── Patterns de détection ────────────────────────────────────────────────────
 
 _DOC_KEYWORDS = [
@@ -14,7 +15,8 @@ _DOC_KEYWORDS = [
     "politique d'investissement", "stratégie d'investissement",
     "modalité", "modalite", "montant minimum", "type de fonds",
     "profil", "investisseur", "secteur", "peut-il investir", "peut investir",
-    "agrément", "agrement", "visa cmf", "redevance", "honoraires", "frais de gestion"
+    "agrément", "agrement", "visa cmf", "redevance", "honoraires", "frais de gestion",
+    "actions", "valeurs assimilées", "droits rattachés", "placement", "dépôt à vue", "depot a vue"
 ]
 
 _DOC_PATTERNS = re.compile(

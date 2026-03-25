@@ -225,6 +225,7 @@
                 <span></span>
                 <span></span>
                 <span></span>
+                
               </div>
             </div>
           </div>
@@ -250,6 +251,12 @@
             (keydown)="onChatKeydown($event)"></textarea>
           <div class="ai-input-actions">
             <span class="ai-helper">L'agent IA propose des recommandations.</span>
+            @if (chatBusy) {
+            <button class="ai-stop-button" type="button" (click)="cancelChatRequest()">
+              <cds-icon shape="stop" size="sm"></cds-icon>
+              Stop
+            </button>
+            }
             <button class="ai-send-button" type="button" (click)="sendChatMessage()"
               [disabled]="chatBusy || !chatInput.trim()">
               <cds-icon shape="bolt" size="sm"></cds-icon>

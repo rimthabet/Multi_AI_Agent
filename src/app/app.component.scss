@@ -20,7 +20,7 @@
     padding: 0 !important;
     margin: 0 !important;
     overflow-x: auto;
-    
+
 }
 
 a {
@@ -115,7 +115,7 @@ a {
     --ai-surface-raised: var(--cds-alias-object-app-background, #ffffff);
     --ai-border: var(--cds-alias-object-border-color, #d9dfe6);
     --ai-ink: var(--cds-alias-object-interaction-color, #1f2a32);
-    --ai-muted: var(--cds-alias-object-interaction-neutral, #5c6b76);
+    --ai-muted: var(--cds-alias-object-interaction-neutral, #303336);
     --ai-accent: var(--cds-alias-status-info, #0d7b73);
     --ai-accent-2: var(--cds-alias-status-success, #1f9d64);
     --ai-shadow: 0 4px 16px rgba(0, 0, 0, 0.10);
@@ -125,13 +125,14 @@ a {
     flex-direction: column;
     gap: 0.55em;
 
-    /* ✅ FIX TAILLE */
+    /* FIX TAILLE */
     width: 500px;
     max-width: 95%;
     height: 80vh;
     max-height: 80vh;
 
-    margin: 20px auto; /* centre */
+    margin: 20px auto;
+    /* centre */
 
     padding: 0.7em 0.8em;
 
@@ -139,9 +140,9 @@ a {
     font-family: "Space Grotesk", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 
     background: linear-gradient(160deg,
-        var(--ai-surface) 0%,
-        var(--ai-surface-raised) 58%,
-        var(--cds-alias-object-interaction-background-highlight) 130%);
+            var(--ai-surface) 0%,
+            var(--ai-surface-raised) 58%,
+            var(--cds-alias-object-interaction-background-highlight) 130%);
 
     border-radius: 16px;
     border: 1px solid var(--ai-border);
@@ -239,9 +240,10 @@ a {
     text-transform: uppercase;
     cursor: pointer;
     transition: background 160ms ease, box-shadow 160ms ease;
+
     &:hover {
         background: var(--ai-surface);
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     }
 }
 
@@ -286,7 +288,7 @@ a {
     font-size: 0.65em;
     letter-spacing: 1px;
     flex-shrink: 0;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .ai-bubble {
@@ -294,7 +296,7 @@ a {
     border-radius: 12px;
     background: var(--ai-surface-raised);
     border: 1px solid var(--ai-border);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     max-width: 78%;
     font-size: 0.92em;
     line-height: 1.5em;
@@ -318,7 +320,7 @@ a {
     margin-bottom: 0.25em;
 }
 
-// ── Markdown rendered content ──────────────────────────────────────────────
+//  ──────────────────────────────────────────────
 ::ng-deep .ai-md {
     font-size: 0.92em;
     line-height: 1.6em;
@@ -327,31 +329,57 @@ a {
     // Paragraphes
     p {
         margin: 0 0 0.5em 0;
-        &:last-child { margin-bottom: 0; }
+
+        &:last-child {
+            margin-bottom: 0;
+        }
     }
 
     // Titres
-    h1, h2, h3, h4 {
+    h1,
+    h2,
+    h3,
+    h4 {
         font-weight: 700;
         margin: 0.6em 0 0.3em 0;
         line-height: 1.3em;
     }
-    h1 { font-size: 1.1em; }
-    h2 { font-size: 1.05em; }
-    h3 { font-size: 1em; }
-    h4 { font-size: 0.95em; }
+
+    h1 {
+        font-size: 1.1em;
+    }
+
+    h2 {
+        font-size: 1.05em;
+    }
+
+    h3 {
+        font-size: 1em;
+    }
+
+    h4 {
+        font-size: 0.95em;
+    }
 
     // Listes
-    ul, ol {
+    ul,
+    ol {
         margin: 0.3em 0 0.5em 0;
         padding-left: 1.4em;
+
         li {
             margin-bottom: 0.2em;
             line-height: 1.5em;
         }
     }
-    ul { list-style-type: disc; }
-    ol { list-style-type: decimal; }
+
+    ul {
+        list-style-type: disc;
+    }
+
+    ol {
+        list-style-type: decimal;
+    }
 
     // Tableaux
     table {
@@ -378,16 +406,18 @@ a {
             vertical-align: top;
         }
 
-        tr:last-child td { border-bottom: none; }
+        tr:last-child td {
+            border-bottom: none;
+        }
 
         tr:nth-child(even) td {
-            background: rgba(0,0,0,0.025);
+            background: rgba(0, 0, 0, 0.025);
         }
     }
 
     // Code inline
     code {
-        background: rgba(0,0,0,0.07);
+        background: rgba(0, 0, 0, 0.07);
         border-radius: 4px;
         padding: 0.1em 0.38em;
         font-family: 'Fira Code', 'Consolas', monospace;
@@ -413,8 +443,14 @@ a {
     }
 
     // Gras, italique
-    strong { font-weight: 700; }
-    em { font-style: italic; opacity: 0.9; }
+    strong {
+        font-weight: 700;
+    }
+
+    em {
+        font-style: italic;
+        opacity: 0.9;
+    }
 
     // Séparateur
     hr {
@@ -439,10 +475,13 @@ a {
         padding: 0.3em 0.75em;
         margin: 0.4em 0;
         color: var(--ai-muted);
-        background: rgba(0,0,0,0.03);
+        background: rgba(0, 0, 0, 0.03);
         border-radius: 0 6px 6px 0;
         font-style: italic;
-        p { margin: 0; }
+
+        p {
+            margin: 0;
+        }
     }
 }
 
@@ -460,7 +499,7 @@ a {
 }
 
 .ai-bubble-meta {
-    font-size: 0.7em;
+    font-size: 0.9em;
     color: var(--ai-muted);
     font-style: italic;
 }
@@ -503,7 +542,7 @@ a {
     border: 1px solid var(--ai-border);
     background: var(--ai-surface-raised);
     padding: 0.55em 0.75em;
-    box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
     display: grid;
     gap: 0.4em;
     flex-shrink: 0;
@@ -586,6 +625,28 @@ a {
     gap: 0.4em;
 }
 
+.ai-stop-button {
+    border: 1px solid var(--ai-border);
+    background: #ffffff;
+    color: var(--ai-ink);
+    border-radius: 999px;
+    padding: 0.4em 0.9em;
+    font-weight: 600;
+    font-size: 0.82em;
+    letter-spacing: 0.7px;
+    text-transform: uppercase;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    transition: transform 120ms ease, box-shadow 180ms ease;
+
+    &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+}
+
 .ai-send-button {
     background: linear-gradient(135deg, var(--ai-accent) 0%, var(--ai-accent-2) 100%);
     color: var(--cds-global-color-white);
@@ -601,10 +662,12 @@ a {
     align-items: center;
     gap: 0.4em;
     transition: opacity 180ms ease, transform 120ms ease;
+
     &:hover:not([disabled]) {
         opacity: 0.88;
         transform: translateY(-1px);
     }
+
     &[disabled] {
         opacity: 0.5;
         cursor: not-allowed;
@@ -617,6 +680,8 @@ a {
     line-height: 1.3em;
     opacity: 0.8;
 }
+
+
 
 @keyframes ai-panel-in {
     from {
@@ -703,20 +768,21 @@ clr-modal .modal-content {
     display: flex;
     justify-content: center;
 }
+
 clr-drawer .drawer-content {
     background: transparent !important;
     padding: 0 !important;
     display: flex !important;
-    justify-content: center; 
+    justify-content: center;
     align-items: flex-start;
 }
 
 clr-modal .modal-backdrop {
-    background: rgba(0, 0, 0, 0.2) !important; 
+    background: rgba(0, 0, 0, 0.2) !important;
     backdrop-filter: blur(4px);
 }
 
-/* ❌ SUPPRIMER LE FOND BLANC DU PANNEAU LATÉRAL */
+/*  SUPPRIMER LE FOND BLANC DU PANNEAU LATÉRAL */
 ::ng-deep .ai-side-panel .modal-content,
 ::ng-deep .ai-side-panel .modal-dialog,
 ::ng-deep .ai-side-panel .side-panel-content,
@@ -726,7 +792,7 @@ clr-modal .modal-backdrop {
     border: none !important;
 }
 
-/* Masquer le header natif car le chatbot a déjà le sien */
+/* Masquer le header natif */
 ::ng-deep .ai-side-panel .modal-header,
 ::ng-deep .ai-side-panel .side-panel-header {
     display: none !important;
@@ -741,3 +807,38 @@ clr-modal .modal-backdrop {
     align-items: center;
 }
 
+/* bouton rond stylé */
+::ng-deep clr-side-panel button[aria-label="Close"] {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(6px);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: #1f2a32 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    opacity: 1 !important;
+}
+
+/* hover */
+::ng-deep clr-side-panel button[aria-label="Close"]:hover {
+    background: #8ca8e6;
+    color: white !important;
+    transform: scale(1.05);
+}
+
+.ai-md {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.ai-md p {
+    word-break: break-word;
+}
+
+.ai-md em {
+    font-style: normal;
+}

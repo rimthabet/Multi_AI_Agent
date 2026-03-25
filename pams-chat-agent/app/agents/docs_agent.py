@@ -4,6 +4,7 @@ import re
 import sys
 import os
 import warnings
+import unicodedata
 
 warnings.filterwarnings("ignore", message=".*create_react_agent.*")
 warnings.filterwarnings("ignore", message=".*LangGraphDeprecated.*")
@@ -149,6 +150,53 @@ def _augment_question(question: str) -> str:
         "Retourne la valeur et sa source. INTERDICTION d'afficher des scores ou une liste de documents. "
         "Réponds UNIQUEMENT en français.]"
     )
+
+
+def _normalize_text(text: str) -> str:
+    cleaned = (text or "").lower()
+    cleaned = unicodedata.normalize("NFD", cleaned)
+    cleaned = "".join(ch for ch in cleaned if unicodedata.category(ch) != "Mn")
+    cleaned = re.sub(r"\s+", " ", cleaned).strip()
+    return cleaned
+
+
+def _extract_requested_label(question: str) -> str:
+    q = (question or "").strip()
+    patterns = [
+        r"\bvaleur\s+de\s+(.+?)(?:\s+au\b|\s+pour\b|\s+du\b|$)",
+        r"\bmontant\s+de\s+(.+?)(?:\s+au\b|\s+pour\b|\s+du\b|$)",
+    ]
+    for pattern in patterns:
+        m = re.search(pattern, q, re.IGNORECASE)
+        if m:
+            return m.group(1).strip().strip("\"' ")
+    return ""
+
+
+def _extract_value_from_chunks(chunks: list[dict], label: str) -> tuple[str, str, str] | None:
+    if not chunks or not label:
+        return None
+
+    label_norm = _normalize_text(label)
+    number_pattern = re.compile(r"\b\d[\d\s.,]*\b")
+
+    for chunk in chunks:
+        content = chunk.get("contenu") or ""
+        source = chunk.get("source") or chunk.get("title") or "Document"
+        page = chunk.get("page")
+        lines = content.splitlines()
+        for line in lines:
+            line_norm = _normalize_text(line)
+            if label_norm and label_norm in line_norm:
+                matches = number_pattern.findall(line)
+                if not matches:
+                    continue
+                value = matches[-1].strip()
+                if "/" in value:
+                    continue
+                return source, page, value
+
+    return None
 
 
 def _is_list_documents_question(question: str) -> bool:
@@ -386,6 +434,41 @@ async def ask_docs_agent(question: str, max_iterations: int = 10) -> str:
 
         if not any(_doc_matches_requested(doc, requested_kind) for doc in docs):
             return _format_missing_requested_doc(fonds_name, requested_kind, docs[0])
+
+    # Extraction deterministe d'une valeur specifique
+    if any(w in (question or "").lower() for w in ["valeur", "montant", "au ", "au 31", "au 30"]):
+        fonds_name = _extract_fund_name(question)
+        label = _extract_requested_label(question)
+        result_json = _search_docs(query=question, fonds_name=fonds_name, top_k=8)
+        try:
+            chunks = json.loads(result_json)
+        except Exception:
+            chunks = []
+
+        if isinstance(chunks, list):
+            found = _extract_value_from_chunks(chunks, label)
+            if found:
+                source, page, value = found
+                page_text = f"page {page}" if page else "page inconnue"
+                return (
+                    f"D'après **{source}**, {page_text} :\n"
+                    f"**{label} : {value} DT**"
+                )
+
+            sources = []
+            seen = set()
+            for c in chunks:
+                title = c.get("source") or c.get("title")
+                if title and title not in seen:
+                    seen.add(title)
+                    sources.append(title)
+
+            if label:
+                sources_text = ", ".join(sources) if sources else "aucune source"
+                return (
+                    f"La valeur de {label} n'a pas été trouvée dans les documents disponibles"
+                    f" pour {fonds_name or 'ce fonds'}. Les documents disponibles sont : {sources_text}."
+                )
 
     llm = ChatOllama(
         base_url=Config.OLLAMA_BASE_URL,

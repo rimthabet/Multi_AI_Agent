@@ -3,6 +3,7 @@ import { ClarityModule } from '@clr/angular';
 import { CdsModule } from '@cds/angular';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterModule, RouterOutlet } from '@angular/router';
+import { Subscription } from 'rxjs';
 
 import {
   announcementIcon,
@@ -385,6 +386,7 @@ export class AppComponent implements OnInit {
   chatBusy: boolean = false;
   chatError: string = '';
   private chatMessageId = 1;
+  private chatSubscription?: Subscription;
   chatMessages: ChatMessage[] = [
     {
       id: 1,
@@ -395,7 +397,7 @@ export class AppComponent implements OnInit {
     }
   ];
   ///////// CHAT
-
+  
   // Lifecycle hooks
   ngOnInit(): void {
 
@@ -453,7 +455,7 @@ export class AppComponent implements OnInit {
 
     this.applyDesiredTheme();
   }
-
+ 
   //  GET LABEL FOR RATIO TYPE
   getLabelForRatioType(type: string, isHistorique: boolean = false): string {
     return `Ratios des souscripteurs ${isHistorique ? '(Historique)' : ''}`;
@@ -532,6 +534,7 @@ export class AppComponent implements OnInit {
 
   this.chatBusy = true;
   this.chatError = '';
+  this.chatSubscription?.unsubscribe();
   const sendTime = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
   this.addChatMessage({
     id: this.nextChatMessageId(),
@@ -541,7 +544,7 @@ export class AppComponent implements OnInit {
   });
   this.chatInput = '';
 
-  this.chatAgentService.ask(question).subscribe({
+  this.chatSubscription = this.chatAgentService.ask(question).subscribe({
     next: (response) => {
       // ── Agent Navigation ──────────────────────────────────────────
       if (response?.agent === 'navigation') {
@@ -602,13 +605,33 @@ export class AppComponent implements OnInit {
       }
 
       this.chatBusy = false;
+      this.chatSubscription = undefined;
     },
-    error: () => {
+    error: (error) => {
       this.chatBusy = false;
+      this.chatSubscription = undefined;
       this.chatError = 'Impossible de joindre l\'agent IA pour le moment.';
     }
   });
 }
+
+  cancelChatRequest(): void {
+    if (!this.chatBusy) {
+      return;
+    }
+    this.chatSubscription?.unsubscribe();
+    this.chatSubscription = undefined;
+    this.chatBusy = false;
+    this.chatError = '';
+    const cancelTime = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    this.addChatMessage({
+      id: this.nextChatMessageId(),
+      role: 'assistant',
+      text: 'Réponse annulée.',
+      meta: 'Agent: system',
+      timestamp: cancelTime
+    });
+  }
 ///////////////////////////
   private addChatMessage(message: ChatMessage) {
     this.chatMessages = [...this.chatMessages, message];

@@ -593,7 +593,7 @@ export class AppComponent implements OnInit {
   }
   if (docSha256 && !question.toLowerCase().includes('sha256')) {
     payloadQuestion = `[SHA256:${docSha256}] Dans le document "${docTitle}" : ${question}`;
-  } else if (docTitle && !question.toLowerCase().includes('document')) {
+  } else if (docTitle) {
     payloadQuestion = `Dans le document "${docTitle}" : ${question}`;
   }
 

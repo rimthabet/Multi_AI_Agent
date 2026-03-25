@@ -1,4 +1,5 @@
 import re
+import sys
 from app.config import Config
 from app.services.embedder import embed_text, to_pgvector
 from app.services.db import execute_rag
@@ -183,15 +184,15 @@ def doc_search(question: str, top_k: int | None = None, include_tables: bool = T
     # 1) Recherche TEXT chunks
     text_sql = _BASE_SQL.format(table_filter="AND (c.metadata->>'is_table' IS NULL OR c.metadata->>'is_table' != 'true')")
     text_params = core_params + scoring_params + [text_slots]
-    print("[DEBUG][doc_search] SQL TEXT:", text_sql)
-    print("[DEBUG][doc_search] PARAMS TEXT:", text_params)
+    print("[DEBUG][doc_search] SQL TEXT:", text_sql, file=sys.stderr)
+    print("[DEBUG][doc_search] PARAMS TEXT:", text_params, file=sys.stderr)
     text_rows = execute_rag(text_sql, text_params)
 
     # 2) Recherche TABLE chunks
     table_sql = _BASE_SQL.format(table_filter="AND (c.metadata->>'is_table')::boolean IS TRUE")
     table_params = core_params + scoring_params + [table_slots]
-    print("[DEBUG][doc_search] SQL TABLE:", table_sql)
-    print("[DEBUG][doc_search] PARAMS TABLE:", table_params)
+    print("[DEBUG][doc_search] SQL TABLE:", table_sql, file=sys.stderr)
+    print("[DEBUG][doc_search] PARAMS TABLE:", table_params, file=sys.stderr)
     table_rows = execute_rag(table_sql, table_params)
     min_score = getattr(Config, "DOC_MIN_SCORE", 0.35)
     table_min_score = 0.10   # Tables get low vscores -- don't filter aggressively

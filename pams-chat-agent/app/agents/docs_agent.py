@@ -156,11 +156,8 @@ _REQUESTED_DOC_INGEST_HINTS = {
 def _extract_document_name(question: str) -> str:
     """Extrait le nom de document si l'utilisateur le spécifie explicitement."""
     patterns = [
-        # Forme générée par le frontend : Dans le document "Nom" : ...
         r"dans le document\s*[\"«]([^\"»\n]+)[\"»]\s*:",
-        # "du document X"
         r"du document\s+[\"«]?([a-zA-Z0-9_\-\.]+(?:\s+[a-zA-Z0-9_\-\.]+)*)[\"»]?",
-        # Autres formes classiques
         r"(?:à partir du document|depuis le document|dans le document|le document)\s+(?:nommé|intitulé|appelé|qui s'appelle)?\s*[\"«]?([\w\s\-\.]+?)[\"»]?(?:\s+donne|\s+calcule|\s+indique|\s+quel|\.pdf|$)",
         r"(?:document|fichier)\s+[\"«]([^\"»\n]+)[\"»]",
         r"document\s+(?:nommé|intitulé)\s+\"?([\w\s\-\.]+?)\"?(?:\s+donne|$)",
@@ -169,7 +166,6 @@ def _extract_document_name(question: str) -> str:
         m = re.search(p, question, re.IGNORECASE)
         if m:
             doc_name = m.group(1).strip().strip('"\'')
-            # Nettoyer les mots-clés parasites
             doc_name = re.sub(r'\b(fais|un|résumé|resume|synthèse|synthese)\b', '', doc_name, flags=re.IGNORECASE).strip()
             return doc_name
     return ""
@@ -205,7 +201,7 @@ def _normalize_text(text: str) -> str:
     cleaned = unicodedata.normalize("NFD", cleaned)
     cleaned = "".join(ch for ch in cleaned if unicodedata.category(ch) != "Mn")
     cleaned = cleaned.replace("_", " ")
-    cleaned = re.sub(r"\.pdf$", "", cleaned)  # ignore extension .pdf
+    cleaned = re.sub(r"\.pdf$", "", cleaned)  
     cleaned = re.sub(r"\s+", " ", cleaned).strip()
     return cleaned
 
@@ -302,9 +298,9 @@ def _is_summary_question(question: str) -> bool:
     """Détecte si la question demande un résumé ou une synthèse."""
     q = (question or "").lower()
     return any(w in q for w in [
-        "résumé", "resume", "synthèse", "synthese", 
+        "résumé", "resume", "résume", "synthèse", "synthese", 
         "présente", "overview", "aperçu", "aperu",
-        "fais un résumé", "donne un résumé", "synthétise"
+        "fais un résumé", "donne un résumé", "synthétise", "synthetise","résume le document"
     ])
 
 
@@ -689,7 +685,7 @@ async def ask_docs_agent(question: str, max_iterations: int = 10) -> str:
                     llm_generate,
                     prompt=f"Voici les extraits bruts du document '{doc_name or fonds_name or 'demandé'}' :\n\n{raw_summary}\n\nRédige le résumé final de manière professionnelle et bien formatée.",
                     system=system_prompt,
-                    max_tokens=4000
+                    max_tokens=40000
                 )
             except Exception as e:
                 print(f"Erreur LLM lors du résumé: {e}")

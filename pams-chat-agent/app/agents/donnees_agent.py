@@ -33,7 +33,7 @@ RÈGLES STRICTES :
 - Aucun conseil, aucune analyse, aucun commentaire
 - Les montants sont en TND (dinars tunisiens), jamais en euros
 - Ne montre JAMAIS le JSON brut à l'utilisateur
-- Présente sous forme de liste numérotée lisible
+- Présente sous forme de liste numérotée markdown (chaque ligne commence par 1. 2. 3. ... sur une nouvelle ligne)
 - Si la liste est vide : réponds "Aucun résultat trouvé."
 - N'invente JAMAIS de données fictives (Projet 1, Projet 2, etc.)"""
 
@@ -237,7 +237,17 @@ def _execute_and_format(question: str, sql: str) -> str:
             f"Présente ces résultats en français sous forme de liste numérotée."
         )
         formatted = llm_generate(prompt, system=_FORMAT_SYSTEM, max_tokens=600)
-        return _normalize_currency(formatted)
+        formatted = _normalize_currency(formatted)
+        # Correction markdown : force chaque item sur une nouvelle ligne
+        lines = re.split(r'(\d+\.\s+)', formatted)
+        out = []
+        i = 1
+        while i < len(lines):
+            prefix = lines[i]
+            content = lines[i+1] if i+1 < len(lines) else ''
+            out.append(f'{prefix}{content.strip()}')
+            i += 2
+        return '\n'.join(out) if out else formatted
 
     except Exception as e:
         return f"Erreur d'exécution : {e}"

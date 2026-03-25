@@ -323,6 +323,13 @@ interface ChatMessage {
   timestamp?: string;
 }
 
+interface ChatDocument {
+  id: number;
+  title: string;
+  path?: string;
+  date?: string | null;
+}
+
 @Component({
   selector: 'app-root',
   imports: [
@@ -396,6 +403,11 @@ export class AppComponent implements OnInit {
       timestamp: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
     }
   ];
+  chatDocuments: ChatDocument[] = [];
+  chatDocumentsLoading: boolean = false;
+  chatDocumentsError: string = '';
+  chatSelectedDocId?: number;
+  chatSelectedDocTitle: string = '';
   ///////// CHAT
   
   // Lifecycle hooks
@@ -518,6 +530,41 @@ export class AppComponent implements OnInit {
   applyQuickPrompt(prompt: string) {
     this.chatInput = prompt;
   }
+
+  openChatPanel(): void {
+    this.chatPanelOpened = true;
+    if (!this.chatDocuments.length) {
+      this.loadChatDocuments();
+    }
+  }
+
+  loadChatDocuments(query: string = ''): void {
+    this.chatDocumentsLoading = true;
+    this.chatDocumentsError = '';
+    this.chatAgentService.listDocuments(query).subscribe({
+      next: (docs) => {
+        this.chatDocuments = docs || [];
+        this.chatDocumentsLoading = false;
+      },
+      error: () => {
+        this.chatDocumentsLoading = false;
+        this.chatDocumentsError = 'Impossible de charger les documents.';
+      }
+    });
+  }
+
+  onChatDocumentChange(docId: string): void {
+    const id = Number(docId);
+    const doc = this.chatDocuments.find(item => item.id === id);
+    if (doc) {
+      this.chatSelectedDocId = doc.id;
+      this.chatSelectedDocTitle = doc.title;
+    } else {
+      this.chatSelectedDocId = undefined;
+      this.chatSelectedDocTitle = '';
+    }
+  }
+
   onChatKeydown(event: KeyboardEvent): void {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
@@ -532,6 +579,24 @@ export class AppComponent implements OnInit {
   const question = this.chatInput.trim();
   if (!question || this.chatBusy) return;
 
+  let payloadQuestion = question;
+  let docTitle = this.chatSelectedDocTitle;
+  let docSha256 = undefined;
+  if (this.chatSelectedDocId) {
+    const doc = this.chatDocuments.find(item => item.id === this.chatSelectedDocId);
+    if (doc && (doc as any).sha256) {
+      docSha256 = (doc as any).sha256;
+    }
+  }
+  if (docTitle && !docTitle.toLowerCase().endsWith('.pdf')) {
+    docTitle = docTitle + '.pdf';
+  }
+  if (docSha256 && !question.toLowerCase().includes('sha256')) {
+    payloadQuestion = `[SHA256:${docSha256}] Dans le document "${docTitle}" : ${question}`;
+  } else if (docTitle && !question.toLowerCase().includes('document')) {
+    payloadQuestion = `Dans le document "${docTitle}" : ${question}`;
+  }
+
   this.chatBusy = true;
   this.chatError = '';
   this.chatSubscription?.unsubscribe();
@@ -544,7 +609,7 @@ export class AppComponent implements OnInit {
   });
   this.chatInput = '';
 
-  this.chatSubscription = this.chatAgentService.ask(question).subscribe({
+  this.chatSubscription = this.chatAgentService.ask(payloadQuestion).subscribe({
     next: (response) => {
       // ── Agent Navigation ──────────────────────────────────────────
       if (response?.agent === 'navigation') {

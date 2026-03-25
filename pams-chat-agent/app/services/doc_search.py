@@ -99,56 +99,82 @@ def doc_search(question: str, top_k: int | None = None, include_tables: bool = T
     q_emb = embed_text(q)
     q_vec = to_pgvector(q_emb)
 
+
     kws = _extract_keywords(q)
     fund, year = _maybe_fund_and_year_boost(q)
 
-    _BASE_SQL = """
-        WITH ranked AS (
-          SELECT
-            c.document_id, d.title, c.page_start, c.page_end,
-            c.text, c.metadata,
-            (1 - (c.embedding <=> %s::vector)) AS vscore,
-            ts_rank(c.tsv, plainto_tsquery('french', %s)) AS tscore
-          FROM doc_chunk c
-          JOIN doc_document d ON d.id = c.document_id
-          WHERE c.text IS NOT NULL AND length(c.text) > 20
-            {table_filter}
-        )
-        SELECT
-          document_id, title, page_start, page_end, text, metadata,
-          (
-            (0.50 * vscore) +
-            (0.30 * LEAST(tscore, 1.0)) +
-            -- Boost fort si le chunk appartient au bon fonds (métadonnées)
-            CASE WHEN %s <> '' AND LOWER(metadata->>'fund_name') LIKE ('%%' || LOWER(%s) || '%%') THEN 0.80 ELSE 0 END +
-            -- Pénalité si le chunk appartient clairement à un AUTRE fonds connu
-            CASE WHEN %s <> '' AND metadata->>'fund_name' IS NOT NULL
-                      AND metadata->>'fund_name' <> ''
-                      AND LOWER(metadata->>'fund_name') NOT LIKE ('%%' || LOWER(%s) || '%%')
-                 THEN -0.30 ELSE 0 END +
-            CASE WHEN %s <> '' AND metadata->>'years' LIKE ('%%' || %s || '%%') THEN 0.40 ELSE 0 END +
-            -- Boost via texte/titre (Fallback)
-            CASE WHEN %s <> '' AND LOWER(REPLACE(title, '_', ' ')) LIKE ('%%' || LOWER(%s) || '%%') THEN 0.20 ELSE 0 END +
-            CASE WHEN %s <> '' AND LOWER(text) LIKE ('%%' || LOWER(%s) || '%%') THEN 0.10 ELSE 0 END +
-            CASE WHEN %s <> '' AND LOWER(REPLACE(title, '_', ' ')) LIKE ('%%' || %s || '%%') THEN 0.10 ELSE 0 END +
-            CASE WHEN %s <> '' AND text ~ %s THEN 0.05 ELSE 0 END
-          ) AS score
-        FROM ranked
-        ORDER BY score DESC
-        LIMIT %s
-    """
+        # Ajout : récupération éventuelle du sha256 à filtrer depuis le paramètre question (format spécial)
+    sha256 = None
+    if hasattr(doc_search, "_force_sha256") and doc_search._force_sha256:
+            sha256 = doc_search._force_sha256
+            doc_search._force_sha256 = None
+        # Permettre passage via question (ex: [SHA256:xxxx])
+    import re
+    m = re.search(r"\[SHA256:([a-fA-F0-9]{32,64})\]", q)
+    if m:
+            sha256 = m.group(1)
 
-    base_params = [
-        q_vec,
-        " ".join(kws) if kws else q,
+    sha256_filter = ""
+    sha256_param = []
+    if sha256:
+            sha256_filter = "AND d.sha256 = %s"
+            sha256_param = [sha256]
 
-        fund, fund,          # fund boost in metadata
-        fund, fund,          # fund penalty in metadata (wrong-fund)
-        year, year,          # year in metadata
-        fund, fund,          # fund in title
-        fund, fund,          # fund in text
-        year, year,          # year in title
-        year, year,          # year in text
+    # Désactiver le filtre length(c.text) > 20 pour résumé/synthèse
+    if re.search(r"\brésumé|resumé|synthèse|resume|synthese\b", q, re.IGNORECASE):
+        base_where = "c.text IS NOT NULL"
+    else:
+        base_where = "c.text IS NOT NULL AND length(c.text) > 20"
+
+    _BASE_SQL = f"""
+            WITH ranked AS (
+                SELECT
+                    c.document_id, d.title, c.page_start, c.page_end,
+                    c.text, c.metadata,
+                    (1 - (c.embedding <=> %s::vector)) AS vscore,
+                    ts_rank(c.tsv, plainto_tsquery('french', %s)) AS tscore
+                FROM doc_chunk c
+                JOIN doc_document d ON d.id = c.document_id
+                WHERE {base_where}
+                    {{table_filter}}
+                    {sha256_filter}
+            )
+            SELECT
+                document_id, title, page_start, page_end, text, metadata,
+                (
+                    (0.50 * vscore) +
+                    (0.30 * LEAST(tscore, 1.0)) +
+                    CASE WHEN %s <> '' AND LOWER(metadata->>'fund_name') LIKE ('%%' || LOWER(%s) || '%%') THEN 0.80 ELSE 0 END +
+                    CASE WHEN %s <> '' AND metadata->>'fund_name' IS NOT NULL
+                                        AND metadata->>'fund_name' <> ''
+                                        AND LOWER(metadata->>'fund_name') NOT LIKE ('%%' || LOWER(%s) || '%%')
+                             THEN -0.30 ELSE 0 END +
+                    CASE WHEN %s <> '' AND metadata->>'years' LIKE ('%%' || %s || '%%') THEN 0.40 ELSE 0 END +
+                    CASE WHEN %s <> '' AND LOWER(REPLACE(title, '_', ' ')) LIKE ('%%' || LOWER(%s) || '%%') THEN 0.20 ELSE 0 END +
+                    CASE WHEN %s <> '' AND LOWER(text) LIKE ('%%' || LOWER(%s) || '%%') THEN 0.10 ELSE 0 END +
+                    CASE WHEN %s <> '' AND LOWER(REPLACE(title, '_', ' ')) LIKE ('%%' || %s || '%%') THEN 0.10 ELSE 0 END +
+                    CASE WHEN %s <> '' AND text ~ %s THEN 0.05 ELSE 0 END
+                ) AS score
+            FROM ranked
+            ORDER BY score DESC
+            LIMIT %s
+     """
+
+    core_params = [
+            q_vec,
+            " ".join(kws) if kws else q,
+    ]
+    if sha256:
+        core_params.append(sha256)
+
+    scoring_params = [
+            fund, fund,          # fund boost in metadata
+            fund, fund,          # fund penalty in metadata (wrong-fund)
+            year, year,          # year in metadata
+            fund, fund,          # fund in title
+            fund, fund,          # fund in text
+            year, year,          # year in title
+            year, year,          # year in text
     ]
 
     table_slots = top_k
@@ -156,14 +182,24 @@ def doc_search(question: str, top_k: int | None = None, include_tables: bool = T
 
     # 1) Recherche TEXT chunks
     text_sql = _BASE_SQL.format(table_filter="AND (c.metadata->>'is_table' IS NULL OR c.metadata->>'is_table' != 'true')")
-    text_rows = execute_rag(text_sql, base_params + [text_slots])
+    text_params = core_params + scoring_params + [text_slots]
+    print("[DEBUG][doc_search] SQL TEXT:", text_sql)
+    print("[DEBUG][doc_search] PARAMS TEXT:", text_params)
+    text_rows = execute_rag(text_sql, text_params)
 
     # 2) Recherche TABLE chunks
     table_sql = _BASE_SQL.format(table_filter="AND (c.metadata->>'is_table')::boolean IS TRUE")
-    table_rows = execute_rag(table_sql, base_params + [table_slots])
-
+    table_params = core_params + scoring_params + [table_slots]
+    print("[DEBUG][doc_search] SQL TABLE:", table_sql)
+    print("[DEBUG][doc_search] PARAMS TABLE:", table_params)
+    table_rows = execute_rag(table_sql, table_params)
     min_score = getattr(Config, "DOC_MIN_SCORE", 0.35)
     table_min_score = 0.10   # Tables get low vscores -- don't filter aggressively
+
+    # Si la question demande un résumé, on désactive le score minimum
+    if re.search(r"\brésumé|resumé|synthèse|resume|synthese\b", q, re.IGNORECASE):
+        min_score = -1.0
+        table_min_score = -1.0
     seen_ids = set()
     out = []
 

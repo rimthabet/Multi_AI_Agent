@@ -161,7 +161,7 @@
   </header>
   <!-- CHAT -->
   <button class="ai-assistant-fab" type="button" aria-label="Ouvrir l'assistant IA" title="Assistant IA"
-    (click)="chatPanelOpened = true" (mouseenter)="chatIconSolid = true" (mouseleave)="chatIconSolid = false">
+    (click)="openChatPanel()" (mouseenter)="chatIconSolid = true" (mouseleave)="chatIconSolid = false">
     <cds-icon shape="talk-bubbles" size="md" [solid]="chatIconSolid"></cds-icon>
     <span class="ai-assistant-dot" aria-hidden="true"></span>
   </button>
@@ -192,6 +192,25 @@
           <button class="ai-chip" type="button" (click)="applyQuickPrompt('Suivi des projets')">
             Suivi des projets
           </button>
+        </div>
+
+        <div class="ai-doc-panel">
+          <div class="ai-doc-row">
+            <label class="ai-doc-label">Document</label>
+            <select class="ai-doc-select" (change)="onChatDocumentChange($any($event.target).value)">
+              <option value="">Tous les documents</option>
+              @for (doc of chatDocuments; track doc.id) {
+              <option [value]="doc.id" [selected]="doc.id === chatSelectedDocId">{{ doc.title }}</option>
+              }
+            </select>
+            <button class="ai-doc-refresh" type="button" (click)="loadChatDocuments()">
+              Rafraîchir
+            </button>
+          </div>
+
+          @if (chatDocumentsError) {
+          <div class="ai-doc-error">{{ chatDocumentsError }}</div>
+          }
         </div>
 
         <div class="ai-thread" aria-live="polite">

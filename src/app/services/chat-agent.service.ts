@@ -16,6 +16,21 @@ export interface NavigationAction {
   params?: Record<string, any>;
 }
 
+export interface ChatDocument {
+  id: number;
+  title: string;
+  path?: string;
+  date?: string | null;
+  sha256?: string;
+}
+
+export interface UploadDocumentResponse {
+  id: number;
+  title: string;
+  filename: string;
+  path: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -37,6 +52,25 @@ export class ChatAgentService {
     );
   }
 
+  listDocuments(query: string = ''): Observable<ChatDocument[]> {
+    const url = query.trim()
+      ? `${this.baseUrl}/documents/list?q=${encodeURIComponent(query.trim())}`
+      : `${this.baseUrl}/documents/list`;
+    return this.httpClient.get<ChatDocument[]>(url);
+  }
+
+  uploadDocument(file: File, title?: string): Observable<UploadDocumentResponse> {
+    const form = new FormData();
+    form.set('file', file);
+    if (title) {
+      form.set('title', title);
+    }
+    return this.httpClient.post<UploadDocumentResponse>(
+      `${this.baseUrl}/documents/upload`,
+      form
+    );
+  }
+
   private _handleNavigation(answer: string): void {
     try {
       const action: NavigationAction = JSON.parse(answer);
@@ -45,7 +79,6 @@ export class ChatAgentService {
 
         case 'navigate':
           if (action.route) {
-            // Découpe la route en segments pour Angular Router
             const segments = action.route.split('/');
             this.router.navigate(segments, { queryParams: action.params || {} });
           }

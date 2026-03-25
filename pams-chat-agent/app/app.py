@@ -9,6 +9,7 @@ import traceback
 from typing import Any
 
 from flask import Flask, request, jsonify
+from werkzeug.utils import secure_filename
 
 from app.agents.agent_router import ask_auto_agent_sync
 from app.services.db import get_rag_conn
@@ -218,6 +219,112 @@ def ingest_status(job_id: str):
 
 
 # ---------------------------------------------------------------------------
+# Document upload + listing
+# ---------------------------------------------------------------------------
+@app.post("/documents/upload")
+def documents_upload():
+    file = request.files.get("file")
+    if not file:
+        return _json_error("file is required", 400)
+
+    filename = secure_filename(file.filename or "")
+    if not filename:
+        return _json_error("invalid filename", 400)
+
+    title = (request.form.get("title") or filename).strip()
+    directory = (request.form.get("dir") or "data/docs").strip()
+
+    if not os.path.isabs(directory):
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        directory = os.path.join(project_root, directory)
+
+    os.makedirs(directory, exist_ok=True)
+    unique_name = f"{uuid.uuid4().hex}_{filename}"
+    save_path = os.path.join(directory, unique_name)
+    file.save(save_path)
+
+    from app.services.doc_ingest import ingest_pdf
+    doc_id = ingest_pdf(save_path, title=title)
+
+    return jsonify({
+        "id": doc_id,
+        "title": title,
+        "filename": unique_name,
+        "path": save_path,
+    })
+
+
+@app.get("/documents/list")
+def documents_list():
+    query = (request.args.get("q") or "").strip()
+
+    with get_rag_conn() as conn:
+        with conn.cursor() as cur:
+            if query:
+                cur.execute(
+                    """
+                    SELECT id, title, source_path, created_at
+                    FROM doc_document
+                    WHERE LOWER(title) LIKE LOWER(%s)
+                    ORDER BY created_at DESC NULLS LAST, id DESC
+                    LIMIT 200
+                    """,
+                    (f"%{query}%",),
+                )
+            else:
+                cur.execute(
+                    """
+                    SELECT id, title, source_path, created_at
+                    FROM doc_document
+                    ORDER BY created_at DESC NULLS LAST, id DESC
+                    LIMIT 200
+                    """
+                )
+
+            rows = cur.fetchall()
+
+    # Ajout du sha256 dans la requête SQL et la réponse
+    # Il faut modifier la requête SQL pour sélectionner sha256
+    # On adapte les deux requêtes ci-dessus
+    with get_rag_conn() as conn:
+        with conn.cursor() as cur:
+            if query:
+                cur.execute(
+                    """
+                    SELECT id, title, source_path, created_at, sha256
+                    FROM doc_document
+                    WHERE LOWER(title) LIKE LOWER(%s)
+                    ORDER BY created_at DESC NULLS LAST, id DESC
+                    LIMIT 200
+                    """,
+                    (f"%{query}%",),
+                )
+            else:
+                cur.execute(
+                    """
+                    SELECT id, title, source_path, created_at, sha256
+                    FROM doc_document
+                    ORDER BY created_at DESC NULLS LAST, id DESC
+                    LIMIT 200
+                    """
+                )
+
+            rows = cur.fetchall()
+
+    results = []
+    for row in rows:
+        results.append({
+            "id": row[0],
+            "title": row[1],
+            "path": row[2],
+            "date": str(row[3]) if row[3] else None,
+            "sha256": row[4],
+        })
+
+    return jsonify(results)
+
+
+# ---------------------------------------------------------------------------
 # Agent API
 # ---------------------------------------------------------------------------
 @app.post("/agents/ask")
@@ -232,6 +339,10 @@ def agents_ask():
         answer, agent_used = ask_auto_agent_sync(question)
         return jsonify({"answer": answer, "agent": agent_used})
     except Exception as exc:
+        import traceback
+        print("\n--- Exception in /agents/ask ---")
+        print(traceback.format_exc())
+        print("-------------------------------\n")
         return _json_error(f"Agent error: {exc}", 500)
 
 

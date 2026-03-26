@@ -58,15 +58,17 @@ def _openai_response(content: str, model: str = "pams-agent"):
 
 @app.errorhandler(Exception)
 def handle_exception(e):
+    code = getattr(e, "code", 500)
     return (
         jsonify(
             {
+                "url": request.url,
                 "error": str(e),
                 "type": e.__class__.__name__,
                 "trace": traceback.format_exc().splitlines()[-30:],
             }
         ),
-        500,
+        code,
     )
 
 
@@ -322,6 +324,28 @@ def documents_list():
         })
 
     return jsonify(results)
+
+@app.route("/documents/view/<path:doc_id>", methods=["GET"])
+@app.route("/chatAgent/documents/view/<path:doc_id>", methods=["GET"])
+def documents_view(doc_id: str):
+    try:
+        # Strip trailing slashes and get the actual integer ID
+        doc_int = int(doc_id.strip("/"))
+    except ValueError:
+        return _json_error("Invalid document ID format", 400)
+    
+    with get_rag_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT source_path FROM doc_document WHERE id = %s", (doc_int,))
+            row = cur.fetchone()
+            if not row:
+                return _json_error("Document not found", 404)
+            path = row[0]
+            if not os.path.exists(path):
+                return _json_error("File not found on disk", 404)
+            
+            from flask import send_file
+            return send_file(os.path.abspath(path), mimetype="application/pdf")
 
 
 # ---------------------------------------------------------------------------

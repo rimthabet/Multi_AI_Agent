@@ -195,6 +195,13 @@
         </div>
 
         <div class="ai-doc-panel">
+          <div class="ai-doc-row" style="margin-bottom: 0.5em;">
+            <label class="ai-doc-label">Chercher</label>
+            <input type="text" [(ngModel)]="chatDocSearchQuery" class="ai-doc-select" placeholder="Nom du document..." (keyup.enter)="loadChatDocuments(chatDocSearchQuery)">
+            <button class="ai-doc-refresh" type="button" (click)="loadChatDocuments(chatDocSearchQuery)" title="Chercher">
+              <cds-icon shape="search"></cds-icon>
+            </button>
+          </div>
           <div class="ai-doc-row">
             <label class="ai-doc-label">Document</label>
             <select class="ai-doc-select" (change)="onChatDocumentChange($any($event.target).value)">
@@ -203,8 +210,8 @@
               <option [value]="doc.id" [selected]="doc.id === chatSelectedDocId">{{ doc.title }}</option>
               }
             </select>
-            <button class="ai-doc-refresh" type="button" (click)="loadChatDocuments()">
-              Rafraîchir
+            <button class="ai-doc-refresh" type="button" (click)="viewSelectedPdf()" [disabled]="!chatSelectedDocId" title="Voir PDF">
+              <cds-icon shape="pdf-file"></cds-icon>
             </button>
           </div>
 

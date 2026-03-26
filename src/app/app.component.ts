@@ -173,7 +173,8 @@ import {
   thumbsUpIcon,
   thumbsDownIcon,
   briefcaseIcon,
-  copyIcon
+  copyIcon,
+  searchIcon
 } from '@cds/core/icon';
 
 import { castleIcon } from '@cds/core/icon/shapes/castle.js';
@@ -298,7 +299,7 @@ ClarityIcons.addIcons(
   certificateIcon, pluginIcon, formIcon, assignUserIcon, syncIcon, idBadgeIcon, timelineIcon, announcementIcon,
   cloudChartIcon, gridViewIcon, barsIcon, fileIcon, ellipsisVerticalIcon, libraryIcon,
   exclamationTriangleIcon, checkboxListIcon, linkIcon, contractIcon, pdfFileIcon, plusCircleIcon, refreshIcon, flagIcon,
-  briefcaseIcon, copyIcon
+  briefcaseIcon, copyIcon, searchIcon
 );
 
 import '@cds/core/icon/register.js';
@@ -386,10 +387,11 @@ export class AppComponent implements OnInit {
   alertsPanelOpened: boolean = false;
   openfeedbackModal: boolean = false;
 
-    ///////// CHAT
+  ///////// CHAT
   chatPanelOpened: boolean = false;
   chatIconSolid: boolean = false;
   chatInput: string = '';
+  chatDocSearchQuery: string = '';
   chatBusy: boolean = false;
   chatError: string = '';
   private chatMessageId = 1;
@@ -408,6 +410,12 @@ export class AppComponent implements OnInit {
   chatDocumentsError: string = '';
   chatSelectedDocId?: number;
   chatSelectedDocTitle: string = '';
+
+  viewSelectedPdf() {
+    if (!this.chatSelectedDocId) return;
+    const url = `/chatAgent/documents/view/${this.chatSelectedDocId}`;
+    window.open(url, '_blank');
+  }
   ///////// CHAT
   
   // Lifecycle hooks

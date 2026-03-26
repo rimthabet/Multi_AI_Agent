@@ -1,0 +1,135 @@
+  <!-- CHAT -->
+  <button class="ai-assistant-fab" type="button" aria-label="Ouvrir l'assistant IA" title="Assistant IA"
+    (click)="openChatPanel()" (mouseenter)="chatIconSolid = true" (mouseleave)="chatIconSolid = false">
+    <cds-icon shape="talk-bubbles" size="md" [solid]="chatIconSolid"></cds-icon>
+    <span class="ai-assistant-dot" aria-hidden="true"></span>
+  </button>
+  <clr-side-panel [(clrSidePanelOpen)]="chatPanelOpened" [clrSidePanelStaticBackdrop]="false"
+    [clrSidePanelSkipAnimation]="false" [clrSidePanelBackdrop]="true" [clrSidePanelSize]="'lg'" class="ai-side-panel">
+    <h3 class="side-panel-title ai-panel-title">Assistant IA</h3>
+    <div class="side-panel-body ai-side-panel-body">
+      <div class="ai-panel" role="region" aria-label="Assistant IA">
+        <div class="ai-banner">
+          <div class="ai-title">
+            <cds-icon shape="lightbulb" size="md"></cds-icon>
+            Assistant IA
+          </div>
+
+
+        </div>
+
+        <div class="ai-quick-actions">
+          <button class="ai-chip" type="button" (click)="applyQuickPrompt('Acces intelligent a l information')">
+            Accès intelligent à l’information
+          </button>
+          <button class="ai-chip" type="button" (click)="applyQuickPrompt('Risque & alertes')">
+            Risque & alertes
+          </button>
+          <button class="ai-chip" type="button" (click)="applyQuickPrompt('Suivi des fonds')">
+            Suivi des fonds
+          </button>
+          <button class="ai-chip" type="button" (click)="applyQuickPrompt('Suivi des projets')">
+            Suivi des projets
+          </button>
+        </div>
+
+        <div class="ai-doc-panel">
+          <div class="ai-doc-row" style="margin-bottom: 0.5em;">
+            <label class="ai-doc-label">Chercher</label>
+            <input type="text" [(ngModel)]="chatDocSearchQuery" class="ai-doc-select" placeholder="Nom du document..." (keyup.enter)="loadChatDocuments(chatDocSearchQuery)">
+            <button class="ai-doc-refresh" type="button" (click)="loadChatDocuments(chatDocSearchQuery)" title="Chercher">
+              <cds-icon shape="search"></cds-icon>
+            </button>
+          </div>
+          <div class="ai-doc-row">
+            <label class="ai-doc-label">Document</label>
+            <select class="ai-doc-select" (change)="onChatDocumentChange($any($event.target).value)">
+              <option value="">Tous les documents</option>
+              @for (doc of chatDocuments; track doc.id) {
+              <option [value]="doc.id" [selected]="doc.id === chatSelectedDocId">{{ doc.title }}</option>
+              }
+            </select>
+            <button class="ai-doc-refresh" type="button" (click)="viewSelectedPdf()" [disabled]="!chatSelectedDocId" title="Voir PDF">
+              <cds-icon shape="pdf-file"></cds-icon>
+            </button>
+          </div>
+
+          @if (chatDocumentsError) {
+          <div class="ai-doc-error">{{ chatDocumentsError }}</div>
+          }
+        </div>
+
+        <div class="ai-thread" aria-live="polite">
+          @for (message of chatMessages; track message.id) {
+          <div class="ai-message" [class.ai-message--user]="message.role === 'user'">
+            @if (message.role === 'assistant') {
+            <div class="ai-avatar">AI</div>
+            }
+            <div class="ai-bubble">
+              @if (message.title) {
+              <div class="ai-bubble-title">{{ message.title }}</div>
+              }
+              <markdown class="ai-md" [data]="message.text"></markdown>
+              <div class="ai-bubble-footer">
+                @if (message.meta) {
+                <span class="ai-bubble-meta">{{ message.meta }}</span>
+                }
+                @if (message.timestamp) {
+                <span class="ai-bubble-time">{{ message.timestamp }}</span>
+                }
+              </div>
+            </div>
+          </div>
+          }
+          <!-- ── Typing indicator (remplace "Analyse en cours...") ── -->
+          @if (chatBusy) {
+          <div class="ai-message">
+            <div class="ai-avatar">AI</div>
+            <div class="ai-bubble">
+              <div class="ai-typing" aria-label="Analyse en cours">
+                <span></span>
+                <span></span>
+                <span></span>
+                
+              </div>
+            </div>
+          </div>
+          }
+
+          @if (chatError) {
+          <div class="ai-message">
+            <div class="ai-avatar">AI</div>
+            <div class="ai-bubble ai-bubble--error">
+              <div class="ai-bubble-title">Erreur</div>
+              <p>{{ chatError }}</p>
+            </div>
+          </div>
+          }
+        </div>
+
+        <div class="ai-input">
+          <label class="ai-label" for="ai-input-textarea">Votre message</label>
+          <textarea id="ai-input-textarea" rows="3" name="chatInput"
+            placeholder="Poser une question ou demander une action. "
+            [(ngModel)]="chatInput"
+            [disabled]="chatBusy"
+            (keydown)="onChatKeydown($event)"></textarea>
+          <div class="ai-input-actions">
+            <span class="ai-helper">L'agent IA propose des recommandations.</span>
+            @if (chatBusy) {
+            <button class="ai-stop-button" type="button" (click)="cancelChatRequest()">
+              <cds-icon shape="stop" size="sm"></cds-icon>
+              Stop
+            </button>
+            }
+            <button class="ai-send-button" type="button" (click)="sendChatMessage()"
+              [disabled]="chatBusy || !chatInput.trim()">
+              <cds-icon shape="bolt" size="sm"></cds-icon>
+              Envoyer
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </clr-side-panel>
+  <!-- CHAT -->

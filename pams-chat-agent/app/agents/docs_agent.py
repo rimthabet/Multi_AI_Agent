@@ -522,7 +522,7 @@ def _build_summary_from_chunks(chunks: list[dict], doc_name: str = "") -> str:
         "autres": []
     }
     
-    for chunk in chunks[:15]:  # Limiter à 15 premiers chunks pour éviter la redondance
+    for chunk in chunks[:15]:  
         content = chunk.get("contenu", "").strip()
         if not content:
             continue

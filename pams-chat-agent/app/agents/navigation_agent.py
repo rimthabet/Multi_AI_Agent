@@ -87,11 +87,8 @@ def _normalize_key(value: str) -> str:
 
 
 def _parse_key_values(question: str) -> dict[str, str]:
-    payload_text = question
-    if ":" in question:
-        payload_text = question.split(":", 1)[1]
-
-    pairs = re.findall(r"([\w\s\-À-ÿ]+)\s*[:=]\s*([^,;\n]+)", payload_text, re.UNICODE)
+    pairs = re.findall(r"(?:^|[;,]|avec)\s*([\w\s\-À-ÿ]+?)\s*(?:[:=]|\best\b)\s*([^,;\n]+)", question, re.UNICODE)
+    
     result: dict[str, str] = {}
     for key, value in pairs:
         k = _normalize_key(key)
@@ -99,6 +96,10 @@ def _parse_key_values(question: str) -> dict[str, str]:
         if k and v:
             result[k] = v
     return result
+
+
+
+
 
 
 def _detect_entity(question: str, keys: list[str]) -> str:

@@ -3,7 +3,9 @@ import { ClarityModule } from '@clr/angular';
 import { CdsModule } from '@cds/angular';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterModule, RouterOutlet } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 import {
   announcementIcon,
@@ -369,6 +371,7 @@ export class AppComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly keycloak = inject(KeycloakService);
   private readonly chatAgentService = inject(ChatAgentService);
+  private readonly sanitizer = inject(DomSanitizer);
 
   isNavCollapsed = signal<boolean>(true);
   computedNavCollapsed = effect(() => {
@@ -396,6 +399,8 @@ export class AppComponent implements OnInit {
   chatError: string = '';
   private chatMessageId = 1;
   private chatSubscription?: Subscription;
+  private searchSubject = new Subject<string>();
+  private searchSubscription?: Subscription;
   chatMessages: ChatMessage[] = [
     {
       id: 1,
@@ -411,10 +416,24 @@ export class AppComponent implements OnInit {
   chatSelectedDocId?: number;
   chatSelectedDocTitle: string = '';
 
-  viewSelectedPdf() {
+  // PDF inline viewer
+  pdfPanelOpen: boolean = false;
+  pdfSafeUrl: SafeResourceUrl | null = null;
+
+  togglePdfPanel() {
     if (!this.chatSelectedDocId) return;
+    if (this.pdfPanelOpen) {
+      this.closePdfPanel();
+      return;
+    }
     const url = `/chatAgent/documents/view/${this.chatSelectedDocId}`;
-    window.open(url, '_blank');
+    this.pdfSafeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+    this.pdfPanelOpen = true;
+  }
+
+  closePdfPanel(): void {
+    this.pdfPanelOpen = false;
+    this.pdfSafeUrl = null;
   }
   ///////// CHAT
   
@@ -474,8 +493,34 @@ export class AppComponent implements OnInit {
     });
 
     this.applyDesiredTheme();
+
+    // Recherche en temps réel avec debounce 300ms
+    this.searchSubscription = this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged()
+    ).subscribe(query => {
+      this.loadChatDocuments(query);
+    });
   }
  
+  ngOnDestroy() {
+    this.chatSubscription?.unsubscribe();
+    this.searchSubscription?.unsubscribe();
+  }
+
+  // Appelé à chaque frappe dans la barre de recherche
+  onSearchInput(query: string): void {
+    this.searchSubject.next(query);
+  }
+
+  // Réinitialiser la sélection du document
+  clearDocumentSelection(): void {
+    this.chatSelectedDocId = undefined;
+    this.chatSelectedDocTitle = '';
+    this.pdfPanelOpen = false;
+    this.pdfSafeUrl = null;
+  }
+
   //  GET LABEL FOR RATIO TYPE
   getLabelForRatioType(type: string, isHistorique: boolean = false): string {
     return `Ratios des souscripteurs ${isHistorique ? '(Historique)' : ''}`;

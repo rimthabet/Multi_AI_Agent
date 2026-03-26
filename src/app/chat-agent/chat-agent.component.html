@@ -4,6 +4,8 @@
     <cds-icon shape="talk-bubbles" size="md" [solid]="chatIconSolid"></cds-icon>
     <span class="ai-assistant-dot" aria-hidden="true"></span>
   </button>
+  <!-- Conteneur flex : chat + PDF -->
+  <div class="ai-dual-panel" [class.ai-dual-panel--open]="pdfPanelOpen">
   <clr-side-panel [(clrSidePanelOpen)]="chatPanelOpened" [clrSidePanelStaticBackdrop]="false"
     [clrSidePanelSkipAnimation]="false" [clrSidePanelBackdrop]="true" [clrSidePanelSize]="'lg'" class="ai-side-panel">
     <h3 class="side-panel-title ai-panel-title">Assistant IA</h3>
@@ -36,19 +38,52 @@
         <div class="ai-doc-panel">
           <div class="ai-doc-row" style="margin-bottom: 0.5em;">
             <label class="ai-doc-label">Chercher</label>
-            <input type="text" [(ngModel)]="chatDocSearchQuery" class="ai-doc-select" placeholder="Nom du document..." (keyup.enter)="loadChatDocuments(chatDocSearchQuery)">
-            <button class="ai-doc-refresh" type="button" (click)="loadChatDocuments(chatDocSearchQuery)" title="Chercher">
-              <cds-icon shape="search"></cds-icon>
-            </button>
+            <div class="ai-doc-search-wrapper">
+              <input
+                type="text"
+                [(ngModel)]="chatDocSearchQuery"
+                class="ai-doc-select"
+                placeholder="Nom du document..."
+                (input)="onSearchInput(chatDocSearchQuery)"
+                autocomplete="off"
+              >
+              <!-- Résultats de recherche -->
+              @if (chatDocuments.length > 0 && chatDocSearchQuery.trim()) {
+              <div class="ai-doc-results">
+                @for (doc of chatDocuments; track doc.id) {
+                <div
+                  class="ai-doc-result-item"
+                  [class.ai-doc-result-item--selected]="doc.id === chatSelectedDocId"
+                  (click)="onChatDocumentChange(doc.id.toString()); chatDocSearchQuery = ''"
+                >
+                  <cds-icon shape="file" size="sm"></cds-icon>
+                  {{ doc.title }}
+                </div>
+                }
+              </div>
+              }
+              @if (chatDocumentsLoading) {
+              <div class="ai-doc-results ai-doc-results--loading">
+                <span>Chargement...</span>
+              </div>
+              }
+            </div>
           </div>
+
+          <!-- Document sélectionné -->
           <div class="ai-doc-row">
             <label class="ai-doc-label">Document</label>
-            <select class="ai-doc-select" (change)="onChatDocumentChange($any($event.target).value)">
-              <option value="">Tous les documents</option>
-              @for (doc of chatDocuments; track doc.id) {
-              <option [value]="doc.id" [selected]="doc.id === chatSelectedDocId">{{ doc.title }}</option>
-              }
-            </select>
+            @if (chatSelectedDocId) {
+            <div class="ai-doc-selected-badge">
+              <cds-icon shape="file" size="sm"></cds-icon>
+              <span class="ai-doc-selected-title">{{ chatSelectedDocTitle }}</span>
+              <button class="ai-doc-clear-btn" type="button" title="Désélectionner" (click)="clearDocumentSelection()">
+                <cds-icon shape="times" size="sm"></cds-icon>
+              </button>
+            </div>
+            } @else {
+            <span class="ai-doc-none">Aucun document sélectionné</span>
+            }
             <button class="ai-doc-refresh" type="button" (click)="viewSelectedPdf()" [disabled]="!chatSelectedDocId" title="Voir PDF">
               <cds-icon shape="pdf-file"></cds-icon>
             </button>
@@ -132,4 +167,22 @@
       </div>
     </div>
   </clr-side-panel>
+
+  <!-- Panneau PDF inline -->
+  @if (pdfPanelOpen && pdfSafeUrl) {
+  <div class="ai-pdf-panel">
+    <div class="ai-pdf-panel-header">
+      <span class="ai-pdf-panel-title">
+        <cds-icon shape="pdf-file" size="sm"></cds-icon>
+        {{ chatSelectedDocTitle }}
+      </span>
+      <button class="ai-pdf-close-btn" type="button" title="Fermer" (click)="closePdfPanel()">
+        <cds-icon shape="times" size="sm"></cds-icon>
+      </button>
+    </div>
+    <iframe class="ai-pdf-iframe" [src]="pdfSafeUrl" title="PDF Viewer"></iframe>
+  </div>
+  }
+
+  </div>
   <!-- CHAT -->

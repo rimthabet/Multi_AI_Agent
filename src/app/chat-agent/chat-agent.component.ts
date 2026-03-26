@@ -4,9 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { ClarityModule } from '@clr/angular';
 import { CdsModule } from '@cds/angular';
 import { MarkdownModule } from 'ngx-markdown';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { ChatAgentService } from '../services/chat-agent.service';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 interface ChatMessage {
   id: number;
@@ -35,6 +37,7 @@ interface ChatDocument {
 export class ChatAgentComponent implements OnInit, OnDestroy {
   private chatAgentService = inject(ChatAgentService);
   private router = inject(Router);
+  private sanitizer = inject(DomSanitizer);
 
   ///////// CHAT STATE
   chatPanelOpened: boolean = false;
@@ -45,6 +48,8 @@ export class ChatAgentComponent implements OnInit, OnDestroy {
   chatError: string = '';
   private chatMessageId = 1;
   private chatSubscription?: Subscription;
+  private searchSubject = new Subject<string>();
+  private searchSubscription?: Subscription;
   chatMessages: ChatMessage[] = [
     {
       id: 1,
@@ -60,17 +65,48 @@ export class ChatAgentComponent implements OnInit, OnDestroy {
   chatSelectedDocId?: number;
   chatSelectedDocTitle: string = '';
 
+  // PDF inline viewer
+  pdfPanelOpen: boolean = false;
+  pdfSafeUrl: SafeResourceUrl | null = null;
+
   ngOnInit() {
+    // Recherche en temps réel avec debounce 300ms
+    this.searchSubscription = this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged()
+    ).subscribe(query => {
+      this.loadChatDocuments(query);
+    });
   }
 
   ngOnDestroy() {
     this.chatSubscription?.unsubscribe();
+    this.searchSubscription?.unsubscribe();
+  }
+
+  // Appelé à chaque frappe dans la barre de recherche
+  onSearchInput(query: string): void {
+    this.searchSubject.next(query);
+  }
+
+  // Réinitialiser la sélection du document
+  clearDocumentSelection(): void {
+    this.chatSelectedDocId = undefined;
+    this.chatSelectedDocTitle = '';
+    this.pdfPanelOpen = false;
+    this.pdfSafeUrl = null;
   }
 
   viewSelectedPdf() {
     if (!this.chatSelectedDocId) return;
     const url = `/chatAgent/documents/view/${this.chatSelectedDocId}`;
-    window.open(url, '_blank');
+    this.pdfSafeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+    this.pdfPanelOpen = true;
+  }
+
+  closePdfPanel(): void {
+    this.pdfPanelOpen = false;
+    this.pdfSafeUrl = null;
   }
 
   applyQuickPrompt(prompt: string) {

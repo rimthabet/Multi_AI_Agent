@@ -1,4 +1,4 @@
-import { Component, effect, inject, OnInit, Renderer2, signal, viewChild } from '@angular/core';
+import { Component, effect, inject, OnInit, Renderer2, signal, viewChild, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
 import { ClarityModule } from '@clr/angular';
 import { CdsModule } from '@cds/angular';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -355,7 +355,7 @@ interface ChatDocument {
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
   title = 'Private Assets Management System';
@@ -363,6 +363,9 @@ export class AppComponent implements OnInit {
   // VIEWS
   aboutModal = viewChild.required<AboutComponent>("aboutModal");
   shortcutsModal = viewChild.required<ShortcutsComponent>("shortcutsModal");
+
+  @ViewChild('chatThread') private chatThread!: ElementRef;
+  private scrollObserver?: MutationObserver;
 
 
   // DEPENDENCIES
@@ -395,6 +398,7 @@ export class AppComponent implements OnInit {
   chatIconSolid: boolean = false;
   chatInput: string = '';
   chatDocSearchQuery: string = '';
+  showChatDocResults: boolean = false;
   chatBusy: boolean = false;
   chatError: string = '';
   private chatMessageId = 1;
@@ -502,10 +506,34 @@ export class AppComponent implements OnInit {
       this.loadChatDocuments(query);
     });
   }
- 
+
+  ngAfterViewInit() {
+    this.setupScrollObserver();
+  }
+
   ngOnDestroy() {
     this.chatSubscription?.unsubscribe();
     this.searchSubscription?.unsubscribe();
+    this.scrollObserver?.disconnect();
+  }
+
+  private setupScrollObserver() {
+    if (this.chatThread?.nativeElement) {
+      this.scrollObserver = new MutationObserver(() => this.scrollToBottom());
+      this.scrollObserver.observe(this.chatThread.nativeElement, {
+        childList: true,
+        subtree: true,
+      });
+      this.scrollToBottom();
+    }
+  }
+
+  scrollToBottom(): void {
+    try {
+      if (this.chatThread?.nativeElement) {
+        this.chatThread.nativeElement.scrollTop = this.chatThread.nativeElement.scrollHeight;
+      }
+    } catch (err) {}
   }
 
   // Appelé à chaque frappe dans la barre de recherche
@@ -589,6 +617,11 @@ export class AppComponent implements OnInit {
     if (!this.chatDocuments.length) {
       this.loadChatDocuments();
     }
+    // Délai pour laisser le DOM se mettre à jour
+    setTimeout(() => {
+      this.setupScrollObserver();
+      this.scrollToBottom();
+    }, 100);
   }
 
   loadChatDocuments(query: string = ''): void {

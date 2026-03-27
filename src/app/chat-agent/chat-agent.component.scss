@@ -293,8 +293,43 @@
 }
 
 .ai-doc-results--loading {
-    padding: 0.5em 1em;
+    padding: 0.8em 1em;
     font-size: 0.82em;
+    color: var(--ai-muted);
+    font-style: italic;
+    border-bottom: 1px solid var(--ai-border);
+}
+
+.ai-doc-results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6em 1em;
+    font-size: 0.72em;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-weight: 600;
+    color: var(--ai-ink-secondary);
+    background: rgba(0,0,0,0.03);
+    border-bottom: 1px solid var(--ai-border);
+}
+
+.ai-doc-close-btn {
+    background: transparent;
+    border: none;
+    font-size: 1.5em;
+    line-height: 1;
+    color: var(--ai-muted);
+    cursor: pointer;
+    padding: 0 0.2em;
+    transition: color 0.2s;
+    &:hover { color: var(--ai-ink); }
+}
+
+.ai-doc-results--empty {
+    padding: 1.5em 1em;
+    text-align: center;
+    font-size: 0.85em;
     color: var(--ai-muted);
     font-style: italic;
 }
@@ -585,54 +620,106 @@
     // Listes
     ul,
     ol {
-        margin: 0.3em 0 0.5em 0;
-        padding-left: 1.4em;
+        margin: 0.6em 0 !important;
+        padding-left: 0 !important;
+        list-style: none !important;
 
         li {
-            margin-bottom: 0.2em;
-            line-height: 1.5em;
+            position: relative;
+            display: flex;
+            gap: 0.8em;
+            padding: 0.45em 0;
+            border-bottom: 1px dashed var(--ai-border);
+            align-items: flex-start;
+            line-height: 1.6em;
+            animation: ai-list-item-in 0.3s ease forwards;
+
+            &::before {
+                content: "";
+                background: linear-gradient(135deg, var(--ai-accent) 0%, var(--ai-accent-2) 100%);
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                margin-top: 0.55em;
+                flex-shrink: 0;
+                box-shadow: 0 0 6px rgba(13, 123, 115, 0.4);
+            }
+
+            &:last-child {
+                border-bottom: none;
+            }
         }
     }
 
-    ul {
-        list-style-type: disc;
+    ol {
+        counter-reset: list-counter;
+        li::before {
+            content: counter(list-counter);
+            counter-increment: list-counter;
+            background: none;
+            width: auto;
+            height: auto;
+            border-radius: 0;
+            color: var(--ai-accent);
+            font-weight: 700;
+            font-size: 0.85em;
+            margin-top: 0;
+            box-shadow: none;
+            min-width: 1.2em;
+        }
     }
 
-    ol {
-        list-style-type: decimal;
+    @keyframes ai-list-item-in {
+        from { opacity: 0; transform: translateX(-5px); }
+        to { opacity: 1; transform: translateX(0); }
     }
 
     // Tableaux
     table {
         width: 100%;
-        border-collapse: collapse;
-        font-size: 0.9em;
-        margin: 0.5em 0;
+        border-collapse: separate;
+        border-spacing: 0;
+        font-size: 0.88em;
+        margin: 1.25em 0;
+        border: 1px solid var(--ai-border);
         border-radius: 8px;
         overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+        display: block; // For horizontal scrolling
+        overflow-x: auto;
+        white-space: nowrap;
 
         th {
-            background: var(--ai-accent);
-            color: #fff;
-            padding: 0.35em 0.65em;
+            background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
+            color: var(--ai-ink);
+            padding: 0.75em 1em;
             text-align: left;
-            font-weight: 600;
-            font-size: 0.85em;
-            letter-spacing: 0.3px;
+            font-weight: 700;
+            font-size: 0.82em;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 2px solid var(--ai-border);
         }
 
         td {
-            padding: 0.3em 0.65em;
+            padding: 0.65em 1em;
             border-bottom: 1px solid var(--ai-border);
-            vertical-align: top;
+            vertical-align: middle;
+            color: var(--ai-ink-light);
+            background: #fff;
         }
 
         tr:last-child td {
             border-bottom: none;
         }
 
+        tr:hover td {
+            background: #f8fafc;
+        }
+
+        // Zebra striping
         tr:nth-child(even) td {
-            background: rgba(0, 0, 0, 0.025);
+            background: #fafbfc;
         }
     }
 

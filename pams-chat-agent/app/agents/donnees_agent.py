@@ -31,11 +31,12 @@ RÈGLES STRICTES :
 - Réponds EXCLUSIVEMENT en français
 - Présente UNIQUEMENT les données reçues, sans en inventer
 - Aucun conseil, aucune analyse, aucun commentaire
-- Les montants sont en TND (dinars tunisiens), jamais en euros
-- Ne montre JAMAIS le JSON brut à l'utilisateur
-- Présente sous forme de liste numérotée markdown (chaque ligne commence par 1. 2. 3. ... sur une nouvelle ligne)
+- Utilise impérativement le format Markdown : listes (1. ou -), gras (**), et tableaux (|) pour une présentation claire et structurée.
+- IMPORTANT : laisse TOUJOURS une ligne vide avant de commencer une liste ou un tableau Markdown.
+- Présente SYSTÉMATIQUEMENT tout groupement de données (fonds, projets, promoteurs, secteurs, etc.) sous forme de liste ou de tableau Markdown bien organisé.
+- Tout montant doit être suivi de "DT" (ex: 1 000 000 DT).
 - Si la liste est vide : réponds "Aucun résultat trouvé."
-- N'invente JAMAIS de données fictives (Projet 1, Projet 2, etc.)"""
+- N'invente JAMAIS de données fictives. """
 
 
 def _normalize_currency(text: str) -> str:
@@ -82,10 +83,16 @@ def _build_system_prompt() -> str:
     return f"""Tu es un agent SQL spécialisé en fonds d'investissement tunisiens.
 Tu réponds UNIQUEMENT en français.
 
+RÈGLES DE PRÉSENTATION (CRITIQUE) :
+- Utilise impérativement le format Markdown : listes (1. ou -), gras (**), et tableaux (|).
+- IMPORTANT : laisse TOUJOURS une ligne vide avant de commencer une liste ou un tableau Markdown.
+- Présente SYSTÉMATIQUEMENT tout groupement de données (fonds, projets, promoteurs, secteurs, etc.) sous forme de liste ou de tableau Markdown bien organisé.
+- Ne montre jamais le SQL ni le JSON brut à l'utilisateur.
+- Tout montant doit être suivi de "DT" (ex: 1 000 000 DT).
+- Si aucun résultat → réponds "Aucun résultat trouvé." JAMAIS de données fictives.
+
 RÈGLE ABSOLUE N°1 : appelle execute_sql() IMMÉDIATEMENT.
 RÈGLE ABSOLUE N°2 : N'invente JAMAIS de données. Si execute_sql() retourne une erreur, corrige le SQL et réessaie.
-RÈGLE ABSOLUE N°3 : Ne montre jamais le SQL ni le JSON brut à l'utilisateur.
-RÈGLE ABSOLUE N°4 : Si aucun résultat → réponds "Aucun résultat trouvé." JAMAIS de données fictives.
 
 RÈGLES CRITIQUES SUR LES JOINTURES :
 1. Fonds → Projets : chemin OBLIGATOIRE en 3 étapes
@@ -234,20 +241,12 @@ def _execute_and_format(question: str, sql: str) -> str:
             f"Question : {question}\n\n"
             f"Résultats RÉELS ({len(rows)} entrées) :\n"
             f"{sample}\n\n"
-            f"Présente ces résultats en français sous forme de liste numérotée."
+            f"Présente ces résultats en français en respectant SCRUPULEUSEMENT les règles de présentation : Markdown (ligne vide avant), tableaux (|) ou listes (1. ou -)."
         )
         formatted = llm_generate(prompt, system=_FORMAT_SYSTEM, max_tokens=600)
+        # Normalise les devises et s'assure que le contenu est propre
         formatted = _normalize_currency(formatted)
-        # Correction markdown : force chaque item sur une nouvelle ligne
-        lines = re.split(r'(\d+\.\s+)', formatted)
-        out = []
-        i = 1
-        while i < len(lines):
-            prefix = lines[i]
-            content = lines[i+1] if i+1 < len(lines) else ''
-            out.append(f'{prefix}{content.strip()}')
-            i += 2
-        return '\n'.join(out) if out else formatted
+        return formatted.strip()
 
     except Exception as e:
         return f"Erreur d'exécution : {e}"
@@ -256,10 +255,11 @@ def _execute_and_format(question: str, sql: str) -> str:
 def _augment_question(question: str) -> str:
     return (
         f"{question}\n\n"
-        "[INSTRUCTION : appelle execute_sql() IMMÉDIATEMENT avec le SELECT approprié. "
-        "N'invente JAMAIS de données. Si erreur SQL → corrige et réessaie. "
-        "Réponds UNIQUEMENT en français avec les vrais résultats. "
-        "Aucune analyse, aucun conseil, aucun commentaire.]"
+        "[INSTRUCTIONS CRITIQUES : \n"
+        "1. Appelle execute_sql() IMMÉDIATEMENT.\n"
+        "2. Formate la réponse finale en Markdown (tableaux ou listes).\n"
+        "3. Laisse TOUJOURS une ligne vide avant tout tableau ou liste.\n"
+        "4. Réponds UNIQUEMENT en français.]"
     )
 
 
@@ -270,7 +270,6 @@ async def ask_donnees_agent(question: str, max_iterations: int = 15) -> str:
         temperature=0,
         disable_streaming=True,
         async_client_kwargs={"timeout": Config.LLM_TIMEOUT_S},
-        system="Tu réponds TOUJOURS et UNIQUEMENT en français. Jamais en chinois, jamais en anglais, jamais en arabe.",
     )
 
     mcp_client = MultiServerMCPClient(

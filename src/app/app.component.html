@@ -204,28 +204,41 @@
                 type="text"
                 [(ngModel)]="chatDocSearchQuery"
                 class="ai-doc-select"
-                placeholder="Nom du document..."
+                placeholder="Chercher ou voir tous les documents..."
                 (input)="onSearchInput(chatDocSearchQuery)"
+                (focus)="showChatDocResults = true"
                 autocomplete="off"
               >
-              <!-- Résultats de recherche -->
-              @if (chatDocuments.length > 0 && chatDocSearchQuery.trim()) {
+              <!-- Résultats de recherche (ou liste complète si vide) -->
+              @if (showChatDocResults && (chatDocuments.length > 0 || chatDocumentsLoading)) {
               <div class="ai-doc-results" style="position: absolute; width: 100%; top: calc(100% + 4px); z-index: 9999; max-height: 250px; overflow-y: auto;">
+                <div class="ai-doc-results-header">
+                  <span>Documents disponibles ({{ chatDocuments.length }})</span>
+                  <button class="ai-doc-close-btn" (click)="showChatDocResults = false">×</button>
+                </div>
+
+                @if (chatDocumentsLoading) {
+                <div class="ai-doc-results--loading">
+                  <span>Chargement...</span>
+                </div>
+                }
+
                 @for (doc of chatDocuments; track doc.id) {
                 <div
                   class="ai-doc-result-item"
                   [class.ai-doc-result-item--selected]="doc.id === chatSelectedDocId"
-                  (click)="onChatDocumentChange(doc.id.toString()); chatDocSearchQuery = ''"
+                  (click)="onChatDocumentChange(doc.id.toString()); showChatDocResults = false; chatDocSearchQuery = ''"
                 >
                   <cds-icon shape="file" size="sm"></cds-icon>
                   {{ doc.title }}
                 </div>
                 }
-              </div>
-              }
-              @if (chatDocumentsLoading) {
-              <div class="ai-doc-results ai-doc-results--loading">
-                <span>Chargement...</span>
+
+                @if (chatDocuments.length === 0 && !chatDocumentsLoading) {
+                <div class="ai-doc-results--empty">
+                  Aucun document trouvé.
+                </div>
+                }
               </div>
               }
             </div>
@@ -255,7 +268,7 @@
           }
         </div>
 
-        <div class="ai-thread" aria-live="polite">
+        <div class="ai-thread" #chatThread aria-live="polite">
           @for (message of chatMessages; track message.id) {
           <div class="ai-message" [class.ai-message--user]="message.role === 'user'">
             @if (message.role === 'assistant') {

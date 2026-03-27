@@ -276,6 +276,7 @@ export class FundsCreateFormV2Component implements OnInit, AfterViewInit {
         'dateVisaCMF',
         'date_obtention_visa_cmf',
         'date_obtention_du_visa_cmf',
+        'date_d_obtention_du_visa_cmf',
         'date_obtention_visa',
         'date_visa'
       )

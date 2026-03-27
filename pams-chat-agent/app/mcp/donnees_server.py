@@ -186,5 +186,101 @@ def execute_sql(query: object = None, limit: int | None = 100) -> str:
         return json.dumps({"error": str(e), "query": q}, ensure_ascii=False)
 
 
+@mcp.tool()
+def total_actif(nom_fonds: str = None) -> str:
+    """
+    Retourne le total actif, qui est la somme de montant_souscription dans la table souscription.
+    Peut être global (tous les fonds) ou filtré pour un fonds spécifique en utilisant nom_fonds.
+    """
+    if nom_fonds:
+        q = """
+            SELECT f.denomination, COALESCE(SUM(s.montant_souscription), 0) as total_actif 
+            FROM souscription s 
+            JOIN fonds f ON s.fonds_id = f.id 
+            WHERE f.denomination ILIKE %s 
+            GROUP BY f.denomination
+        """
+        rows = execute_data_readonly(q, [f"%{nom_fonds}%"])
+    else:
+        q = "SELECT COALESCE(SUM(montant_souscription), 0) as total_actif_global FROM souscription"
+        rows = execute_data_readonly(q)
+
+    return json.dumps(_rows_to_list(rows), ensure_ascii=False, default=str)
+
+
+@mcp.tool()
+def total_investi(type_investissement: str = "tous", nom_fonds: str = None) -> str:
+    """
+    Retourne le total investi (montant_liberation) dans inv_liberation_oca, inv_liberation_cca, inv_liberation_action.
+    On peut filtrer par type_investissement ('oca', 'cca', 'action', ou 'tous') et/ou par nom_fonds.
+    """
+    t = (type_investissement or "tous").lower().strip()
+    
+    if nom_fonds:
+        q_act = """SELECT COALESCE(SUM(ila.montant_liberation), 0) as total
+                   FROM fonds f
+                   JOIN inv_souscription_action isa ON isa.fonds_id = f.id
+                   JOIN inv_liberation_action ila ON ila.souscription_id = isa.id
+                   WHERE f.denomination ILIKE %s"""
+        q_oca = """SELECT COALESCE(SUM(ilo.montant_liberation), 0) as total
+                   FROM fonds f
+                   JOIN inv_souscription_oca iso ON iso.fonds_id = f.id
+                   JOIN inv_liberation_oca ilo ON ilo.souscription_id = iso.id
+                   WHERE f.denomination ILIKE %s"""
+        q_cca = """SELECT COALESCE(SUM(ilc.montant_liberation), 0) as total
+                   FROM fonds f
+                   JOIN inv_souscription_cca isc ON isc.fonds_id = f.id
+                   JOIN inv_liberation_cca ilc ON ilc.souscription_id = isc.id
+                   WHERE f.denomination ILIKE %s"""
+
+        if t == "oca":
+            rows = execute_data_readonly(q_oca, [f"%{nom_fonds}%"])
+            res = {"fonds": nom_fonds, "total_investi_oca": rows[0]["total"] if rows else 0}
+        elif t == "cca":
+            rows = execute_data_readonly(q_cca, [f"%{nom_fonds}%"])
+            res = {"fonds": nom_fonds, "total_investi_cca": rows[0]["total"] if rows else 0}
+        elif t in ["action", "actions"]:
+            rows = execute_data_readonly(q_act, [f"%{nom_fonds}%"])
+            res = {"fonds": nom_fonds, "total_investi_action": rows[0]["total"] if rows else 0}
+        else:
+            r_act = execute_data_readonly(q_act, [f"%{nom_fonds}%"])
+            r_oca = execute_data_readonly(q_oca, [f"%{nom_fonds}%"])
+            r_cca = execute_data_readonly(q_cca, [f"%{nom_fonds}%"])
+            v_act = r_act[0]["total"] if r_act else 0
+            v_oca = r_oca[0]["total"] if r_oca else 0
+            v_cca = r_cca[0]["total"] if r_cca else 0
+            res = {
+                "fonds": nom_fonds,
+                "total_investi_action": v_act,
+                "total_investi_oca": v_oca,
+                "total_investi_cca": v_cca,
+                "total_investi_global": v_act + v_oca + v_cca
+            }
+        return json.dumps([res], ensure_ascii=False, default=str)
+    else:
+        if t == "oca":
+            q = "SELECT COALESCE(SUM(montant_liberation), 0) AS total_investi_oca FROM inv_liberation_oca"
+            rows = execute_data_readonly(q)
+        elif t == "cca":
+            q = "SELECT COALESCE(SUM(montant_liberation), 0) AS total_investi_cca FROM inv_liberation_cca"
+            rows = execute_data_readonly(q)
+        elif t in ("action", "actions"):
+            q = "SELECT COALESCE(SUM(montant_liberation), 0) AS total_investi_action FROM inv_liberation_action"
+            rows = execute_data_readonly(q)
+        else:
+            q = """
+                SELECT 
+                  (SELECT COALESCE(SUM(montant_liberation), 0) FROM inv_liberation_action) AS total_investi_action,
+                  (SELECT COALESCE(SUM(montant_liberation), 0) FROM inv_liberation_oca) AS total_investi_oca,
+                  (SELECT COALESCE(SUM(montant_liberation), 0) FROM inv_liberation_cca) AS total_investi_cca,
+                  (SELECT COALESCE(SUM(montant_liberation), 0) FROM inv_liberation_action) +
+                  (SELECT COALESCE(SUM(montant_liberation), 0) FROM inv_liberation_oca) +
+                  (SELECT COALESCE(SUM(montant_liberation), 0) FROM inv_liberation_cca) AS total_investi_global
+            """
+            rows = execute_data_readonly(q)
+        
+        return json.dumps(_rows_to_list(rows), ensure_ascii=False, default=str)
+
+
 if __name__ == "__main__":
     mcp.run(transport="stdio")

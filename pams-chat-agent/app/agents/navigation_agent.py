@@ -27,7 +27,7 @@ _ENTITY_KEYWORDS = {
 }
 
 _ROUTES_PATH = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "../../..", "..", "src", "app", "app.routes.ts")
+    os.path.join(os.path.dirname(__file__), "../../..", "src", "app", "app.routes.ts")
 )
 
 
@@ -81,13 +81,37 @@ def _normalize_key(value: str) -> str:
     v = (value or "").strip().lower()
     v = unicodedata.normalize("NFD", v)
     v = "".join(ch for ch in v if unicodedata.category(ch) != "Mn")
-    v = re.sub(r"[\s\-]+", "_", v)
+    v = re.sub(r"[\s\-\'’]+", "_", v)
     v = re.sub(r"[^a-z0-9_]+", "", v)
     return v
 
 
 def _parse_key_values(question: str) -> dict[str, str]:
-    pairs = re.findall(r"(?:^|[;,]|avec)\s*([\w\s\-À-ÿ]+?)\s*(?:[:=]|\best\b)\s*([^,;\n]+)", question, re.UNICODE)
+    from app.services.llm_client import llm_generate
+    import json
+    
+    prompt = f"""Extrais tous les champs et leurs valeurs de cette requête sous forme de dictionnaire JSON (clé: valeur).
+Sois très intelligent et tolérant sur la syntaxe : les séparateurs peuvent être "=", "est", ":", "vaut", ou simplement un espace vide.
+Ne renvoie QUE le JSON final, rien avant et rien après.
+Requête: {question}"""
+    
+    try:
+        raw = llm_generate(prompt, max_tokens=300)
+        m = re.search(r'\{.*\}', raw, re.DOTALL)
+        if m:
+            data = json.loads(m.group(0))
+            result = {}
+            for key, value in data.items():
+                k = _normalize_key(key)
+                v = str(value).strip().strip("\"'")
+                if k and v and v.lower() not in ("null", "none"):
+                    result[k] = v
+            return result
+    except Exception:
+        pass
+
+    # Fallback si le LLM échoue
+    pairs = re.findall(r"(?:^|[;,]|avec)\s*([\w\s\-À-ÿ\'’]+?)\s*(?:[:=]|\best\b|\s+)\s*([^,;\n]+)", question, re.UNICODE)
     
     result: dict[str, str] = {}
     for key, value in pairs:
@@ -401,7 +425,25 @@ def ask_navigation_agent_sync(question: str) -> str:
                 "label":  f"Navigation vers {route}",
             }, ensure_ascii=False)
 
-    # 5. Non reconnu
+    # 5. Fallback IA pour les routes non couvertes par les regex simples
+    from app.services.llm_client import llm_generate
+    prompt = f"""Trouve la route la plus appropriée pour cette demande : "{question}".
+Voici la liste des routes valides :
+{json.dumps([r for r in _ALL_ROUTES if ':' not in r])}
+
+Réponds uniquement avec le nom exact de la route, sans aucun autre texte ni ponctuation. Si rien ne correspond, réponds "unknown"."""
+    try:
+        llm_route = llm_generate(prompt, max_tokens=20).strip().replace('"', '').replace("'", "")
+        if llm_route in _ALL_ROUTES:
+            return json.dumps({
+                "action": "navigate",
+                "route": llm_route,
+                "label": f"Navigation assistée vers {llm_route}",
+            }, ensure_ascii=False)
+    except Exception:
+        pass
+
+    # 6. Non reconnu
     return json.dumps({
         "action":  "unknown",
         "message": "Je n'ai pas compris cette action de navigation.",

@@ -26,8 +26,18 @@ _MCP_SERVER_PATH = os.path.abspath(
 _PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 
 _SYSTEM_PROMPT = """
-Tu es un expert en extraction de données financières à partir de documents PDF de fonds d'investissement tunisiens.
-LANGUE : EXCLUSIVEMENT en français. JAMAIS en anglais, arabe ou autre langue.
+
+═══════════════════════════════════════════════════
+RÈGLES DE PRÉSENTATION (CRITIQUE)
+═══════════════════════════════════════════════════
+- Par défaut, utilise le format Markdown : listes (1. ou -), gras (**), et tableaux (|) pour une présentation claire et structurée.
+- IMPORTANT : laisse TOUJOURS une ligne vide avant de commencer une liste ou un tableau Markdown.
+- Présente SYSTÉMATIQUEMENT tout groupement de données sous forme de liste ou de tableau Markdown bien organisé.
+- Tout montant doit être suivi de "DT" (ex: 1 000 000 DT).
+
+EXCEPTION :
+- Si la question demande un résumé ou une synthèse, la réponse doit être en TEXTE BRUT UNIQUEMENT (aucun markdown, pas de gras, pas de listes, pas de tirets, pas de tableaux, pas d'étoiles, pas de #, etc.).
+
 
 ══════════════════════════════════════════════════
 RÈGLE ABSOLUE N°1 — EXTRACTION DE VALEUR PRÉCISE
@@ -541,45 +551,44 @@ def _build_summary_from_chunks(chunks: list[dict], doc_name: str = "") -> str:
         else:
             summary_sections["autres"].append(content)
     
-    # Construire le résumé structuré
-    summary_parts = [f"**Résumé du document {source} :**\n"]
+    # Construire le résumé en texte brut (SANS MARKDOWN)
+    summary_parts = [f"Résumé du document {source} :\n"]
     
     if summary_sections["informations_generales"]:
-        summary_parts.append("**Informations générales :**")
+        summary_parts.append("INFORMATIONS GÉNÉRALES :")
         for info in summary_sections["informations_generales"][:5]:
-            # Extraire les lignes importantes
-            lines = [l.strip() for l in info.split('\n') if l.strip() and not l.strip().startswith('-')]
-            summary_parts.extend(f"- {line}" for line in lines[:3])
+            lines = [l.strip() for l in info.split('\n') if l.strip()]
+            summary_parts.extend(f"  {line}" for line in lines[:2])
         summary_parts.append("")
     
     if summary_sections["donnees_financieres"]:
-        summary_parts.append("**Données financières clés :**")
+        summary_parts.append("DONNÉES FINANCIÈRES CLÉS :")
         for info in summary_sections["donnees_financieres"][:5]:
-            lines = [l.strip() for l in info.split('\n') if l.strip() and not l.strip().startswith('-')]
-            summary_parts.extend(f"- {line}" for line in lines[:3])
+            lines = [l.strip() for l in info.split('\n') if l.strip()]
+            summary_parts.extend(f"  {line}" for line in lines[:2])
         summary_parts.append("")
     
     if summary_sections["performance"]:
-        summary_parts.append("**Performance :**")
+        summary_parts.append("PERFORMANCE :")
         for info in summary_sections["performance"][:5]:
-            lines = [l.strip() for l in info.split('\n') if l.strip() and not l.strip().startswith('-')]
-            summary_parts.extend(f"- {line}" for line in lines[:3])
+            lines = [l.strip() for l in info.split('\n') if l.strip()]
+            summary_parts.extend(f"  {line}" for line in lines[:2])
         summary_parts.append("")
     
     if summary_sections["portefeuille"]:
-        summary_parts.append("**Composition du portefeuille :**")
+        summary_parts.append("COMPOSITION DU PORTEFEUILLE :")
         for info in summary_sections["portefeuille"][:5]:
-            lines = [l.strip() for l in info.split('\n') if l.strip() and not l.strip().startswith('-')]
-            summary_parts.extend(f"- {line}" for line in lines[:3])
+            lines = [l.strip() for l in info.split('\n') if l.strip()]
+            summary_parts.extend(f"  {line}" for line in lines[:2])
         summary_parts.append("")
     
     # Si aucune section identifiée, afficher les premiers chunks bruts
     if not any(summary_sections.values()):
-        summary_parts.append("**Contenu extrait :**")
+        summary_parts.append("CONTENU EXTRAIT :")
         for chunk in chunks[:5]:
             content = chunk.get("contenu", "").strip()
             if content:
-                summary_parts.append(f"- {content[:200]}...")
+                summary_parts.append(f"  {content[:200]}...")
     
     return "\n".join(summary_parts)
 
@@ -635,64 +644,41 @@ async def ask_docs_agent(question: str, max_iterations: int = 10) -> str:
     if _is_summary_question(question):
         fonds_name = _extract_fund_name(question)
         doc_name = _extract_document_name(question)
-        
+
         print(f"DEBUG: Résumé demandé")
         print(f"  - Fonds: {fonds_name}")
         print(f"  - Document: {doc_name}")
-        
+
         # Rechercher avec plus de contexte pour le résumé
         result_json = _search_docs(query=question, fonds_name=fonds_name, top_k=30)
-        
+
         try:
             chunks = json.loads(result_json)
         except Exception:
             chunks = []
-        
+
         print(f"  - Chunks trouvés: {len(chunks) if isinstance(chunks, list) else 0}")
-        
+
         if isinstance(chunks, list):
             # Filtrer par document si spécifié
             if doc_name:
                 original_count = len(chunks)
                 chunks = _filter_chunks_by_doc_name(chunks, doc_name)
                 print(f"  - Après filtrage par doc '{doc_name}': {len(chunks)} chunks")
-                
+
                 if not chunks:
                     return f"Aucun extrait trouvé pour le document '{doc_name}'."
-            
+
             # DEBUG: Afficher les sources trouvées
             sources = set(c.get("source", "") for c in chunks[:10])
             print(f"  - Sources principales: {list(sources)[:3]}")
-            
+
             # Construire le résumé brut à partir des chunks réels
             raw_summary = _build_summary_from_chunks(chunks, doc_name)
 
-            # Formater le résumé en utilisant le LLM pour qu'il soit propre et lisible
-            from app.services.llm_client import llm_generate
-            system_prompt = (
-                "Tu es un analyste financier expert. Ton rôle est de rédiger un résumé clair, structuré et professionnel "
-                "basé EXCLUSIVEMENT sur les informations brutes (textes et tableaux extraits) fournies ci-dessous.\n\n"
-                "RÈGLES STRICTES :\n"
-                "1. Ne rajoute AUCUNE information externe. Si l'information n'est pas dans le texte brut, ne l'invente pas.\n"
-                "2. Met en évidence les informations clés présentes (ex: actif net, résultat, dates importantes, noms d'entités).\n"
-                "3. Utilise des listes à puces pour rendre la lecture facile et agréable.\n"
-                "4. Ne fais pas un simple copier-coller des lignes brutes, rédige des phrases complètes et cohérentes de manière thématique.\n"
-                "5. Écris en français professionnel.\n"
-            )
-            try:
-                # Exécution dans un thread pour ne pas bloquer l'event loop asyncio
-                summary = await asyncio.to_thread(
-                    llm_generate,
-                    prompt=f"Voici les extraits bruts du document '{doc_name or fonds_name or 'demandé'}' :\n\n{raw_summary}\n\nRédige le résumé final de manière professionnelle et bien formatée.",
-                    system=system_prompt,
-                    max_tokens=40000
-                )
-            except Exception as e:
-                print(f"Erreur LLM lors du résumé: {e}")
-                summary = raw_summary
+            # Retourner le résumé brut sans markdown ni LLM
+            return raw_summary
 
-            return summary
-        
         return f"Aucune information trouvée pour générer un résumé."
 
     # Vérifier si un type de document spécifique est demandé

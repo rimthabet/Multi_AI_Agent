@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ClarityModule } from '@clr/angular';
@@ -34,16 +34,20 @@ interface ChatDocument {
   templateUrl: './chat-agent.component.html',
   styleUrl: './chat-agent.component.scss'
 })
-export class ChatAgentComponent implements OnInit, OnDestroy {
+export class ChatAgentComponent implements OnInit, OnDestroy, AfterViewInit {
   private chatAgentService = inject(ChatAgentService);
   private router = inject(Router);
   private sanitizer = inject(DomSanitizer);
+
+  @ViewChild('chatThread') private chatThread!: ElementRef;
+  private scrollObserver?: MutationObserver;
 
   ///////// CHAT STATE
   chatPanelOpened: boolean = false;
   chatIconSolid: boolean = false;
   chatInput: string = '';
   chatDocSearchQuery: string = '';
+  showChatDocResults: boolean = false;
   chatBusy: boolean = false;
   chatError: string = '';
   private chatMessageId = 1;
@@ -79,9 +83,33 @@ export class ChatAgentComponent implements OnInit, OnDestroy {
     });
   }
 
+  ngAfterViewInit() {
+    this.setupScrollObserver();
+  }
+
   ngOnDestroy() {
     this.chatSubscription?.unsubscribe();
     this.searchSubscription?.unsubscribe();
+    this.scrollObserver?.disconnect();
+  }
+
+  private setupScrollObserver() {
+    if (this.chatThread?.nativeElement) {
+      this.scrollObserver = new MutationObserver(() => this.scrollToBottom());
+      this.scrollObserver.observe(this.chatThread.nativeElement, {
+        childList: true,
+        subtree: true,
+      });
+      this.scrollToBottom();
+    }
+  }
+
+  scrollToBottom(): void {
+    try {
+      if (this.chatThread?.nativeElement) {
+        this.chatThread.nativeElement.scrollTop = this.chatThread.nativeElement.scrollHeight;
+      }
+    } catch (err) {}
   }
 
   // Appelé à chaque frappe dans la barre de recherche

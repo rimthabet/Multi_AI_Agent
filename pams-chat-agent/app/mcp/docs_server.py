@@ -1,6 +1,7 @@
 import json
 import sys
 import os
+import re
 
 try:
     sys.stdout.reconfigure(encoding="utf-8")
@@ -18,32 +19,14 @@ from app.services.db import get_rag_conn
 
 mcp = FastMCP(
     name="docs-agent",
-    instructions="Serveur MCP documents. Utilise search_docs pour répondre aux questions sur les PDFs, list_documents pour lister les documents disponibles.",
+    instructions="Serveur MCP documents. Utilise search_docs pour répondre aux questions sur les PDFs, list_documents pour lister les documents disponibles, get_document_chunks pour récupérer tous les chunks d'un document précis.",
 )
 
 
-# ──────────────────────────────────────────────
-# Outil 1 : Recherche dans les documents
-# ──────────────────────────────────────────────
 @mcp.tool()
 def search_docs(query: str, fonds_name: str = "", top_k: int = 6) -> str:
     """
-    Recherche dans les documents PDF (rapports annuels, bilans, prospectus, PV)
-    via recherche vectorielle (RAG).
-
-    Utiliser pour :
-    - Politique d'investissement d'un fonds
-    - Données financières d'un rapport (bilan, résultat, actif net)
-    - Procédures, règlements, situations annuelles
-    - Tout contenu documentaire non disponible en base structurée
-
-    Args:
-        query:      Question ou terme à rechercher dans les documents.
-        fonds_name: Nom du fonds pour cibler les documents (optionnel).
-        top_k:      Nombre de passages à retourner (défaut 6).
-
-    Returns:
-        JSON array des passages pertinents avec source, page et score.
+    Recherche sémantique/vectorielle dans les documents PDF.
     """
     combined = f"{fonds_name} {query}".strip() if fonds_name else query
     chunks = doc_search(combined, top_k=top_k)
@@ -66,20 +49,13 @@ def search_docs(query: str, fonds_name: str = "", top_k: int = 6) -> str:
     return json.dumps(results, ensure_ascii=False, default=str)
 
 
-# ──────────────────────────────────────────────
-# Outil 2 : Lister les documents d'un fonds
-# ──────────────────────────────────────────────
 @mcp.tool()
 def list_documents(fonds_name: str = "", doc_type: str = "") -> str:
     try:
-        from app.services.db import get_rag_conn
-
         with get_rag_conn() as conn:
             with conn.cursor() as cur:
 
                 if fonds_name.strip():
-                    # Cherche chaque mot du nom du fonds séparément
-                    # pour éviter les faux positifs
                     words = [w for w in fonds_name.strip().split() if len(w) > 2]
                     if words:
                         conditions = " AND ".join(
@@ -88,7 +64,7 @@ def list_documents(fonds_name: str = "", doc_type: str = "") -> str:
                         params = [f"%{w}%" for w in words]
                         cur.execute(
                             f"""
-                            SELECT id, title, source_path, created_at
+                            SELECT id, title, source_path, created_at, sha256
                             FROM doc_document
                             WHERE {conditions}
                             ORDER BY created_at DESC
@@ -99,7 +75,7 @@ def list_documents(fonds_name: str = "", doc_type: str = "") -> str:
                     else:
                         cur.execute(
                             """
-                            SELECT id, title, source_path, created_at
+                            SELECT id, title, source_path, created_at, sha256
                             FROM doc_document
                             WHERE LOWER(title) LIKE LOWER(%s)
                             ORDER BY created_at DESC
@@ -110,7 +86,7 @@ def list_documents(fonds_name: str = "", doc_type: str = "") -> str:
                 else:
                     cur.execute(
                         """
-                        SELECT id, title, source_path, created_at
+                        SELECT id, title, source_path, created_at, sha256
                         FROM doc_document
                         ORDER BY created_at DESC
                         LIMIT 50
@@ -128,10 +104,94 @@ def list_documents(fonds_name: str = "", doc_type: str = "") -> str:
                 results = []
                 for row in rows:
                     results.append({
-                        "id":    row[0],
+                        "id": row[0],
                         "titre": row[1],
-                        "path":  row[2],
-                        "date":  str(row[3]) if row[3] else None,
+                        "path": row[2],
+                        "date": str(row[3]) if row[3] else None,
+                        "sha256": row[4],
+                    })
+
+                return json.dumps(results, ensure_ascii=False, default=str)
+
+    except Exception as e:
+        return json.dumps({"error": str(e)}, ensure_ascii=False)
+
+
+@mcp.tool()
+def get_document_chunks(document_title: str = "", sha256: str = "") -> str:
+    """
+    Récupère TOUS les chunks d'un document précis, sans ranking sémantique.
+
+    Priorité :
+    1. sha256 si fourni
+    2. sinon title exact / proche
+    """
+    try:
+        with get_rag_conn() as conn:
+            with conn.cursor() as cur:
+                if sha256.strip():
+                    cur.execute(
+                        """
+                        SELECT
+                            d.id,
+                            d.title,
+                            d.sha256,
+                            c.page_start,
+                            c.page_end,
+                            c.text,
+                            c.metadata
+                        FROM doc_document d
+                        JOIN doc_chunk c ON c.document_id = d.id
+                        WHERE LOWER(d.sha256) = LOWER(%s)
+                        ORDER BY c.page_start ASC NULLS LAST, c.id ASC
+                        """,
+                        (sha256.strip(),),
+                    )
+                elif document_title.strip():
+                    normalized_title = document_title.strip()
+
+                    cur.execute(
+                        """
+                        SELECT
+                            d.id,
+                            d.title,
+                            d.sha256,
+                            c.page_start,
+                            c.page_end,
+                            c.text,
+                            c.metadata
+                        FROM doc_document d
+                        JOIN doc_chunk c ON c.document_id = d.id
+                        WHERE LOWER(REPLACE(d.title, '_', ' ')) LIKE LOWER(%s)
+                        ORDER BY c.page_start ASC NULLS LAST, c.id ASC
+                        """,
+                        (f"%{normalized_title.replace('_', ' ')}%",),
+                    )
+                else:
+                    return json.dumps(
+                        {"message": "Aucun identifiant de document fourni."},
+                        ensure_ascii=False,
+                    )
+
+                rows = cur.fetchall()
+
+                if not rows:
+                    return json.dumps(
+                        {"message": "Aucun chunk trouvé pour ce document."},
+                        ensure_ascii=False,
+                    )
+
+                results = []
+                for row in rows:
+                    metadata = row[6] if isinstance(row[6], dict) else {}
+                    results.append({
+                        "document_id": row[0],
+                        "source": row[1],
+                        "sha256": row[2],
+                        "page": row[3],
+                        "page_end": row[4],
+                        "contenu": row[5] or "",
+                        "metadata": metadata,
                     })
 
                 return json.dumps(results, ensure_ascii=False, default=str)

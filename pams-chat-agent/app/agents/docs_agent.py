@@ -17,8 +17,11 @@ from langchain_mcp_adapters.client import MultiServerMCPClient
 from langgraph.prebuilt import create_react_agent
 from app.config import Config
 
-from app.mcp.docs_server import list_documents as _list_documents
-from app.mcp.docs_server import search_docs as _search_docs
+from app.mcp.docs_server import (
+    list_documents as _list_documents,
+    search_docs as _search_docs,
+    get_document_chunks as _get_document_chunks,
+)
 
 _MCP_SERVER_PATH = os.path.abspath(
     os.path.join(os.path.dirname(__file__), "../mcp/docs_server.py")
@@ -26,7 +29,6 @@ _MCP_SERVER_PATH = os.path.abspath(
 _PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 
 _SYSTEM_PROMPT = """
-
 ═══════════════════════════════════════════════════
 RÈGLES DE PRÉSENTATION (CRITIQUE)
 ═══════════════════════════════════════════════════
@@ -36,93 +38,7 @@ RÈGLES DE PRÉSENTATION (CRITIQUE)
 - Tout montant doit être suivi de "DT" (ex: 1 000 000 DT).
 
 EXCEPTION :
-- Si la question demande un résumé ou une synthèse, la réponse doit être en TEXTE BRUT UNIQUEMENT (aucun markdown, pas de gras, pas de listes, pas de tirets, pas de tableaux, pas d'étoiles, pas de #, etc.).
-
-
-══════════════════════════════════════════════════
-RÈGLE ABSOLUE N°1 — EXTRACTION DE VALEUR PRÉCISE
-══════════════════════════════════════════════════
-Si la question demande une valeur, un montant, un résultat ou un chiffre spécifique :
-1. Appelle search_docs() avec la question complète.
-2. Cherche dans les TABLEAUX retournés la ligne dont le libellé correspond exactement.
-3. Retourne la valeur trouvée avec ce format OBLIGATOIRE :
-
-   "D'après **[TITRE DU DOCUMENT]**, page [X] :
-   **[Libellé exact du tableau] : [VALEUR] DT**"
-
-EXEMPLE CORRECT :
-   Question : "valeur de VARIATION DE L'ACTIF NET au 31.12.2020 du fonds FCPR MAXULA CROISSANCE ENTREPRISES"
-   search_docs() retourne un tableau avec : "VARIATION DE L'ACTIF NET RÉSULTANT DES OPÉRATIONS D'EXPLOITATION | 1 234 567"
-   Réponse : "D'après **comite_valorisation_2020_fcpr_maxula_croissance_entreprises_2020.pdf**, page 5 :\n**Variation de l'actif net résultant des opérations d'exploitation : 1 234 567 DT**"
-
-══════════════════════════════════════════════════
-RÈGLE ABSOLUE N°2 — INTERDICTIONS STRICTES
-══════════════════════════════════════════════════
-❌ N'invente JAMAIS de chiffres, dates ou montants qui ne sont pas dans les extraits
-❌ Ne mélange JAMAIS des données de différents exercices/années/fonds
-❌ Si un chiffre n'est pas dans les chunks retournés, dis explicitement "Non trouvé"
-❌ Ne généralise pas, ne complète pas, ne suppose pas
-❌ N'utilise JAMAIS des données d'un autre document que celui demandé
-
-VÉRIFICATION OBLIGATOIRE AVANT CHAQUE RÉPONSE :
-✓ Le chiffre vient-il EXACTEMENT d'un chunk retourné ?
-✓ L'année/date correspond-elle exactement à la question ?
-✓ Le nom du fonds correspond-il exactement ?
-✓ Le document source correspond-il à celui demandé ?
-
-══════════════════════════════════════════════════
-RÈGLE N°3 — QUAND UN DOCUMENT EST CIBLÉ
-══════════════════════════════════════════════════
-Si l'utilisateur mentionne un nom de document spécifique :
-"à partir du document nommé X" / "dans le fichier X" / "du document X" / etc.
-→ Concentre-toi UNIQUEMENT sur les chunks provenant de ce document.
-→ Ignore TOUS les extraits provenant d'autres documents.
-→ Si aucun chunk ne provient du document demandé, réponds : "Aucune information trouvée dans le document [NOM]."
-
-═══════════════════════════════════════════════════
-RÈGLE N°4 — RÉSUMÉ STRICTEMENT FACTUEL
-═══════════════════════════════════════════════════
-Si la question demande un résumé ou une synthèse :
-- Rédige le résumé UNIQUEMENT à partir des extraits/textes réellement trouvés dans les chunks.
-- Structure le résumé avec les sections présentes dans les chunks (Bilan, État de résultat, Notes, etc.)
-- Cite les chiffres EXACTS trouvés dans les chunks (actif net, valeur liquidative, etc.)
-- N'invente JAMAIS d'information, ne complète pas, ne généralise pas, ne mélange pas avec d'autres documents ou années.
-- Si aucune information n'est trouvée dans les chunks, réponds explicitement : "Aucune information trouvée dans le document sélectionné."
-
-EXEMPLE DE BON RÉSUMÉ :
-"Résumé du document **FCPR_Max_Espoir_2014.pdf** :
-
-**Informations générales :**
-- Fonds : FCPR MaxEspoir
-- Exercice clos : 31 décembre 2014
-- Gestionnaire : MAXULA GESTION
-- Dépositaire : AMEN BANK
-
-**Données financières clés :**
-- Actif net : 6 956 502 DT
-- Valeur liquidative : 1 041,081 DT par part
-- Nombre de parts : 6 682
-
-**Performance :**
-- Résultat net : 141 003 DT
-- Taux de rendement annuel : 2,238%
-
-[Uniquement les informations présentes dans les chunks]"
-
-══════════════════════════════════════════════════
-RÈGLE N°5 — SI LA VALEUR N'EST PAS TROUVÉE
-══════════════════════════════════════════════════
-Si la valeur demandée est absente des extraits retournés, répond :
-"La valeur de [libellé demandé] n'a pas été trouvée dans les documents disponibles pour [nom du fonds].
-Les documents disponibles sont : [liste des sources retournées par search_docs]."
-
-══════════════════════════════════════════════════
-RÈGLE N°6 — DOCUMENTS MANQUANTS
-══════════════════════════════════════════════════
-Si l'utilisateur demande un type de document non disponible (bilan, PV, rapport annuel...),
-utilise ce modèle :
-"Le document disponible pour ce fonds est le [NOM TROUVÉ], qui contient [contenu réel]
-— pas [ce qui était demandé]. Pour consulter [ce qui était demandé], il faut l'ingérer."
+- Si la question demande un résumé ou une synthèse, la réponse doit être en TEXTE BRUT UNIQUEMENT.
 """
 
 _REQUESTED_DOC_PATTERNS = [
@@ -163,10 +79,14 @@ _REQUESTED_DOC_INGEST_HINTS = {
 }
 
 
+def _extract_sha256(question: str) -> str:
+    m = re.search(r"\[SHA256:([a-fA-F0-9]{32,64})\]", question or "")
+    return m.group(1) if m else ""
+
+
 def _extract_document_name(question: str) -> str:
-    """Extrait le nom de document si l'utilisateur le spécifie explicitement."""
     patterns = [
-        r"dans le document\s*[\"«]([^\"»\n]+)[\"»]\s*:",
+        r'dans le document\s*["«]([^"»\n]+)["»]\s*:',
         r"du document\s+[\"«]?([a-zA-Z0-9_\-\.]+(?:\s+[a-zA-Z0-9_\-\.]+)*)[\"»]?",
         r"(?:à partir du document|depuis le document|dans le document|le document)\s+(?:nommé|intitulé|appelé|qui s'appelle)?\s*[\"«]?([\w\s\-\.]+?)[\"»]?(?:\s+donne|\s+calcule|\s+indique|\s+quel|\.pdf|$)",
         r"(?:document|fichier)\s+[\"«]([^\"»\n]+)[\"»]",
@@ -175,68 +95,43 @@ def _extract_document_name(question: str) -> str:
     for p in patterns:
         m = re.search(p, question, re.IGNORECASE)
         if m:
-            doc_name = m.group(1).strip().strip('"\'')
-            doc_name = re.sub(r'\b(fais|un|résumé|resume|synthèse|synthese)\b', '', doc_name, flags=re.IGNORECASE).strip()
+            doc_name = m.group(1).strip().strip("\"'")
+            doc_name = re.sub(
+                r"\b(fais|un|résumé|resume|résume|synthèse|synthese)\b",
+                "",
+                doc_name,
+                flags=re.IGNORECASE,
+            ).strip()
             return doc_name
     return ""
 
 
-def _augment_question(question: str) -> str:
-    q = question.lower().strip()
-    doc_name = _extract_document_name(question)
-
-    if any(w in q for w in ["liste", "quels documents", "lister"]) and not any(
-        w in q for w in ["valeur", "montant", "résultat", "variation", "total", "actif net", "quel est", "quelle est"]
-    ):
-        return (
-            f"{question}\n\n"
-            "[ACTION : appelle list_documents() pour lister les documents disponibles. "
-            "Réponds en français.]"
-        )
-
-    # Demande d'extraction de valeur
-    doc_hint = f" Concentre-toi sur les chunks du document '{doc_name}'." if doc_name else ""
-    return (
-        f"{question}\n\n"
-        f"[ACTION : appelle search_docs() avec la question complète et le nom du fonds.{doc_hint} "
-        "Cherche dans les tableaux retournés la valeur exacte demandée. "
-        "Retourne la valeur et sa source. INTERDICTION d'afficher des scores ou une liste de documents. "
-        "Réponds UNIQUEMENT en français.]"
-    )
-
-
 def _normalize_text(text: str) -> str:
-    """Normalise le texte pour comparaison (minuscules, sans accents, sans espaces multiples)."""
     cleaned = (text or "").lower()
     cleaned = unicodedata.normalize("NFD", cleaned)
     cleaned = "".join(ch for ch in cleaned if unicodedata.category(ch) != "Mn")
     cleaned = cleaned.replace("_", " ")
-    cleaned = re.sub(r"\.pdf$", "", cleaned)  
+    cleaned = re.sub(r"\.pdf$", "", cleaned)
     cleaned = re.sub(r"\s+", " ", cleaned).strip()
     return cleaned
 
 
-def _filter_chunks_by_doc_name(chunks: list[dict], doc_name: str) -> list[dict]:
-    """Filtre les chunks pour ne garder que ceux du document spécifié."""
-    if not chunks or not doc_name:
-        return chunks
-    
-    doc_norm = _normalize_text(doc_name)
-    filtered = []
-    
-    for chunk in chunks:
-        source = chunk.get("source") or chunk.get("title") or ""
-        source_norm = _normalize_text(source)
-        
-        # Matching flexible : contient le nom OU le nom contient la source
-        if doc_norm in source_norm or source_norm in doc_norm:
-            filtered.append(chunk)
-    
-    return filtered
+def _normalize_for_intent(text: str) -> str:
+    text = (text or "").lower().strip()
+    text = unicodedata.normalize("NFD", text)
+    text = "".join(ch for ch in text if unicodedata.category(ch) != "Mn")
+    text = re.sub(r"\s+", " ", text)
+    return text
+
+
+def _clean_question_for_search(question: str) -> str:
+    q = question or ""
+    q = re.sub(r"\[SHA256:[^\]]+\]\s*", "", q, flags=re.IGNORECASE)
+    q = re.sub(r'dans le document\s*["«][^"»]+["»]\s*:\s*', "", q, flags=re.IGNORECASE)
+    return q.strip()
 
 
 def _extract_requested_label(question: str) -> str:
-    """Extrait le libellé de la valeur recherchée dans la question."""
     q = (question or "").strip()
     patterns = [
         r"\bvaleur\s+de\s+(?:la\s+)?(.+?)(?:\s+au\b|\s+pour\b|\s+du\b|$)",
@@ -247,51 +142,75 @@ def _extract_requested_label(question: str) -> str:
         m = re.search(pattern, q, re.IGNORECASE)
         if m:
             label = m.group(1).strip().strip("\"' ")
-            # Nettoyer les prépositions finales
-            label = re.sub(r'\s+(au|du|pour|de|la)\s*$', '', label, flags=re.IGNORECASE).strip()
+            label = re.sub(r"\s+(au|du|pour|de|la)\s*$", "", label, flags=re.IGNORECASE).strip()
             return label
     return ""
 
 
-def _extract_value_from_chunks(chunks: list[dict], label: str) -> tuple[str, str, str] | None:
-    """Extrait une valeur numérique d'un chunk dont le contenu matche le libellé."""
+def _extract_value_from_chunks(
+    chunks: list[dict],
+    label: str,
+    question_year: str | None = None
+) -> tuple[str, str, str] | None:
+    """
+    Extrait une valeur numérique d'un chunk en tenant compte de la bonne colonne année.
+    """
     if not chunks or not label:
         return None
 
     label_norm = _normalize_text(label)
-    number_pattern = re.compile(r"\b\d[\d\s.,]*\b")
 
     for chunk in chunks:
+        if not isinstance(chunk, dict):
+            continue
+
         content = chunk.get("contenu") or ""
         source = chunk.get("source") or chunk.get("title") or "Document"
         page = chunk.get("page")
-        lines = content.splitlines()
-        
+        lines = [l.strip() for l in content.splitlines() if l.strip()]
+
+        header_years = None
+        for line in lines:
+            cols = [c.strip() for c in line.split("|")]
+            years = []
+            year_count = 0
+
+            for c in cols:
+                m = re.search(r"\b(20\d{2})\b", c)
+                if m:
+                    years.append(m.group(1))
+                    year_count += 1
+                else:
+                    years.append("")
+
+            if year_count >= 2:
+                header_years = years
+                break
+
         for line in lines:
             line_norm = _normalize_text(line)
-            
-            # Le libellé doit être présent dans la ligne
             if label_norm and label_norm in line_norm:
-                matches = number_pattern.findall(line)
-                if not matches:
-                    continue
-                
-                # Prendre le dernier nombre de la ligne (généralement la valeur)
-                value = matches[-1].strip()
-                
-                # Ignorer les dates (contiennent des /)
-                if "/" in value:
-                    continue
-                
-                return source, page, value
+                cols = [c.strip() for c in line.split("|")]
+
+                if question_year and header_years and len(cols) == len(header_years):
+                    for idx, y in enumerate(header_years):
+                        if y == question_year and idx < len(cols):
+                            value = cols[idx].strip()
+                            if re.search(r"\d", value):
+                                return source, page, value
+
+                matches = re.findall(r"\b\d[\d\s.,%]*\b", line)
+                if matches:
+                    value = matches[0].strip() if len(matches) == 1 else matches[-1].strip()
+                    if "/" not in value:
+                        return source, page, value
 
     return None
 
 
 def _is_list_documents_question(question: str) -> bool:
-    """Retourne True seulement si c'est une vraie demande de liste de documents."""
     q = (question or "").lower()
-    # Si la question veut une valeur/extraction → ce n'est PAS une liste
+
     has_extraction_intent = any(w in q for w in [
         "valeur", "montant", "quel est", "quelle est", "donne moi",
         "variation", "résultat", "total", "actif net", "redevance",
@@ -300,25 +219,31 @@ def _is_list_documents_question(question: str) -> bool:
     ])
     if has_extraction_intent:
         return False
-    # Sinon, vrais mots de listage
+
     return any(w in q for w in ["liste des documents", "lister", "quels documents", "quels sont les documents", "documents disponibles"])
 
 
 def _is_summary_question(question: str) -> bool:
-    """Détecte si la question demande un résumé ou une synthèse."""
-    q = (question or "").lower()
+    q = _normalize_for_intent(question)
     return any(w in q for w in [
-        "résumé", "resume", "résume", "synthèse", "synthese", 
-        "présente", "overview", "aperçu", "aperu",
-        "fais un résumé", "donne un résumé", "synthétise", "synthetise","résume le document"
+        "resume",
+        "resumer",
+        "fais un resume",
+        "donne un resume",
+        "resume le document",
+        "resumé",
+        "résumé",
+        "résume",
+        "synthese",
+        "synthetise",
+        "apercu",
+        "overview",
     ])
 
 
 def _extract_fund_name(question: str) -> str:
-    """Extrait le nom du fonds de la question."""
     q = (question or "").strip()
 
-    # Patterns FCPR/SICAV/FCP + nom
     m = re.search(r"\b(FCPR|FCP|FCPI|SICAV)\s+([A-Za-z0-9\-\s]+)", q, re.IGNORECASE)
     if m:
         name = (m.group(1) + " " + m.group(2)).strip()
@@ -329,14 +254,17 @@ def _extract_fund_name(question: str) -> str:
     if not name:
         return ""
 
-    # Nettoyer les mots-clés parasites
-    name = re.split(r"\b(document|documents|disponible|disponibles|liste|lister|rapport|bilan|prospectus|pv|pdf)\b", name, 1, flags=re.IGNORECASE)[0]
+    name = re.split(
+        r"\b(document|documents|disponible|disponibles|liste|lister|rapport|bilan|prospectus|pv|pdf)\b",
+        name,
+        1,
+        flags=re.IGNORECASE,
+    )[0]
     name = re.sub(r"[?.!,;]+$", "", name).strip()
     return name
 
 
 def _format_documents_list(result_json: str) -> str:
-    """Formate la liste des documents de manière lisible."""
     try:
         data = json.loads(result_json)
     except Exception:
@@ -359,7 +287,6 @@ def _format_documents_list(result_json: str) -> str:
 
 
 def _extract_requested_doc_kind(question: str) -> str:
-    """Détecte le type de document demandé (bilan, PV, etc.)."""
     q = (question or "").lower()
     for kind, pattern in _REQUESTED_DOC_PATTERNS:
         if re.search(pattern, q, re.IGNORECASE):
@@ -368,7 +295,6 @@ def _extract_requested_doc_kind(question: str) -> str:
 
 
 def _infer_doc_kind(title: str, doc_type: str) -> str:
-    """Infère le type de document à partir de son titre et type."""
     haystack = f"{title} {doc_type}".lower()
     for kind, pattern in _REQUESTED_DOC_PATTERNS:
         if re.search(pattern, haystack, re.IGNORECASE):
@@ -377,7 +303,6 @@ def _infer_doc_kind(title: str, doc_type: str) -> str:
 
 
 def _parse_documents_list(result_json: str) -> list[dict]:
-    """Parse la réponse JSON de list_documents."""
     try:
         data = json.loads(result_json)
     except Exception:
@@ -393,7 +318,6 @@ def _parse_documents_list(result_json: str) -> list[dict]:
 
 
 def _format_doc_details(doc: dict) -> str:
-    """Formate les détails d'un document."""
     parts = []
     doc_type = (doc.get("type") or "").strip()
     doc_date = (doc.get("date") or "").strip()
@@ -408,7 +332,6 @@ def _format_doc_details(doc: dict) -> str:
 
 
 def _doc_matches_requested(doc: dict, requested_kind: str) -> bool:
-    """Vérifie si un document correspond au type demandé."""
     title = doc.get("titre") or doc.get("title") or doc.get("source") or ""
     doc_type = doc.get("type") or ""
     haystack = f"{title} {doc_type}".lower()
@@ -419,7 +342,6 @@ def _doc_matches_requested(doc: dict, requested_kind: str) -> bool:
 
 
 def _parse_search_docs(result_json: str) -> list[dict]:
-    """Parse la réponse JSON de search_docs et extrait les documents uniques."""
     try:
         data = json.loads(result_json)
     except Exception:
@@ -434,6 +356,8 @@ def _parse_search_docs(result_json: str) -> list[dict]:
     docs = []
     seen = set()
     for row in data:
+        if not isinstance(row, dict):
+            continue
         title = row.get("source") or row.get("title") or ""
         if not title:
             continue
@@ -449,7 +373,6 @@ def _parse_search_docs(result_json: str) -> list[dict]:
 
 
 def _get_available_documents(fonds_name: str, question: str) -> list[dict]:
-    """Récupère la liste des documents disponibles."""
     list_json = _list_documents(fonds_name=fonds_name, doc_type="")
     docs = _parse_documents_list(list_json)
     if docs:
@@ -464,7 +387,6 @@ def _format_missing_requested_doc(
     requested_kind: str,
     available_doc: dict | None,
 ) -> str:
-    """Formate un message indiquant qu'un document demandé n'est pas disponible."""
     requested_label = _REQUESTED_DOC_LABELS.get(requested_kind, requested_kind)
     ingest_hint = _REQUESTED_DOC_INGEST_HINTS.get(requested_kind, requested_label)
 
@@ -493,133 +415,539 @@ def _format_missing_requested_doc(
 
 
 def _extract_year_from_question(question: str) -> Optional[str]:
-    """Extrait l'année mentionnée dans la question (2014, 2020, etc.)."""
-    # Pattern pour dates complètes
-    m = re.search(r'\b(31[/\-\.]12[/\-\.](\d{4}))\b', question)
+    m = re.search(r"\b(31[/\-\.]12[/\-\.](\d{4}))\b", question)
     if m:
         return m.group(2)
-    
-    # Pattern pour années seules
-    m = re.search(r'\b(20\d{2})\b', question)
+
+    m = re.search(r"\b(20\d{2})\b", question)
     if m:
         return m.group(1)
-    
+
     return None
 
 
 def _extract_year_from_source(source: str) -> Optional[str]:
-    """Extrait l'année du nom du fichier source."""
-    m = re.search(r'\b(20\d{2})\b', source)
+    m = re.search(r"\b(20\d{2})\b", source)
     if m:
         return m.group(1)
     return None
 
 
+def _question_keywords(question: str) -> list[str]:
+    q = _normalize_for_intent(_clean_question_for_search(question))
+
+    stopwords = {
+        "le", "la", "les", "de", "du", "des", "un", "une", "et", "ou",
+        "pour", "dans", "ce", "cette", "au", "aux", "a", "est", "sont",
+        "donne", "moi", "quelle", "quel", "quelles", "quels", "resume",
+        "resumer", "document", "fonds", "sur", "avec", "par", "qui",
+        "que", "quoi", "ceci", "cela"
+    }
+
+    words = re.findall(r"[a-zA-Z0-9]+", q)
+    words = [w for w in words if len(w) > 2 and w not in stopwords]
+    return words
+
+
+def _score_line_against_question(line: str, keywords: list[str]) -> int:
+    line_norm = _normalize_for_intent(line)
+    score = 0
+
+    for kw in keywords:
+        if kw in line_norm:
+            score += 2
+
+    if "|" in line:
+        score += 1
+    if re.search(r"\d", line):
+        score += 1
+
+    return score
+
+
+def _find_best_matching_lines(question: str, chunks: list[dict], top_n: int = 5) -> list[dict]:
+    keywords = _question_keywords(question)
+    candidates = []
+
+    for chunk in chunks:
+        if not isinstance(chunk, dict):
+            continue
+
+        source = chunk.get("source") or chunk.get("title") or "Document"
+        page = chunk.get("page")
+        content = chunk.get("contenu") or ""
+
+        lines = [line.strip() for line in content.splitlines() if line.strip()]
+        if not lines:
+            lines = re.split(r"(?<=[\.\!\?])\s+", content)
+
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+
+            score = _score_line_against_question(line, keywords)
+            if score > 0:
+                candidates.append({
+                    "source": source,
+                    "page": page,
+                    "line": line,
+                    "score": score,
+                })
+
+    candidates.sort(key=lambda x: x["score"], reverse=True)
+    return candidates[:top_n]
+
+
+def _answer_question_from_document_chunks(question: str, chunks: list[dict]) -> str:
+    matches = _find_best_matching_lines(question, chunks, top_n=5)
+
+    if not matches:
+        return "Je n'ai pas trouvé d'information pertinente dans le document sélectionné."
+
+    best = matches[0]
+    source = best["source"]
+    page = best["page"]
+    line = best["line"].strip()
+    page_text = f"page {page}" if page else "page inconnue"
+
+    if "|" in line:
+        cols = [c.strip() for c in line.split("|") if c.strip()]
+        if len(cols) >= 2:
+            label = cols[0]
+            value = cols[1]
+            return f"D'après **{source}**, {page_text} :\n**{label} : {value}**"
+
+    return f"D'après **{source}**, {page_text} :\n{line}"
+
+
 def _build_summary_from_chunks(chunks: list[dict], doc_name: str = "") -> str:
-    """Construit un résumé structuré à partir des chunks réels."""
+    """
+    Produit un résumé court + points clés.
+    Gère :
+    - états financiers
+    - prospectus / agréments
+    - règlements intérieurs / documents descriptifs
+    """
     if not chunks:
         return f"Aucune information trouvée dans le document{' ' + doc_name if doc_name else ''}."
-    
-    # Identifier le document source
-    source = chunks[0].get("source", "Document")
-    
-    # Extraire les informations clés des chunks
-    summary_sections = {
-        "informations_generales": [],
-        "donnees_financieres": [],
-        "performance": [],
-        "portefeuille": [],
-        "autres": []
-    }
-    
-    for chunk in chunks[:15]:  
-        content = chunk.get("contenu", "").strip()
-        if not content:
-            continue
-        
-        content_lower = content.lower()
-        
-        # Catégoriser le contenu
-        if any(kw in content_lower for kw in ["fcpr", "fonds", "gestionnaire", "dépositaire", "depositaire", "durée", "duree", "agrément"]):
-            summary_sections["informations_generales"].append(content)
-        elif any(kw in content_lower for kw in ["actif net", "valeur liquidative", "capital", "nombre de parts"]):
-            summary_sections["donnees_financieres"].append(content)
-        elif any(kw in content_lower for kw in ["résultat", "resultat", "rendement", "performance", "dividende"]):
-            summary_sections["performance"].append(content)
-        elif any(kw in content_lower for kw in ["portefeuille", "actions", "placement", "sicav", "participation"]):
-            summary_sections["portefeuille"].append(content)
+
+    source = chunks[0].get("source", doc_name or "Document")
+
+    raw_texts = []
+    for c in chunks:
+        if isinstance(c, dict):
+            txt = (c.get("contenu") or "").strip()
+            if txt:
+                raw_texts.append(txt)
+
+    if not raw_texts:
+        return f"Aucune information exploitable trouvée dans le document{' ' + doc_name if doc_name else ''}."
+
+    full_text = "\n".join(raw_texts)
+    lower_text = full_text.lower()
+
+    def clean(v: str) -> str:
+        return re.sub(r"\s+", " ", (v or "").strip()).strip(" :-;,.|")
+
+    def clean_entity(v: str) -> str:
+        v = clean(v)
+        v = re.sub(r"^l['’]\s*", "", v, flags=re.IGNORECASE)
+        v = re.sub(
+            r"\b(Adresse|Tél|Tel|Fax|Site web|Montant du fonds|Divisé en|Président Directeur Général|Article|Fiscalité|Orientation du fonds)\b.*$",
+            "",
+            v,
+            flags=re.IGNORECASE,
+        )
+        v = clean(v)
+        if len(v) <= 1:
+            return ""
+        return v
+
+    def find_first(patterns: list[str], text: str) -> str:
+        for pattern in patterns:
+            m = re.search(pattern, text, re.IGNORECASE | re.DOTALL)
+            if m:
+                return clean(m.group(1))
+        return ""
+
+    def add_dt(v: str) -> str:
+        if not v:
+            return ""
+        return v if ("dt" in v.lower() or "tnd" in v.lower()) else f"{v} DT"
+
+    def first_sentence_containing(keywords: list[str], text: str) -> str:
+        sentences = re.split(r"(?<=[\.\!\?])\s+", text)
+        for s in sentences:
+            low = s.lower()
+            if all(k.lower() in low for k in keywords):
+                return clean(s)
+        return ""
+
+    financial_markers = [
+        "actif net",
+        "valeur liquidative",
+        "résultat net",
+        "resultat net",
+        "résultat d'exploitation",
+        "resultat d'exploitation",
+        "bilan",
+        "état de résultat",
+        "etat de resultat",
+        "données par part",
+        "total actifs",
+    ]
+    financial_score = sum(1 for m in financial_markers if m in lower_text)
+
+    is_financial = financial_score >= 3
+    is_reglement = (
+        "règlement intérieur" in lower_text
+        or "reglement interieur" in lower_text
+        or "article 1" in lower_text
+        or "article 2" in lower_text
+        or "article 3" in lower_text
+    )
+
+    fonds = find_first([
+        r"\bDénomination du fonds\s*[:\-]?\s*([A-Z0-9\s\-_]+?)(?:\s{2,}|\n|Article|Gestionnaire|Dépositaire|Montant|$)",
+        r"\bnom du fonds\s*[:\-]?\s*([A-Z0-9\s\-_]+?)(?:\s{2,}|\n|Article|Gestionnaire|Dépositaire|Montant|$)",
+        r"\bFCPR\s+([A-Z0-9\s\-_]+?)(?:\s{2,}|\n|Gestionnaire|Dépositaire|Montant du fonds|Article|Fiscalité|$)",
+    ], full_text)
+    fonds = clean_entity(fonds)
+
+    gestionnaire = find_first([
+        r"\bGestionnaire\s*[:\-]?\s*([A-Z][A-Za-z0-9«»\"\s\-_&\.]+?)(?:\s{2,}|\n|Dépositaire|Adresse|Tél|Tel|Fax|Site web|Article|Montant|$)",
+        r"\ble gestionnaire(?:\s+étant|\s+du fonds est|\s*[:\-])\s*([^\n\.]+)",
+    ], full_text)
+    gestionnaire = clean_entity(gestionnaire)
+
+    depositaire = find_first([
+        r"\bDépositaire\s*[:\-]?\s*([A-Z][A-Za-z0-9«»\"\s\-_&\.,]+?)(?:\s{2,}|\n|Adresse|Tél|Tel|Fax|Site web|Article|Montant|$)",
+        r"\ble dépositaire(?:\s+de\s+ce\s+fonds\s+est|\s+du fonds est|\s*[:\-])\s*([^\n\.]+)",
+    ], full_text)
+    depositaire = clean_entity(depositaire)
+
+    commissaire = find_first([
+        r"\bCommissaire aux comptes\s*[:\-]?\s*([A-Z][A-Za-z0-9«»\"\s\-_&\.]+?)(?:\s{2,}|\n|Adresse|Article|$)",
+    ], full_text)
+    commissaire = clean_entity(commissaire)
+
+    duree = find_first([
+        r"\bLa durée du fonds est de\s*([^.]+)",
+        r"\bDurée de vie du fonds\s*([^.]+)",
+        r"\bDurée de blocage[^.]*?(\d+\s*ans[^.]*)",
+    ], full_text)
+    duree = clean_entity(duree)
+
+    montant_fonds = find_first([
+        r"\bMontant du fonds\s*:\s*([\d\s\.,]+(?:TND|DT)?)",
+        r"\bcapital(?:\s+initial)?\s*[:\-]?\s*([\d\s\.,]+(?:TND|DT)?)",
+    ], full_text)
+
+    if is_financial:
+        exercice = find_first([
+            r"arr[êe]t[ée]s?\s+au\s+31\s+d[ée]cembre\s+(20\d{2})",
+            r"exercice clos le\s+31[/\-.]12[/\-.](20\d{2})",
+            r"au\s+31[/\-.]12[/\-.](20\d{2})",
+        ], full_text)
+
+        actif_net = find_first([
+            r"ACTIF NET\s*\|\s*\|\s*([\d\s\.,]+)",
+            r"actif net[^0-9]{0,40}([\d\s\.,]+)",
+        ], full_text)
+
+        valeur_liquidative = find_first([
+            r"VALEUR LIQUIDATIVE\s*\|\s*([\d\s\.,%]+)",
+            r"valeur liquidative[^0-9]{0,40}([\d\s\.,]+)",
+        ], full_text)
+
+        nb_parts = find_first([
+            r"b\s*-\s*en fin d'exercice\s*\|\s*([\d\s\.,]+)",
+            r"Nombre de part[s]?\s*\|\s*([\d\s\.,]+)",
+        ], full_text)
+
+        total_actifs = find_first([r"TOTAL ACTIFS\s*\|\s*\|\s*([\d\s\.,]+)"], full_text)
+        total_passifs = find_first([r"TOTAL PASSIFS\s*\|\s*\|\s*([\d\s\.,]+)"], full_text)
+        portefeuille = find_first([r"AC 1 - Portefeuille titre\s*\|\s*AC1\s*\|\s*([\d\s\.,]+)"], full_text)
+        disponibilites = find_first([r"b\s*-\s*Disponibilités\s*\|\s*([\d\s\.,]+)"], full_text)
+
+        resultat_net = find_first([
+            r"R[ÉE]SULTAT NET\s*\|\s*\|\s*DE L'EXERCICE\s*\|\s*\|\s*([\d\s\.,\-\(\)]+)",
+            r"R[ée]sultat net de l'exercice.*?\|\s*([\d\s\.,\-\(\)]+)",
+        ], full_text)
+
+        resultat_exploitation = find_first([
+            r"R[ÉE]SULTAT D'EXPLOITATION\s*\|\s*\|\s*([\d\s\.,\-\(\)]+)",
+            r"R[ée]sultat d'exploitation\s*\(1\)\s*\|\s*([\d\s\.,\-\(\)]+)",
+        ], full_text)
+
+        taux_rendement = find_first([
+            r"TAUX DE RENDEMENT ANNUEL\s*\|\s*([\d\s\.,%]+)",
+            r"AN 6 - TAUX DE RENDEMENT ANNUEL\s*\|\s*([\d\s\.,%]+)",
+        ], full_text)
+
+        observation = first_sentence_containing(["seuil", "15%"], full_text)
+
+        resume_sentences = []
+        if fonds and exercice:
+            resume_sentences.append(f"Ce document présente les états financiers du fonds {fonds} arrêtés au 31 décembre {exercice}.")
+        elif exercice:
+            resume_sentences.append(f"Ce document présente les états financiers arrêtés au 31 décembre {exercice}.")
         else:
-            summary_sections["autres"].append(content)
-    
-    # Construire le résumé en texte brut (SANS MARKDOWN)
-    summary_parts = [f"Résumé du document {source} :\n"]
-    
-    if summary_sections["informations_generales"]:
-        summary_parts.append("INFORMATIONS GÉNÉRALES :")
-        for info in summary_sections["informations_generales"][:5]:
-            lines = [l.strip() for l in info.split('\n') if l.strip()]
-            summary_parts.extend(f"  {line}" for line in lines[:2])
-        summary_parts.append("")
-    
-    if summary_sections["donnees_financieres"]:
-        summary_parts.append("DONNÉES FINANCIÈRES CLÉS :")
-        for info in summary_sections["donnees_financieres"][:5]:
-            lines = [l.strip() for l in info.split('\n') if l.strip()]
-            summary_parts.extend(f"  {line}" for line in lines[:2])
-        summary_parts.append("")
-    
-    if summary_sections["performance"]:
-        summary_parts.append("PERFORMANCE :")
-        for info in summary_sections["performance"][:5]:
-            lines = [l.strip() for l in info.split('\n') if l.strip()]
-            summary_parts.extend(f"  {line}" for line in lines[:2])
-        summary_parts.append("")
-    
-    if summary_sections["portefeuille"]:
-        summary_parts.append("COMPOSITION DU PORTEFEUILLE :")
-        for info in summary_sections["portefeuille"][:5]:
-            lines = [l.strip() for l in info.split('\n') if l.strip()]
-            summary_parts.extend(f"  {line}" for line in lines[:2])
-        summary_parts.append("")
-    
-    # Si aucune section identifiée, afficher les premiers chunks bruts
-    if not any(summary_sections.values()):
-        summary_parts.append("CONTENU EXTRAIT :")
-        for chunk in chunks[:5]:
-            content = chunk.get("contenu", "").strip()
-            if content:
-                summary_parts.append(f"  {content[:200]}...")
-    
-    return "\n".join(summary_parts)
+            resume_sentences.append(f"Ce document présente les principaux éléments financiers figurant dans {source}.")
+
+        indicateurs = []
+        if actif_net:
+            indicateurs.append(f"un actif net de {add_dt(actif_net)}")
+        if valeur_liquidative:
+            indicateurs.append(f"une valeur liquidative de {add_dt(valeur_liquidative)}")
+        if nb_parts:
+            indicateurs.append(f"{nb_parts} parts en fin d'exercice")
+        if indicateurs:
+            resume_sentences.append("Les principaux indicateurs montrent " + ", ".join(indicateurs) + ".")
+
+        perf = []
+        if resultat_net:
+            perf.append(f"un résultat net de {add_dt(resultat_net)}")
+        if resultat_exploitation:
+            perf.append(f"un résultat d'exploitation de {add_dt(resultat_exploitation)}")
+        if taux_rendement:
+            perf.append(f"un taux de rendement annuel de {taux_rendement}")
+        if perf:
+            resume_sentences.append("La performance ressort avec " + ", ".join(perf) + ".")
+
+        structure = []
+        if portefeuille:
+            structure.append(f"un portefeuille titres de {add_dt(portefeuille)}")
+        if disponibilites:
+            structure.append(f"des disponibilités de {add_dt(disponibilites)}")
+        if structure:
+            resume_sentences.append("La structure de l'actif comprend " + ", ".join(structure) + ".")
+
+        if observation:
+            resume_sentences.append(f"Le document signale aussi une observation importante : {observation}")
+
+        points = []
+
+        def push(label: str, value: str, dt: bool = False):
+            if value:
+                points.append(f"- {label} : {add_dt(value) if dt else value}")
+
+        push("Fonds", fonds)
+        push("Exercice clos", f"31 décembre {exercice}" if exercice else "")
+        push("Gestionnaire", gestionnaire)
+        push("Dépositaire", depositaire)
+        push("Actif net", actif_net, True)
+        push("Valeur liquidative", valeur_liquidative, True)
+        push("Nombre de parts", nb_parts)
+        push("Résultat net", resultat_net, True)
+        push("Résultat d'exploitation", resultat_exploitation, True)
+        push("Taux de rendement annuel", taux_rendement)
+        push("Total actifs", total_actifs, True)
+        push("Total passifs", total_passifs, True)
+        push("Portefeuille titres", portefeuille, True)
+        push("Disponibilités", disponibilites, True)
+
+        if observation:
+            points.append(f"- Observation : {observation}")
+
+    elif is_reglement:
+        orientation = first_sentence_containing(["principalement pour objet"], full_text)
+        if not orientation:
+            orientation = first_sentence_containing(["orientation du fonds"], full_text)
+
+        blocage = first_sentence_containing(["durée de blocage"], full_text)
+        if not blocage and duree:
+            blocage = f"La durée du fonds est de {duree}."
+
+        fiscalite = first_sentence_containing(["fiscal"], full_text)
+
+        resume_sentences = []
+        if fonds:
+            resume_sentences.append(f"Ce document présente le règlement intérieur du fonds {fonds}.")
+        else:
+            resume_sentences.append(f"Ce document présente les règles de fonctionnement du fonds décrit dans {source}.")
+
+        general = []
+        if gestionnaire:
+            general.append(f"le gestionnaire est {gestionnaire}")
+        if depositaire:
+            general.append(f"le dépositaire est {depositaire}")
+        if duree:
+            general.append(f"la durée du fonds est de {duree}")
+        if montant_fonds:
+            general.append(f"le montant du fonds est de {montant_fonds}")
+        if general:
+            resume_sentences.append("Il précise notamment que " + ", ".join(general) + ".")
+
+        if orientation:
+            resume_sentences.append(orientation)
+        if blocage and blocage not in resume_sentences:
+            resume_sentences.append(blocage)
+        if fiscalite:
+            resume_sentences.append(fiscalite)
+
+        points = []
+
+        def push(label: str, value: str):
+            if value:
+                points.append(f"- {label} : {value}")
+
+        push("Fonds", fonds)
+        push("Gestionnaire", gestionnaire)
+        push("Dépositaire", depositaire)
+        push("Commissaire aux comptes", commissaire)
+        push("Durée", duree)
+        push("Montant du fonds", montant_fonds)
+
+        if orientation:
+            points.append(f"- Objet : {orientation}")
+        if blocage:
+            points.append(f"- Blocage / durée : {blocage}")
+
+    else:
+        identity_texts = [t for t in raw_texts if "sommaire" not in t.lower()]
+        identity_text = "\n".join(identity_texts) if identity_texts else full_text
+
+        fonds = find_first([
+            r"\bDénomination du fonds\s+([A-Z0-9\s\-]+)",
+            r"\bFonds commun de placement à risque\s*:\s*([A-Z0-9\s\-]+)",
+            r"\bPROSPECTUS\s+FONDS COMMUN DE PLACEMENT A RISQUE\s+([A-Z0-9\s\-]+?)\s+Gestionnaire\b",
+            r"\b(FCPR\s+[A-Z0-9\s\-]+?)(?:\s+Gestionnaire|\s+Dépositaire|\s+Montant du fonds|\s*$)",
+        ], identity_text)
+        fonds = clean_entity(fonds)
+        fonds = re.sub(r"\b\d+(?:\.\d+)+.*$", "", fonds).strip()
+
+        gestionnaire = find_first([
+            r"\bGestionnaire\s+([A-Z][A-Z\s\-]+?)(?:\s+Dépositaire|\s+Adresse|\s+Fax|\s+Site web|\s+Montant du fonds|\s*$)",
+        ], identity_text)
+        gestionnaire = clean_entity(gestionnaire)
+
+        depositaire = find_first([
+            r"\bDépositaire\s+([A-Z][A-Z\s\-]+?)(?:\s+Adresse|\s+Tél|\s+Tel|\s+Fax|\s+Site web|\s+Montant du fonds|\s*$)",
+        ], identity_text)
+        depositaire = clean_entity(depositaire)
+
+        duree = find_first([
+            r"\bLa durée du fonds est de\s*([^.]+)",
+            r"\bDurée de blocage[^.]*soit\s*([^.]+)",
+        ], full_text)
+        duree = clean_entity(duree)
+
+        montant_fonds = find_first([
+            r"\bMontant du fonds\s*:\s*([\d\s\.,]+(?:TND|DT)?)",
+        ], identity_text)
+
+        objectif = first_sentence_containing(["principalement pour objet"], full_text)
+        risque = first_sentence_containing(["placements", "risqués"], full_text)
+        if not risque:
+            risque = first_sentence_containing(["durée de blocage", "10"], full_text)
+
+        resume_sentences = []
+        if fonds:
+            resume_sentences.append(f"Ce document présente le fonds {fonds}.")
+        else:
+            resume_sentences.append(f"Ce document décrit les principales caractéristiques du fonds présenté dans {source}.")
+
+        details = []
+        if gestionnaire:
+            details.append(f"il est géré par {gestionnaire}")
+        if depositaire:
+            details.append(f"son dépositaire est {depositaire}")
+        if duree:
+            details.append(f"sa durée est de {duree}")
+        if montant_fonds:
+            details.append(f"le montant du fonds est de {montant_fonds}")
+
+        if details:
+            resume_sentences.append("Sur le plan général, " + ", ".join(details) + ".")
+
+        if objectif:
+            resume_sentences.append(objectif)
+        if risque:
+            resume_sentences.append(risque)
+
+        points = []
+
+        def push(label: str, value: str):
+            if value:
+                points.append(f"- {label} : {value}")
+
+        push("Fonds", fonds)
+        push("Gestionnaire", gestionnaire)
+        push("Dépositaire", depositaire)
+        push("Durée", duree)
+        push("Montant du fonds", montant_fonds)
+
+        if objectif:
+            points.append(f"- Objet : {objectif}")
+        if risque:
+            points.append(f"- Point d'attention : {risque}")
+
+    final_points = []
+    seen = set()
+    for p in points:
+        key = p.lower()
+        if key not in seen:
+            seen.add(key)
+            final_points.append(p)
+
+    parts = [f"Résumé du document {source} :", ""]
+    parts.append(" ".join(resume_sentences[:4]))
+    parts.append("")
+    parts.append("Points clés :")
+    parts.extend(final_points[:10] if final_points else ["- Aucun point clé exploitable n'a été extrait."])
+
+    return "\n".join(parts).strip()
+
+
+def _load_all_chunks_for_selected_document(question: str) -> tuple[list[dict], str, str]:
+    sha256 = _extract_sha256(question)
+    doc_name = _extract_document_name(question)
+
+    print("DEBUG: Chargement direct des chunks du document")
+    print(f"  - sha256: {sha256}")
+    print(f"  - doc_name: {doc_name}")
+
+    result_json = _get_document_chunks(
+        document_title=doc_name,
+        sha256=sha256,
+    )
+
+    try:
+        data = json.loads(result_json)
+    except Exception:
+        data = []
+
+    if isinstance(data, dict):
+        print("DEBUG: get_document_chunks a retourné un dict:", data)
+        return [], sha256, doc_name
+
+    if not isinstance(data, list):
+        print("DEBUG: get_document_chunks a retourné un format inattendu:", type(data))
+        return [], sha256, doc_name
+
+    valid_chunks = [c for c in data if isinstance(c, dict) and (c.get("contenu") or "").strip()]
+    print(f"  - Chunks directs récupérés: {len(valid_chunks)}")
+
+    return valid_chunks, sha256, doc_name
 
 
 async def ask_docs_agent(question: str, max_iterations: int = 10) -> str:
-    """
-    Pose une question à l'agent documents et retourne la réponse.
+    print("[DEBUG] ask_docs_agent appelée avec question:", question, flush=True)
 
-    Args:
-        question: Question en langage naturel sur les documents.
-        max_iterations: Nombre max d'itérations pour l'agent LLM.
-
-    Returns:
-        Réponse basée sur le contenu des PDFs.
-    """
-    
-    # DEBUG: Logger la question
     print(f"\n{'='*80}")
     print(f"QUESTION: {question}")
     print(f"{'='*80}\n")
-    
-    # Fast path 1: Liste de documents
+
     if _is_list_documents_question(question):
         fonds_name = _extract_fund_name(question)
         result_json = _list_documents(fonds_name=fonds_name, doc_type="")
         formatted = _format_documents_list(result_json)
-        
+
         if not formatted.startswith("Aucun document"):
             return formatted
 
-        # Fallback: use vector search and build a document list from chunks
         search_json = _search_docs(query=fonds_name or question, fonds_name=fonds_name, top_k=12)
         try:
             chunks = json.loads(search_json)
@@ -630,6 +958,8 @@ async def ask_docs_agent(question: str, max_iterations: int = 10) -> str:
         seen = set()
         if isinstance(chunks, list):
             for c in chunks:
+                if not isinstance(c, dict):
+                    continue
                 title = c.get("source") or c.get("title")
                 if title and title not in seen:
                     seen.add(title)
@@ -640,48 +970,25 @@ async def ask_docs_agent(question: str, max_iterations: int = 10) -> str:
 
         return formatted
 
-    # Fast path 2: Résumé de document
     if _is_summary_question(question):
-        fonds_name = _extract_fund_name(question)
-        doc_name = _extract_document_name(question)
+        chunks, sha256, doc_name = _load_all_chunks_for_selected_document(question)
 
-        print(f"DEBUG: Résumé demandé")
-        print(f"  - Fonds: {fonds_name}")
-        print(f"  - Document: {doc_name}")
-
-        # Rechercher avec plus de contexte pour le résumé
-        result_json = _search_docs(query=question, fonds_name=fonds_name, top_k=30)
-
-        try:
-            chunks = json.loads(result_json)
-        except Exception:
-            chunks = []
-
-        print(f"  - Chunks trouvés: {len(chunks) if isinstance(chunks, list) else 0}")
-
-        if isinstance(chunks, list):
-            # Filtrer par document si spécifié
+        if not chunks:
             if doc_name:
-                original_count = len(chunks)
-                chunks = _filter_chunks_by_doc_name(chunks, doc_name)
-                print(f"  - Après filtrage par doc '{doc_name}': {len(chunks)} chunks")
+                return f"Aucun extrait trouvé pour le document '{doc_name}'."
+            return "Aucune information trouvée dans le document sélectionné."
 
-                if not chunks:
-                    return f"Aucun extrait trouvé pour le document '{doc_name}'."
+        print("\n===== CHUNKS UTILISÉS POUR LE RÉSUMÉ =====")
+        for i, c in enumerate(chunks[:20]):
+            print(f"Chunk {i+1}:")
+            print(f"  Source: {c.get('source')}")
+            print(f"  Page: {c.get('page')}")
+            print(f"  Contenu: {c.get('contenu', '')[:500]}")
+            print("----------------------------------------")
+        print("===== FIN DES CHUNKS =====\n")
 
-            # DEBUG: Afficher les sources trouvées
-            sources = set(c.get("source", "") for c in chunks[:10])
-            print(f"  - Sources principales: {list(sources)[:3]}")
+        return _build_summary_from_chunks(chunks, doc_name)
 
-            # Construire le résumé brut à partir des chunks réels
-            raw_summary = _build_summary_from_chunks(chunks, doc_name)
-
-            # Retourner le résumé brut sans markdown ni LLM
-            return raw_summary
-
-        return f"Aucune information trouvée pour générer un résumé."
-
-    # Vérifier si un type de document spécifique est demandé
     requested_kind = _extract_requested_doc_kind(question)
     if requested_kind:
         fonds_name = _extract_fund_name(question)
@@ -692,103 +999,41 @@ async def ask_docs_agent(question: str, max_iterations: int = 10) -> str:
         if not any(_doc_matches_requested(doc, requested_kind) for doc in docs):
             return _format_missing_requested_doc(fonds_name, requested_kind, docs[0])
 
-    # Fast path 3: Extraction deterministe d'une valeur specifique
-    if any(w in (question or "").lower() for w in ["valeur", "montant", "au ", "au 31", "au 30", "quel est", "quelle est"]):
-        fonds_name = _extract_fund_name(question)
-        doc_name = _extract_document_name(question)
-        label = _extract_requested_label(question)
+    selected_chunks, sha256, doc_name = _load_all_chunks_for_selected_document(question)
+    if selected_chunks:
         question_year = _extract_year_from_question(question)
-        
-        print(f"DEBUG: Extraction de valeur")
-        print(f"  - Fonds: {fonds_name}")
-        print(f"  - Document: {doc_name}")
-        print(f"  - Label recherché: {label}")
-        print(f"  - Année demandée: {question_year}")
-        
-        result_json = _search_docs(query=question, fonds_name=fonds_name, top_k=12)
-        
-        try:
-            chunks = json.loads(result_json)
-        except Exception:
-            chunks = []
+        label = _extract_requested_label(question)
 
-        if isinstance(chunks, list):
-            print(f"  - Chunks trouvés: {len(chunks)}")
-            
-            # Filtrer par document si spécifié
-            if doc_name:
-                original_count = len(chunks)
-                chunks = _filter_chunks_by_doc_name(chunks, doc_name)
-                print(f"  - Après filtrage par doc '{doc_name}': {len(chunks)} chunks (avant: {original_count})")
-                
-                if not chunks:
-                    return f"Aucun extrait trouvé pour le document '{doc_name}'."
-            
-            # Filtrer par année si mentionnée dans la question
+        print("DEBUG: QA générique sur document sélectionné")
+        print(f"  - sha256: {sha256}")
+        print(f"  - doc_name: {doc_name}")
+        print(f"  - question_year: {question_year}")
+        print(f"  - label: {label}")
+
+        if label:
+            chunks_for_value = selected_chunks
             if question_year:
                 year_filtered_chunks = []
-                for c in chunks:
+                for c in chunks_for_value:
+                    if not isinstance(c, dict):
+                        continue
                     source = c.get("source", "")
                     source_year = _extract_year_from_source(source)
                     if source_year == question_year:
                         year_filtered_chunks.append(c)
-                
                 if year_filtered_chunks:
-                    print(f"  - Après filtrage par année {question_year}: {len(year_filtered_chunks)} chunks")
-                    chunks = year_filtered_chunks
-                else:
-                    print(f"  - ATTENTION: Année {question_year} demandée mais aucun chunk ne correspond")
-            
-            # DEBUG: Afficher les 3 premiers chunks
-            for i, c in enumerate(chunks[:3]):
-                print(f"  - Chunk {i}: source={c.get('source')}, page={c.get('page')}")
-                print(f"    Contenu: {c.get('contenu', '')[:150]}...")
-            
-            # Extraire la valeur
-            found = _extract_value_from_chunks(chunks, label)
+                    chunks_for_value = year_filtered_chunks
+
+            found = _extract_value_from_chunks(chunks_for_value, label, question_year)
             if found:
                 source, page, value = found
                 page_text = f"page {page}" if page else "page inconnue"
-                
-                # Vérifier la cohérence de l'année
-                source_year = _extract_year_from_source(source)
-                if question_year and source_year and source_year != question_year:
-                    print(f"  - ALERTE: Année trouvée ({source_year}) != année demandée ({question_year})")
-                    return (
-                        f"⚠️ Attention : La valeur trouvée provient de l'année {source_year}, "
-                        f"mais vous avez demandé l'année {question_year}.\n\n"
-                        f"D'après **{source}**, {page_text} :\n"
-                        f"**{label} : {value} DT**\n\n"
-                        f"Si vous souhaitez la valeur pour {question_year}, veuillez vérifier que le document existe."
-                    )
-                
-                print(f"  - ✓ Valeur trouvée: {value}")
-                return (
-                    f"D'après **{source}**, {page_text} :\n"
-                    f"**{label} : {value} DT**"
-                )
+                return f"D'après **{source}**, {page_text} :\n**{label} : {value} DT**"
 
-            # Construire la liste des sources disponibles
-            sources = []
-            seen = set()
-            for c in chunks:
-                title = c.get("source") or c.get("title")
-                if title and title not in seen:
-                    seen.add(title)
-                    sources.append(title)
+        return _answer_question_from_document_chunks(question, selected_chunks)
 
-            if label:
-                sources_text = ", ".join(sources) if sources else "aucune source"
-                year_info = f" pour l'année {question_year}" if question_year else ""
-                return (
-                    f"La valeur de **{label}** n'a pas été trouvée dans les documents disponibles"
-                    f" pour {fonds_name or 'ce fonds'}{year_info}.\n\n"
-                    f"Documents consultés : {sources_text}."
-                )
+    print("DEBUG: Aucun fast-path, utilisation de l'agent LLM")
 
-    # Si aucun fast-path n'a matché, utiliser l'agent LLM
-    print(f"DEBUG: Aucun fast-path, utilisation de l'agent LLM")
-    
     llm = ChatOllama(
         base_url=Config.OLLAMA_BASE_URL,
         model=Config.LLM_MODEL,
@@ -801,7 +1046,7 @@ async def ask_docs_agent(question: str, max_iterations: int = 10) -> str:
         {
             "docs": {
                 "command": sys.executable,
-                "args":    [_MCP_SERVER_PATH],
+                "args": [_MCP_SERVER_PATH],
                 "transport": "stdio",
                 "env": {
                     **os.environ,
@@ -822,7 +1067,7 @@ async def ask_docs_agent(question: str, max_iterations: int = 10) -> str:
     )
 
     result = await agent.ainvoke(
-        {"messages": [{"role": "user", "content": _augment_question(question)}]},
+        {"messages": [{"role": "user", "content": question}]},
         config={"recursion_limit": max_iterations},
     )
 
@@ -838,21 +1083,10 @@ async def ask_docs_agent(question: str, max_iterations: int = 10) -> str:
         if content and content.strip():
             return content.strip()
 
-    # Fallback: attempt direct search if tool wasn't called
-    fonds_name = _extract_fund_name(question)
-    result_json = _search_docs(query=question, fonds_name=fonds_name, top_k=6)
-    try:
-        data = json.loads(result_json)
-        if isinstance(data, dict) and data.get("message"):
-            return data["message"]
-    except Exception:
-        pass
-
     return "Aucun document trouvé pour cette question."
 
 
 def ask_docs_agent_sync(question: str) -> str:
-    """Version synchrone utilisable depuis Flask."""
     return asyncio.run(ask_docs_agent(question))
 
 

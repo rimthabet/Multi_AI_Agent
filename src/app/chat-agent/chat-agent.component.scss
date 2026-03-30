@@ -416,8 +416,8 @@
 .ai-pdf-panel {
     position: fixed;
     top: 0;
-    right: 820px; /* juste à gauche du side-panel Clarity (~800px) */
-    width: 500px;
+    right: 990px; /* juste à gauche du side-panel Clarity (~820) */
+    width: 700px;/* juste à gauche du side-panel Clarity (~500px) */
     height: 100vh;
     background: var(--ai-surface-raised);
     border-left: 1px solid var(--ai-border);
